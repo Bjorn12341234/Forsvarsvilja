@@ -1,278 +1,459 @@
-# Tasks: FÖRSVARSVILJA - Klickerspel
+# Tasks: FÖRSVARSVILJA v2 — Beredskap under press
 
 ## Datum: 2026-02-19
 
 ---
 
-## Sprint 1: Grundspel ✅
+## Avslutade sprints (v1)
 
-### 1.1 HTML-struktur ✅
-- [x] Skapa `index.html` med grundläggande HTML5-boilerplate
-- [x] Header med speltitel "FÖRSVARSVILJA"
-- [x] Klickområde med sköld-ikon (SVG med tre kronor)
-- [x] Poängdisplay: totala FP, FP/sekund, FP/klick
-- [x] Uppgraderingspanel (sidebar/nedre sektion)
-- [x] Era-indikator med progress bar
-- [x] Nyhetsticker-container längst ner
-
-### 1.2 CSS-styling ✅
-- [x] Färgschema: svenskt/militärt tema (blått, gult, mörkt grönt)
-- [x] Layout: klickområde centrerat, upgrades till höger/under
-- [x] Styling för klickknapp med hover/active-states
-- [x] Styling för uppgraderingskort (namn, kostnad, beskrivning, FP/s)
-- [x] Typografi: tydliga siffror, läsbar text
-- [x] Grundläggande animationer (knapp-press, pulsering)
-
-### 1.3 Klick-mekanik ✅
-- [x] Klick-eventlistener på sköld
-- [x] FP-räknare som ökar per klick
-- [x] Visa aktuellt FP/klick-värde
-- [x] Visuell feedback vid klick (skala-animation)
-
-### 1.4 Uppgraderingssystem (Era 1: Hemberedskap) ✅
-- [x] Datastruktur för uppgraderingar: `{ id, name, description, baseCost, fpPerSecond, count }`
-- [x] Era 1-uppgraderingar:
-  - Vattenflaskor (cost 10, 0.5 FP/s)
-  - Konservburkar (cost 50, 2 FP/s)
-  - Stormkök & bränsle (cost 200, 8 FP/s)
-  - Ficklampa, radio & batterier (cost 600, 30 FP/s)
-  - Sovsäck & filtar (cost 1500, 100 FP/s)
-  - Hemberedskapskit (cost 5000, 300 FP/s)
-- [x] Köp-logik: dra FP, öka count, uppdatera FP/s
-- [x] Kostnadseskalering: `baseCost * 1.15^count`
-- [x] Knapp disabled + visuell dimming om inte råd
-- [x] Visa antal köpta per uppgradering
-
-### 1.5 FP/sekund-motor ✅
-- [x] Game loop med `setInterval` (uppdatera var 100ms)
-- [x] Summera alla uppgraderingars FP/s-bidrag
-- [x] Visa total FP/s i UI
-- [x] Ackumulera FP varje tick
-
-### 1.6 Formatering av stora tal ✅
-- [x] Funktion för att formatera tal: 1 000 → "1K", 1 000 000 → "1M", etc.
-- [x] Stöd för: K (tusen), M (miljoner), B (miljarder), T (biljoner), Q (kvadriljoner)
-- [x] Använd genomgående i UI (FP, kostnader, FP/s)
-
-### 1.7 Tester ✅
-- [x] test.js: 147 automatiserade tester (Node.js) — utökat i Sprint 2
-- [x] test.html: Webbläsarbaserad testrunner
-- [x] Testar: formatering, kostnad, FP/s, köplogik, era-progression, dataintegritet, balanssimuleringar
-- [x] Balans verifierad: Era 2 nås på ~3.7 min (2 cps), alla upgrades x1 på ~7.3 min (3 cps)
+Sprint 1–5 från v1 är klara. Se git-historik för detaljer.
+- 394 tester, 30 uppgraderingar, 5 eror, 12 events, 16 achievements
+- Fullt fungerande spel med save/load, responsiv design, ljud, partiklar
 
 ---
 
-## Sprint 2: Progression ✅
+## Sprint 1: Fliksystem + UI-grund
 
-### 2.1 Alla eror och uppgraderingar ✅
+**Mål:** Lägg till flik-navigation i uppgraderingspanelen. Omfördela befintliga uppgraderingar i 5 flikar. Sista 4 flikarna börjar låsta. Spelet ska vara fullt spelbart efter denna sprint (inga nya mekaniker, bara ny UI-struktur).
 
-**Era 1: Hemberedskap** (redan i Sprint 1)
-- [x] Vattenflaskor (cost 10, 0.5 FP/s)
-- [x] Konservburkar (cost 50, 2 FP/s)
-- [x] Stormkök & bränsle (cost 200, 8 FP/s)
-- [x] Ficklampa, radio & batterier (cost 600, 30 FP/s)
-- [x] Sovsäck & filtar (cost 1500, 100 FP/s)
-- [x] Hemberedskapskit (cost 5000, 300 FP/s)
+### 1.1 Flik-navigation (HTML/CSS)
+- [ ] Lägg till tab-bar ovanför upgrades-listan i `<aside class="upgrades-panel">`
+- [ ] 5 flikar: Hemmet, Info & Komm, Familj & Grannar, Kommun & Region, Nationen
+- [ ] Varje flik har: ikon/emoji, namn, locked/unlocked/active-state
+- [ ] Låst flik: grå, lås-ikon, tooltip "Låses upp vid [beredskapsläge]"
+- [ ] Aktiv flik: gul border-bottom, ljusare bakgrund
+- [ ] Responsiv: tabs scrollar horisontellt på mobil, eller wrappas till 2 rader
 
-**Era 2: Grannskapet** (threshold 5K)
-- [x] Grannsamverkan (cost 8K, 500 FP/s)
-- [x] Vedförråd & gemensam eldstad (cost 25K, 1.5K FP/s)
-- [x] Vattenrenare & vattendunkar (cost 75K, 5K FP/s)
-- [x] Informationsmöte (cost 200K, 15K FP/s)
-- [x] Lokal beredskapsgrupp (cost 500K, 40K FP/s)
-- [x] Gemensamt skyddsrum (cost 1.2M, 100K FP/s)
+### 1.2 Flik-logik (JS)
+- [ ] `activeTab` state i `game`-objektet (default: 0)
+- [ ] `tabUnlocked[]` array (default: [true, false, false, false, false])
+- [ ] Tab-klick byter vilka uppgraderingar som visas
+- [ ] Låsta flikar kan inte klickas (visar tooltip)
+- [ ] `unlockTab(index)` funktion (spelar ljud, visar kort animation)
+- [ ] Tab-state inkluderas i save/load (version 2 migration)
 
-**Era 3: Kommunen** (threshold 100K)
-- [x] Kommunal krisplan (cost 1.5M, 200K FP/s)
-- [x] Beredskapsveckan (cost 4M, 500K FP/s)
-- [x] Nödvattenförsörjning (cost 10M, 1.2M FP/s)
-- [x] Räddningstjänst-uppgradering (cost 25M, 3M FP/s)
-- [x] Civilplikt-organisering (cost 60M, 8M FP/s)
-- [x] Rakel-kommunikation (cost 150M, 20M FP/s)
+### 1.3 Omfördelning av uppgraderingar
+- [ ] Lägg till `tab`-fält på varje upgrade (0–4)
+- [ ] Tab 0 (Hemmet): water, cans, stove, sleeping, kit + ny "backup_power"
+- [ ] Tab 1 (Info & Komm): radio (flyttad), + nya placeholder-upgrades
+- [ ] Tab 2 (Familj & Grannar): neighbors, firewood, water_purifier, info_meeting, local_group, shelter
+- [ ] Tab 3 (Kommun & Region): crisis_plan, prep_week, water_supply, fire_service, civil_duty, rakel, county_coord, civil_area, power_prep, food_supply, fuel_reserves, cyber_security
+- [ ] Tab 4 (Nationen): mcf, home_guard, gripen, global_eye, nato_art5, total_defense
+- [ ] `buildUpgrades()` filtrerar på `activeTab` istället för `era`
+- [ ] Behåll era-baserad synlighet INOM varje flik (upgrades i låsta flikar syns inte)
 
-**Era 4: Regionen** (threshold 2M)
-- [x] Länsstyrelse-samordning (cost 200M, 40M FP/s)
-- [x] Regionalt civilområde (cost 500M, 100M FP/s)
-- [x] Elberedskap & reservkraft (cost 1.5B, 250M FP/s)
-- [x] Livsmedelsförsörjning (cost 4B, 600M FP/s)
-- [x] Drivmedelsreserver (cost 10B, 1.5B FP/s)
-- [x] Cybersäkerhet (cost 25B, 4B FP/s)
+### 1.4 Era → Flik-mappning
+- [ ] Befintliga era-trösklar styr fortfarande vilka upgrades som syns
+- [ ] Men flikar styrs separat av beredskapsläge (implementeras fullt i Sprint 2)
+- [ ] I Sprint 1: alla flikar utom Tab 0 börjar låsta, men kan forceras öppna via totalFp-trösklar (temporärt, tills beredskapsläge finns)
+- [ ] Alternativt: lås upp flikar baserat på befintliga era-trösklar som placeholder
 
-**Era 5: Nationen** (threshold 50M)
-- [x] MCF (cost 40B, 8B FP/s)
-- [x] Hemvärnet (cost 100B, 20B FP/s)
-- [x] JAS 39 Gripen (cost 300B, 50B FP/s)
-- [x] Global Eye-flygplan (cost 800B, 120B FP/s)
-- [x] NATO artikel 5 (cost 2T, 300B FP/s)
-- [x] Totalförsvar 3,5% av BNP (cost 5T, 800B FP/s)
+### 1.5 Klickkraft-sektion
+- [ ] Klickkraft-uppgraderingar visas i ALLA flikar (gemensam sektion under tab-innehållet)
+- [ ] Eller: flytta till en egen "mini-tab" / alltid-synlig sektion
 
-### 2.2 Era-progression ✅
-- [x] FP-trösklar: 0, 5K, 100K, 2M, 50M
-- [x] Progress bar visar avstånd till nästa era
-- [x] Visuell "unlock"-animation vid ny era (overlay med puls-animation)
-- [x] Uppgraderingar för nya eror synliggörs först vid unlock
-- [x] Era-namn med headers i upgrade-listan
+### 1.6 Save/Load v2
+- [ ] Bumpa save version till 2
+- [ ] Spara `activeTab` och `tabUnlocked[]`
+- [ ] Migration: v1 spardata → v2 (sätt alla tabs utom 0 till locked, activeTab = 0)
+- [ ] Testa att v1 saves laddas korrekt
 
-### 2.3 Klickkraft-uppgraderingar ✅
-- [x] Separat sektion i UI ("Klickkraft")
-- [x] Engångsköp (kan bara köpas en gång)
-- [x] 6 uppgraderingar:
-  - Vikingblod (2x, cost 500)
-  - Karolinsk beslutsamhet (3x, cost 15K)
-  - Ärtsoppekraft (5x, cost 250K)
-  - Beredskapskämpe (10x, cost 5M)
-  - Försvarsminister-handslag (25x, cost 100M)
-  - "NU JÄVLAR"-knappen (100x, cost 5B)
-- [x] Markera som köpt (grön bakgrund + ✓)
+### 1.7 Tester
+- [ ] Tab switching: byta flik visar rätt upgrades
+- [ ] Tab locking: låsta flikar kan inte aktiveras
+- [ ] Tab unlocking: `unlockTab()` ändrar state korrekt
+- [ ] Upgrade visibility: upgrades filtreras på aktiv tab
+- [ ] Save/load v2: ny data sparas och laddas korrekt
+- [ ] Migration: v1 → v2 migration fungerar
+- [ ] Data integrity: alla upgrades har `tab`-fält, alla tab-tilldelningar är giltiga
 
-### 2.4 Balansering ✅
-- [x] Baskostad och FP/s för alla 30 uppgraderingar
-- [x] Progression verifierad via 147 automatiserade tester
-- [x] Era-timing: ~3.2, 3.7, 3.8, 5.4 min per era
-- [x] Full genomspelning: ~23 min (3 cps)
-- [x] Klickkraft: 500 → 5B FP (750,000x total multiplikator)
+### 1.8 Manuell verifiering
+- [ ] Öppna spelet i browser — flikar syns
+- [ ] Klicka mellan flikar — rätt upgrades visas
+- [ ] Låsta flikar har visuell indikation
+- [ ] Spela genom hela spelet — upgrades fungerar som förut
+- [ ] Spara, ladda om — tab-state bevaras
+- [ ] Mobilvy — flikar är användbara
+
+**Filer:** index.html, style.css, game.js, test.js
+**Beräknad storlek:** Medel
 
 ---
 
-## Sprint 3: Juice & Events ✅
+## Sprint 2: Resurssystem + Beredskapsläge
 
-### 3.1 Partikeleffekter ✅
-- [x] Generera partiklar vid klick (CSS-animerade element)
-- [x] Partiklar flyger ut från klickpunkten
-- [x] Variation i riktning, hastighet, storlek
-- [x] Ta bort partiklar efter animation (performance)
+**Mål:** Lägg till resursmätare och beredskapsläge-termostat. Resurser dräneras passivt. Uppgraderingar fyller på resurser. Straff vid 0. Beredskapsläget eskalerar automatiskt och låser upp flikar.
 
-### 3.2 Float-text ✅
-- [x] Visa "+X FP" text som flyter uppåt vid klick
-- [x] Text fadar ut och försvinner
-- [x] Positionera vid klickpunkten
+### 2.1 Beredskapsläge-system
+- [ ] State: `game.threatLevel` (0–4: Vardag, Oro, Störning, Kris, Uppbyggnad)
+- [ ] Timer: eskalerar automatiskt (Vardag→Oro ~5 min, Oro→Störning ~12 min, etc.)
+- [ ] Visuell indikator i headern (färgkodad: grön/gul/orange/röd/blå + text)
+- [ ] Animation vid byte ("BEREDSKAPSLÄGE: ORO" — liknande era-unlock)
+- [ ] Ljud vid byte (nytt ljud: stigande, lite oroande ton)
+- [ ] Beredskapsläge styr:
+  - Vilka flikar som är upplåsta
+  - Resursdräneringsrate
+  - Event-frekvens och event-pool
+  - Krävd totalFp för att nå nästa nivå (eller ren tidsbas? — diskutera)
 
-### 3.3 Ljud ✅
-- [x] Web Audio API-setup
-- [x] Klickljud (kort, tillfredsställande)
-- [x] Köp-ljud
-- [x] Era-unlock-ljud
-- [ ] Achievement-ljud (Sprint 4)
-- [x] Volymkontroll / mute-knapp
+### 2.2 Resursmätare (UI)
+- [ ] 3 meters i UI: Försörjning, Samband, Samhörighet
+- [ ] Placering: under era-indikatorn i header, eller som fast sektion ovanför flikarna
+- [ ] Visuell: horisontella bars med ikon, namn, värde (0–100)
+- [ ] Färgkodning: grön (>60), gul (30–60), röd (<30), pulserande vid <15
+- [ ] Tooltip med förklaring av vad resursen representerar
 
-### 3.4 Slumpmässiga händelser ✅
-- [x] Event-system: slumpmässigt event var 45-90 sekund
-- [x] Overlay/popup med eventbeskrivning och klickbar knapp
-- [x] 12 events med 5 typer (multiplier, bonus, conditional, click_bonus, upgrade_bonus)
-- [x] Timer/countdown på aktiva events
-- [x] Visuell indikation på aktiv bonus (glödande indikator med tid)
+### 2.3 Resursmätare (logik)
+- [ ] `game.resources = { supply: 80, comms: 80, community: 80 }`
+- [ ] Maxvärde: 100 (kan inte överstiga)
+- [ ] Passiv dränering i game loop, rate baserad på beredskapsläge:
+  - Vardag: 0/min
+  - Oro: ~0.5/min
+  - Störning: ~1.5/min
+  - Kris: ~3/min
+  - Uppbyggnad: ~0.5/min
+- [ ] Straff vid 0:
+  - Försörjning = 0: `game.fpPerSecond` halveras (multiplier 0.5)
+  - Samband = 0: Event-bonusar blockeras
+  - Samhörighet = 0: Uppgraderingskostnader +50%
+- [ ] Straff upphör direkt när resursen överstiger 0
 
-### 3.5 Nyhetsticker ✅ (Sprint 1)
-- [x] Löpande text längst ner på skärmen (CSS animation)
-- [x] 25 riktiga budskap om beredskap
-- [x] Seamless loop med duplicerade meddelanden
+### 2.4 Uppgraderingar → Resurser
+- [ ] Varje upgrade ger resursbonus vid köp (engångseffekt per köpt)
+- [ ] Hemmet-upgrades: +5–15 Försörjning per köp
+- [ ] Info-upgrades: +5–15 Samband per köp
+- [ ] Familj & Grannar-upgrades: +5–15 Samhörighet per köp
+- [ ] Kommun & Region-upgrades: +5 alla resurser per köp
+- [ ] Nationen-upgrades: +3 alla resurser per köp
+- [ ] Alternativt: upgrades ger passiv resurs-regenerering (mer komplext, kanske Sprint 4)
 
-### 3.6 Tester ✅
-- [x] 278 automatiserade tester (131 nya event-tester)
-- [x] Event data integrity, type distribution, multiplier math, bonus calculations
-- [x] Conditional event logic, scheduling range, upgrade references
+### 2.5 Beredskapsläge ↔ Flikar
+- [ ] Tab 2 låses upp vid Oro
+- [ ] Tab 3 låses upp vid Störning
+- [ ] Tab 4 låses upp vid Kris
+- [ ] Tab 5 låses upp vid Uppbyggnad
+- [ ] Ersätter den temporära era-baserade unlocking från Sprint 1
 
----
+### 2.6 Save/Load-uppdatering
+- [ ] Spara `threatLevel`, `resources`, resurstimers
+- [ ] Behåll bakåtkompatibilitet (v1 → v2)
 
-## Sprint 4: Achievements & Slutspel ✅
+### 2.7 Tester
+- [ ] Resurser börjar på 80
+- [ ] Resurser dräneras korrekt per beredskapsläge
+- [ ] Resurser kan inte gå under 0 eller över 100
+- [ ] Straff aktiveras/avaktiveras korrekt vid 0 / >0
+- [ ] Beredskapsläge eskalerar vid rätt tid
+- [ ] Flikar låses upp vid rätt beredskapsläge
+- [ ] Uppgraderingar ger resursbonusar
+- [ ] Save/load bevarar resurser och beredskapsläge
+- [ ] Balanssimuleringar: kan spelaren hålla resurser uppe med aktivt spelande?
 
-### 4.1 Achievement-system ✅
-- [x] Datastruktur: `{ id, name, description, check, unlocked }`
-- [x] 16 achievements:
-  - Första steget (1 klick)
-  - Hundra klick (100 klick)
-  - Tusen klick (1 000 klick)
-  - Tiotusen klick (10 000 klick)
-  - Första inköpet (första uppgradering)
-  - "Hemberedskapen klar" (alla Era 1-uppgraderingar)
-  - "Grannen du vill ha" (alla Era 2-uppgraderingar)
-  - Kommunal kraft (nå Era 3)
-  - Regional samordning (nå Era 4)
-  - Nationens försvar (nå Era 5)
-  - Klickkraftare (första klickkraft-uppgradering)
-  - "NU JÄVLAR" (NU JÄVLAR-knappen köpt)
-  - "Kontanter?!" (nå 10 000 FP)
-  - "Har du läst broschyren?" (nå 5 200 000 FP)
-  - Totalförsvaret komplett (slutför spelet)
-  - Fullständig beredskap (alla andra achievements — meta)
-- [x] Kontrollera achievements varje sekund
-- [x] Achievement sound (triumphant arpeggio)
+### 2.8 Manuell verifiering
+- [ ] Resursmätare syns och uppdateras
+- [ ] Beredskapsläge eskalerar visuellt
+- [ ] Straff märks (FP/s sjunker vid Försörjning=0)
+- [ ] Att köpa upgrades fyller på resurser
+- [ ] Spelet är fortfarande spelbart och kul
+- [ ] Mobilvy fungerar med nya UI-element
 
-### 4.2 Achievement-toasts ✅
-- [x] Toast-notifikation som glider in från höger vid unlock
-- [x] Visa achievement-namn, beskrivning och trophy-ikon
-- [x] Försvinner efter 3 sekunder
-- [x] Queue-system — stackar om flera triggas
-
-### 4.3 Achievement-display ✅
-- [x] Panel/modal med alla achievements (klickbar knapp i header)
-- [x] Unlockade visas med guld trophy-ikon, låsta visas gråa med lås
-- [x] Visa progress (X/16 unlockade)
-- [x] Stäng genom att klicka utanför
-
-### 4.4 Slutskärm ✅
-- [x] Triggas vid köp av sista uppgraderingen ("Totalförsvar 3,5% av BNP")
-- [x] Overlay som täcker spelet med fade-in animation
-- [x] Spelstatistik: klick, speltid, totalt FP, uppgraderingar, meriter
-- [x] Reflekterande text om försvarsvilja
-- [x] Avslutas med "Nu jävlar."
-- [x] Grand fanfare sound
-- [x] Länkar till riktiga resurser (MCF, Försvarsmakten, Hemvärnet, broschyren)
-- [x] "Spela igen"-knapp (full game reset)
-
-### 4.5 Tester ✅
-- [x] 355 automatiserade tester (77 nya achievement/endgame-tester)
-- [x] Achievement data integrity, click milestones, upgrade milestones, era milestones
-- [x] Click upgrade achievements, FP milestones, game complete detection
-- [x] Full game achievement simulation (15/15 unlock in ~55 min)
+**Filer:** index.html, style.css, game.js, test.js
+**Beräknad storlek:** Stor
 
 ---
 
-## Sprint 5: Polish ✅
+## Sprint 3: Kriser & Dilemma-system
 
-### 5.1 Responsiv design ✅
-- [x] Mobillayout (< 768px): stacked, klickknapp överst, upgrades under
-- [x] Surfplattelayout (768-1024px): anpassad
-- [x] Liten telefon (< 400px): extra kompakt layout
-- [x] Touch-events för mobil (touchend preventDefault mot zoom)
-- [x] touch-action: manipulation på klickknapp och upgrade-kort
-- [x] user-select: none i spelområdet
+**Mål:** Ersätt det rena bonus-eventsystemet med tre eventtyper: bonusar, kriser, och dilemman. Kriser dränerar resurser. Dilemman ger spelaren binära val med konsekvenser.
 
-### 5.2 localStorage-sparning ✅
-- [x] Spara spelläge: FP, alla upgrade-counts, achievements, era, statistik
-- [x] Ladda sparning vid sidladdning
-- [x] Auto-save varje 30 sekund
-- [x] Sparar vid beforeunload
-- [x] "Nollställ spelet"-knapp (↻) med confirm-dialog i header
-- [x] Versionerad spardata (version: 1) för framtidskompatibilitet
+### 3.1 Utökat eventsystem
+- [ ] Events har nu `category`: 'bonus', 'crisis', 'dilemma'
+- [ ] Event-pool filtreras baserat på beredskapsläge:
+  - Vardag: 80% bonus, 20% lindrig kris
+  - Oro: 50% bonus, 40% kris, 10% dilemma
+  - Störning: 20% bonus, 40% kris, 40% dilemma
+  - Kris: 10% bonus, 50% kris, 40% dilemma
+  - Uppbyggnad: 40% bonus, 20% kris, 40% dilemma
+- [ ] Event-frekvens ökar med beredskapsläge:
+  - Vardag: var 45–90s (som idag)
+  - Oro: var 30–60s
+  - Störning: var 20–45s
+  - Kris: var 15–30s
+  - Uppbyggnad: var 30–60s
 
-### 5.3 Balansering och playtesting ✅
-- [x] Balance verifierad via 394 automatiserade tester
-- [x] Full genomspelning ~23 min (3 cps), alla eror 2-5 min
-- [x] Alla achievements triggar korrekt i simulering (15/15)
-- [x] Event edge cases testade (conditional bonusar, upgrade bonusar)
+### 3.2 Kris-events (~12 stycken)
+- [ ] Strömavbrott: Försörjning -20
+- [ ] Vattenledning brast: Försörjning -25
+- [ ] Mobilnätet nere: Samband -30
+- [ ] Stormen Gudrun 2.0: Alla resurser -10
+- [ ] Matbrist i butikerna: Försörjning -15, Samhörighet -5
+- [ ] Cyberangrepp mot myndigheter: Samband -25
+- [ ] Desinformationsvåg: Samband -15, Samhörighet -10
+- [ ] Kyla utan el: Försörjning -20 (extra -10 om Försörjning redan < 30)
+- [ ] Grannbråk om resurser: Samhörighet -20
+- [ ] Sjukdomsutbrott: Försörjning -15, Samhörighet -10
+- [ ] Bränslebrist: Försörjning -15
+- [ ] Fler vid behov
+- [ ] Kriser visar en röd/orange variant av event-overlay
+- [ ] Krisljud: distinkt från bonus-ljud (sjunkande ton, lite oroande)
 
-### 5.4 Buggfixar ✅
-- [x] Memory leaks: safety-timeout på partiklar och float-text (1.5s)
-- [x] Reset rensar DOM-partiklar och float-text
-- [x] Reset rensar event-timers (eventTimer, _eventDismissTimer)
-- [x] Reset nollställer _clickBonusValue
-- [x] Reset startar om event-scheduling
-- [x] Dubbelklick-zoom förhindrad på klickknapp
+### 3.3 Dilemma-events (~10 stycken)
+- [ ] Dilemma-overlay: som event-overlay men med TVÅ knappar
+- [ ] Varje knapp visar kort beskrivning av konsekvenser
+- [ ] Dilemma-val sparas i `game.dilemmaHistory[]`
+- [ ] Initiala dilemman:
+  1. "Grannen behöver vatten": Dela (-10 Försörj, +15 Samhörig) / Behåll (-5 Samhörig)
+  2. "Rykten om förorenat vatten": Kolla fakta (-5 Samband, korrekt info) / Hamstra (-20 FP, +10 Försörj)
+  3. "Kommunen söker frivilliga": Ställ upp (-FP/s 20% 60s, +20 Samhörig) / Avböj (+0)
+  4. "Okänd bankar på — behöver hjälp": Öppna (-10 Försörj, +10 Samhörig) / Ignorera (-5 Samhörig)
+  5. "Tonåringen vill ut och hjälpa grannar": Tillåt (-5 Samhörig [oro], +10 Samhörig [bidrag]) / Neka (-10 Samhörig)
+  6. "Grannen erbjuder bensin mot mat": Byt (+10 Försörj, -5 Försörj, +10 Samhörig) / Avböj (+0)
+  7. "Någon sprider falsk info i gruppen": Konfrontera (-10 Samhörig, +15 Samband) / Ignorera (-10 Samband)
+  8. "Din arbetsgivare vill ha dig på plats": Gå (+FP/s bonus 60s, -10 Samhörig) / Stanna hemma (+10 Samhörig)
+  9. "Äldre granne behöver medicin, du har extra": Dela (-10 Försörj, +15 Samhörig) / Behåll (-5 Samhörig)
+  10. "Räddningstjänsten behöver ditt fordon": Lämna ut (-15 Försörj, +20 Samhörig, +FP bonus) / Neka (-10 Samhörig)
 
-### 5.5 Slutfinish ✅
-- [x] Favicon (SVG inline — svensk sköld med kronor)
-- [x] Meta-taggar (description, og:title, og:description, og:type, theme-color)
-- [x] 394 tester (39 nya Sprint 5-tester: save/load, reset, edge cases)
+### 3.4 Befintliga events — migrering
+- [ ] Behåll befintliga 12 events men klassificera som 'bonus'
+- [ ] Justera conditional events (strömavbrott, vattenledning, etc.) — de är nu kriser istället
+- [ ] Ta bort/sammanfoga duplicerade scenarier
+
+### 3.5 Dilemma-historik
+- [ ] `game.dilemmaHistory = []` — loggar varje val: `{ eventId, choice: 'a'|'b', time }`
+- [ ] Används i slutskärmen (Sprint 5)
+
+### 3.6 UI-uppdateringar
+- [ ] Kris-event: röd border/bakgrund i event-overlay
+- [ ] Dilemma-event: event-overlay med två knappar + konsekvenstext
+- [ ] Ljud: nytt kris-ljud (fallande, oroande), dilemma-ljud (tveksam ton)
+
+### 3.7 Save/Load
+- [ ] Spara dilemmaHistory
+- [ ] Event-pool kan inte sparas (volatile) — bara aktiv event + timer
+
+### 3.8 Tester
+- [ ] Kris-events minskar rätt resurser
+- [ ] Dilemma val A och val B ger korrekta konsekvenser
+- [ ] Event-pool filtreras korrekt per beredskapsläge
+- [ ] Event-frekvens matchar beredskapsläge
+- [ ] Conditional kris-events (extra skada vid låg resurs) fungerar
+- [ ] Dilemma-historik sparas korrekt
+- [ ] Alla event-data har korrekta fält
+- [ ] Save/load bevarar dilemma-historik
+
+### 3.9 Manuell verifiering
+- [ ] Kriser visas med distinkt visuellt tema (röd)
+- [ ] Dilemman visas med två valknappar
+- [ ] Resurser sjunker synligt vid kris
+- [ ] Val i dilemman ger direkt feedback (resursändring syns)
+- [ ] Event-takt ökar med beredskapsläge
+- [ ] Spelet känns mer dynamiskt och pressat
+- [ ] Mobilvy fungerar med dilemma-overlay
+
+**Filer:** index.html, style.css, game.js, test.js
+**Beräknad storlek:** Stor
 
 ---
 
-## Öppna frågor (avslutade)
+## Sprint 4: Flik-innehåll & strategiskt djup
 
-- [x] Prestige-mekanik? → Nej, spelet har tydligt slut
-- [x] Oändligt spel eller tydligt slut? → Tydligt slut vid Totalförsvar 3,5% av BNP
-- [x] "Fiender" som desinformation? → Desinformation som klick-event istället
-- [x] Målad speltid? → ~23 min
-- [x] Idle save-funktion? → Ja, localStorage med auto-save
-- [x] Mini-games? → Nej, fokus på klick + slumpmässiga events
-- [x] Hosting/deploy? → Öppen fråga, statiska filer
+**Mål:** Fyll varje flik med unika uppgraderingar och mekaniker. Balansera hela upgrade-trädet. Lägg till inter-flik-synergier.
+
+### 4.1 Tab 2: Info & Kommunikation (nya uppgraderingar)
+- [ ] 6–8 uppgraderingar med Info/Samband-tema
+- [ ] Unik mekanik: "Rykten vs Fakta" — dilemma-events ger bättre information om du har Info-upgrades
+  - Exempelvis: med Faktakoll-grupp visar dilemma-events vilken konsekvens som är bäst
+- [ ] Uppgraderingar:
+  - Ficklampa & radio (befintlig, flyttad)
+  - Grannlista med telefonnummer (ny)
+  - Vevradio-nätverk (ny)
+  - Faktakoll-grupp (ny — förbättrar dilemma-info)
+  - Krisapp (ny)
+  - Rakel-kommunikation (befintlig, flyttad)
+  - Kommunens SMS-utskick (ny)
+  - Lokal radiostation (ny)
+
+### 4.2 Tab 3: Familj & Grannar (nya mekaniker)
+- [ ] Befintliga grannuppgraderingar + nya
+- [ ] Unik mekanik: "Tillit" (trust) som sub-resurs
+  - Tillit byggs av Samhörighet-vänliga dilemma-val
+  - Hög tillit ger billigare uppgraderingar i Tab 3
+  - Låg tillit gör dilemman dyrare
+- [ ] Nya uppgraderingar:
+  - Gemensam matlagning
+  - Barnpassning-rotation
+  - Trygghetsvandringar
+
+### 4.3 Tab 4: Kommun & Region (befintliga, ombalanserade)
+- [ ] Välj 6–8 uppgraderingar från befintliga era 3+4 (de har redan bra teman)
+- [ ] Unik mekanik: "Civilplikt-uppgifter" — vid Kris-beredskapsläge kan du ta uppdrag som ger stor FP-bonus men kostar resurser
+- [ ] Ombalansera kostnader och FP/s nu när spelaren har resurstryck
+
+### 4.4 Tab 5: Nationen (endgame)
+- [ ] Befintliga nationella uppgraderingar
+- [ ] Slutför spelet genom att köpa "Totalförsvar 3,5% av BNP"
+- [ ] Kräver att spelaren har klarat sig genom krisen — om resurser är för låga, kan inte köpa
+
+### 4.5 Inter-flik-synergier
+- [ ] Info-upgrades förbättrar dilemma-utfall
+- [ ] Familj & Grannar-upgrades minskar Samhörighet-dränering
+- [ ] Kommun & Region-upgrades minskar ALL resursdränering
+- [ ] Nationella upgrades ger global FP/s-multiplikator
+
+### 4.6 Nya klickkraft-uppgraderingar
+- [ ] 2–3 nya klickkraft-upgrades kopplade till resurser
+- [ ] Exempelvis: "Krisstyrka" (klickkraft + Försörjning-bonus)
+
+### 4.7 Balansering
+- [ ] Justera ALL upgrade-kostnader för ny flödesbalans
+- [ ] Simulera med playtest.js (utöka med resurser)
+- [ ] Varje flik ska ta ~5–8 min att "klara" (köpa alla upgrades med normalt spelande)
+- [ ] Total speltid: ~30–40 min
+- [ ] Resurser ska kunna hållas uppe med aktivt spelande men kräva prioritering
+
+### 4.8 Tester
+- [ ] Alla nya upgrades har korrekta fält
+- [ ] Tab-tilldelningar stämmer
+- [ ] Inter-flik-synergier fungerar matematiskt
+- [ ] Balanssimuleringar: hela spelet i ~35 min vid 3 cps
+- [ ] Resurser hållbara men utmanande
+
+### 4.9 Manuell verifiering
+- [ ] Varje flik har meningsfullt innehåll
+- [ ] Uppgraderingar i varje flik känns tematiskt rätt
+- [ ] Resurstrycket gör att man måste prioritera
+- [ ] Spelet är utmanande men inte frustrerande
+- [ ] Alla flikar används under en genomspelning
+
+**Filer:** game.js, test.js, playtest.js
+**Beräknad storlek:** Stor
+
+---
+
+## Sprint 5: Slutskärm & Polish
+
+**Mål:** Implementera den utökade beredskapsrapporten. Lägg till nya achievements. Responsiv design för alla nya element. Final balansering och testning.
+
+### 5.1 Beredskapsrapport (slutskärm)
+- [ ] Sektion 1: Spelstatistik (behåll befintlig)
+- [ ] Sektion 2: Din beredskapsrapport
+  - Lägsta nivå per resurs under spelet (spåra i game loop)
+  - Antal gånger varje resurs nådde 0
+  - Antal kriser klarade / totalt
+  - Sammanfattning av dilemma-val (t.ex. "Du delade vatten 3 gånger")
+- [ ] Sektion 3: Verklighetscheck (fakta från research.md)
+  - 4–6 faktameningar om svensk beredskap
+  - Konservativa, verifierade — inga gissningar
+- [ ] Sektion 4: Reflektionsfrågor
+  - 4–5 frågor som spelaren kan fundera på
+- [ ] Sektion 5: "Nu jävlar" + länkar (behåll befintliga + ev. fler)
+
+### 5.2 Spårning av speldata för rapporten
+- [ ] `game.resourceHistory = { supplyMin: 80, commsMin: 80, communityMin: 80 }`
+- [ ] `game.resourceZeroCount = { supply: 0, comms: 0, community: 0 }`
+- [ ] `game.crisesHandled = 0, game.crisesTotal = 0`
+- [ ] Uppdateras i game loop och event-handlers
+
+### 5.3 Nya achievements (~8–10 nya)
+- [ ] "Resursstark" — alla resurser > 50 under hela spelet
+- [ ] "Medmänniska" — valt att hjälpa i alla dilemman
+- [ ] "Pragmatiker" — valt att behålla i alla dilemman
+- [ ] "Kriserfaren" — överlevt 10 kriser
+- [ ] "Informerad" — alla Info-upgrades köpta
+- [ ] "Gemenskapsmästare" — Samhörighet aldrig under 30
+- [ ] "Nollgånger" — en resurs nådde 0 minst 3 gånger (men du överlevde)
+- [ ] "Balanserad" — alla resurser slutade över 50
+- [ ] Uppdatera achievement-panel och count
+
+### 5.4 Responsiv design
+- [ ] Flikar fungerar på mobil (scrollbar eller 2 rader)
+- [ ] Resursmätare fungerar på mobil (kompakt vy)
+- [ ] Beredskapsläge-indikator fungerar på mobil
+- [ ] Dilemma-overlay fungerar på mobil (knappar klickbara)
+- [ ] Beredskapsrapport scrollbar på mobil
+- [ ] Testa på 320px, 375px, 768px, 1024px
+
+### 5.5 Balansering
+- [ ] Uppdatera playtest.js med resurssimulering
+- [ ] Kör fullständig balanssimulering
+- [ ] Justera: resursdräneringsrater, event-frekvenser, upgrade-kostnader
+- [ ] Mål: ~35 min genomspelning vid 3 cps, resurser utmanande men överlevnadsbara
+
+### 5.6 Buggfixar & edge cases
+- [ ] Reset rensar alla nya state (resurser, beredskapsläge, dilemma-historik)
+- [ ] Save/load hanterar alla nya fält
+- [ ] Resource penalties avaktiveras korrekt vid reset
+- [ ] Partiklar/float-text fungerar med nya overlays
+- [ ] Performance: inga minneslexor vid lång spelsession
+
+### 5.7 Tester
+- [ ] Slutskärm visar korrekt beredskapsrapport
+- [ ] Resurs-spårning (min, zero-counts) stämmer
+- [ ] Nya achievements triggar korrekt
+- [ ] Alla achievements i simulering
+- [ ] Full save/load med alla nya fält
+- [ ] Reset nollställer allt korrekt
+- [ ] Responsiv: manuell test på olika skärmstorlekar
+
+### 5.8 Manuell verifiering
+- [ ] Spela igenom hela spelet — upplevelsen ska vara engagerande
+- [ ] Slutskärmen ska lämna en eftertanke
+- [ ] Fakta i verklighetscheck ska vara korrekta
+- [ ] Reflektionsfrågor ska kännas relevanta
+- [ ] Inga visuella buggar på mobil
+- [ ] Spelet laddar korrekt med gammal save-data (bakåtkompatibilitet)
+
+**Filer:** index.html, style.css, game.js, test.js, playtest.js
+**Beräknad storlek:** Stor
+
+---
+
+## Sprint 6 (valfri): Final Balance & Release
+
+**Mål:** Extern playtesting, slutjusteringar, ev. deployment.
+
+### 6.1 Extern playtesting
+- [ ] Låt 3–5 personer spela igenom
+- [ ] Samla feedback: var fastnade de? Var det för svårt/lätt? Förstod de systemen?
+- [ ] Justera baserat på feedback
+
+### 6.2 Slutjusteringar
+- [ ] Finjustera balans
+- [ ] Textgenomgång: alla texter begripliga, korrekta, konsekvent ton
+- [ ] Tillgänglighet: kontrastcheck, skärmläsare, tangentbordsnavigation
+- [ ] Favicon och meta-taggar uppdaterade
+
+### 6.3 Deployment
+- [ ] Bestäm hosting (GitHub Pages, Netlify, annat)
+- [ ] Konfigurera deployment
+- [ ] Testa i produktion
+
+**Filer:** Alla
+**Beräknad storlek:** Medel
+
+---
+
+## Öppna frågor per sprint
+
+### Sprint 1
+- Ska klickkraft-uppgraderingar vara globala (syns i alla flikar) eller kopplas till specifik flik?
+- Exakt vilka upgrades hamnar i vilken flik? (Förslag i plan.md — justera vid implementation)
+
+### Sprint 2
+- Ska beredskapsläge vara tidsstyrt eller FP-tröskelstyrt?
+- Hur hård ska resursdränering vara? (Måste playtestas)
+- Ska resurser kunna gå under 0?
+
+### Sprint 3
+- Hur många dilemman totalt? (10 förslag — fler kan läggas till)
+- Ska dilemman ha timeout (auto-val om ingen input)?
+- Ska samma dilemma kunna visas flera gånger?
+
+### Sprint 4
+- Exakt antal nya uppgraderingar per flik?
+- Hur komplex ska "Rykten vs Fakta"-mekaniken vara?
+- Ska det finnas upgrade-dependencies (kräv upgrade X innan Y)?
+
+### Sprint 5
+- Vilka specifika fakta ska finnas i verklighetscheck? (Bara research.md-data, eller ny research?)
+- Ska reflektionsfrågor vara statiska eller baserade på spelarens val?

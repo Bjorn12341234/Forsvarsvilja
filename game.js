@@ -17,6 +17,8 @@ const game = {
   eventTimer: null,
   eventEndTime: 0,
   gameComplete: false,
+  activeTab: 0,
+  tabsUnlocked: [true, false, false, false, false],
 };
 
 // --- Era Definitions ---
@@ -26,6 +28,15 @@ const eras = [
   { name: 'Kommunen', threshold: 100000 },
   { name: 'Regionen', threshold: 2000000 },
   { name: 'Nationen', threshold: 50000000 },
+];
+
+// --- Tab Definitions (v2) ---
+const tabs = [
+  { id: 'home', name: 'Hemmet', icon: '\u{1F3E0}', unlockEra: 0 },
+  { id: 'info', name: 'Info & Komm', icon: '\u{1F4FB}', unlockEra: 1 },
+  { id: 'family', name: 'Grannar', icon: '\u{1F91D}', unlockEra: 1 },
+  { id: 'municipality', name: 'Kommun', icon: '\u{1F3DB}', unlockEra: 2 },
+  { id: 'nation', name: 'Nationen', icon: '\u2B50', unlockEra: 4 },
 ];
 
 // --- Upgrades (All Eras) ---
@@ -186,6 +197,49 @@ const upgrades = [
     baseCost: 5000000000000, fpPerSecond: 800000000000, count: 0, era: 4,
   },
 ];
+
+// --- Tab Assignments & New Upgrades (v2) ---
+(function setupTabs() {
+  const tabMap = {
+    // Tab 0: Hemmet
+    water: 0, cans: 0, stove: 0, sleeping: 0, kit: 0,
+    // Tab 1: Info & Kommunikation
+    radio: 1, rakel: 1, cyber_security: 1,
+    // Tab 2: Familj & Grannar
+    neighbors: 2, firewood: 2, water_purifier: 2, info_meeting: 2, local_group: 2, shelter: 2,
+    // Tab 3: Kommun & Region
+    crisis_plan: 3, prep_week: 3, water_supply: 3, fire_service: 3, civil_duty: 3,
+    county_coord: 3, civil_area: 3, power_prep: 3, food_supply: 3, fuel_reserves: 3,
+    // Tab 4: Nationen
+    mcf: 4, home_guard: 4, gripen: 4, global_eye: 4, nato_art5: 4, total_defense: 4,
+  };
+  for (const u of upgrades) u.tab = tabMap[u.id] ?? 0;
+
+  const newUpgrades = [
+    {
+      id: 'backup_power', name: 'Reservkraft',
+      description: 'Powerbank och liten generator — håll det viktigaste igång',
+      baseCost: 800, fpPerSecond: 35, count: 0, era: 0, tab: 0,
+    },
+    {
+      id: 'neighbor_list', name: 'Grannlista',
+      description: 'Vet du ens vad dina grannar heter?',
+      baseCost: 3000, fpPerSecond: 150, count: 0, era: 0, tab: 1,
+    },
+    {
+      id: 'crank_radio_net', name: 'Vevradio-nätverk',
+      description: 'Varje kvarter behöver minst en vevradio',
+      baseCost: 20000, fpPerSecond: 1000, count: 0, era: 1, tab: 1,
+    },
+    {
+      id: 'crisis_app', name: 'Krisapp',
+      description: 'MCF:s app — varningar direkt i fickan',
+      baseCost: 100000, fpPerSecond: 8000, count: 0, era: 2, tab: 1,
+    },
+  ];
+  upgrades.push(...newUpgrades);
+  upgrades.sort((a, b) => a.tab - b.tab || a.era - b.era || a.baseCost - b.baseCost);
+})();
 
 // --- Click Power Upgrades (one-time purchases) ---
 const clickUpgrades = [
@@ -356,14 +410,14 @@ const achievements = [
   },
   {
     id: 'era1_complete', name: 'Hemberedskapen klar',
-    description: 'Alla Era 1-uppgraderingar — du klarar en vecka utan samhällets hjälp!',
-    check: () => upgrades.filter(u => u.era === 0).every(u => u.count >= 1),
+    description: 'Alla uppgraderingar i Hemmet — du klarar en vecka!',
+    check: () => upgrades.filter(u => u.tab === 0).every(u => u.count >= 1),
     unlocked: false,
   },
   {
     id: 'era2_complete', name: 'Grannen du vill ha',
-    description: 'Alla Era 2-uppgraderingar — hela kvarteret är tryggare',
-    check: () => upgrades.filter(u => u.era === 1).every(u => u.count >= 1),
+    description: 'Alla uppgraderingar i Familj & Grannar',
+    check: () => upgrades.filter(u => u.tab === 2).every(u => u.count >= 1),
     unlocked: false,
   },
   {
@@ -456,6 +510,7 @@ const dom = {
   endStatFp: document.getElementById('end-stat-fp'),
   endStatUpgrades: document.getElementById('end-stat-upgrades'),
   endStatAchievements: document.getElementById('end-stat-achievements'),
+  tabBar: document.getElementById('tab-bar'),
 };
 
 // --- Number Formatting ---
@@ -511,6 +566,9 @@ function updateEra() {
 
   game.currentEra = newEra;
 
+  // Check for tab unlocks
+  updateTabUnlocks();
+
   const era = eras[game.currentEra];
   const nextEra = eras[game.currentEra + 1];
 
@@ -538,6 +596,46 @@ function showEraUnlock(eraIndex) {
   setTimeout(() => {
     dom.eraUnlockOverlay.classList.remove('visible');
   }, 2500);
+}
+
+// --- Tab System ---
+function switchTab(tabIndex) {
+  if (tabIndex < 0 || tabIndex >= tabs.length) return;
+  if (!game.tabsUnlocked[tabIndex]) return;
+  game.activeTab = tabIndex;
+  markUpgradesDirty();
+  renderTabs();
+  updateUI();
+}
+
+function renderTabs() {
+  dom.tabBar.innerHTML = '';
+  for (let i = 0; i < tabs.length; i++) {
+    const tab = tabs[i];
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn';
+    if (i === game.activeTab) btn.classList.add('active');
+    if (!game.tabsUnlocked[i]) {
+      btn.classList.add('locked');
+      btn.textContent = '\u{1F512}';
+      btn.title = 'L\u00e5st';
+    } else {
+      btn.textContent = tab.icon + ' ' + tab.name;
+      btn.addEventListener('click', () => switchTab(i));
+    }
+    dom.tabBar.appendChild(btn);
+  }
+}
+
+function updateTabUnlocks() {
+  let anyNew = false;
+  for (let i = 0; i < tabs.length; i++) {
+    if (!game.tabsUnlocked[i] && game.currentEra >= tabs[i].unlockEra) {
+      game.tabsUnlocked[i] = true;
+      anyNew = true;
+    }
+  }
+  if (anyNew) renderTabs();
 }
 
 // --- Particle Effects ---
@@ -700,6 +798,7 @@ function buyUpgrade(id) {
   const upgrade = upgrades.find(u => u.id === id);
   if (!upgrade) return;
   if (upgrade.era > game.currentEra) return;
+  if (!game.tabsUnlocked[upgrade.tab]) return;
 
   const cost = getUpgradeCost(upgrade);
   if (game.fp < cost) return;
@@ -733,10 +832,11 @@ function buyClickUpgrade(id) {
 }
 
 // --- Render Upgrades ---
-// Track whether a full rebuild is needed (e.g. new era unlocked, upgrade bought)
+// Track whether a full rebuild is needed (e.g. new era unlocked, upgrade bought, tab switched)
 let _upgradesNeedRebuild = true;
 let _clickUpgradesNeedRebuild = true;
 let _lastVisibleEra = -1;
+let _lastVisibleTab = -1;
 
 function markUpgradesDirty() { _upgradesNeedRebuild = true; }
 function markClickUpgradesDirty() { _clickUpgradesNeedRebuild = true; }
@@ -744,19 +844,11 @@ function markClickUpgradesDirty() { _clickUpgradesNeedRebuild = true; }
 function buildUpgrades() {
   dom.upgradesList.innerHTML = '';
   _lastVisibleEra = game.currentEra;
+  _lastVisibleTab = game.activeTab;
 
-  let lastEra = -1;
   for (const u of upgrades) {
-    if (u.era > game.currentEra) break;
-
-    // Add era header
-    if (u.era !== lastEra) {
-      lastEra = u.era;
-      const header = document.createElement('div');
-      header.className = 'era-header';
-      header.textContent = eras[u.era].name;
-      dom.upgradesList.appendChild(header);
-    }
+    if (u.tab !== game.activeTab) continue;
+    if (u.era > game.currentEra) continue;
 
     const cost = getUpgradeCost(u);
     const canAfford = game.fp >= cost;
@@ -780,8 +872,8 @@ function buildUpgrades() {
 }
 
 function refreshUpgrades() {
-  // Check if era changed — need full rebuild
-  if (game.currentEra !== _lastVisibleEra) {
+  // Check if era or tab changed — need full rebuild
+  if (game.currentEra !== _lastVisibleEra || game.activeTab !== _lastVisibleTab) {
     _upgradesNeedRebuild = true;
   }
   if (_upgradesNeedRebuild) {
@@ -1121,6 +1213,8 @@ function resetGame() {
   game.eventEndTime = 0;
   game._clickBonusValue = 0;
   game.gameComplete = false;
+  game.activeTab = 0;
+  game.tabsUnlocked = [true, false, false, false, false];
 
   // Reset upgrades
   for (const u of upgrades) u.count = 0;
@@ -1139,6 +1233,7 @@ function resetGame() {
   markUpgradesDirty();
   markClickUpgradesDirty();
   updateAchievementBtn();
+  renderTabs();
   updateUI();
 
   // Restart event scheduling
@@ -1148,9 +1243,24 @@ function resetGame() {
 // --- Save / Load ---
 const SAVE_KEY = 'forsvarsvilja_save';
 
+// v1 upgrade order (for save migration)
+const V1_UPGRADE_IDS = [
+  'water', 'cans', 'stove', 'radio', 'sleeping', 'kit',
+  'neighbors', 'firewood', 'water_purifier', 'info_meeting', 'local_group', 'shelter',
+  'crisis_plan', 'prep_week', 'water_supply', 'fire_service', 'civil_duty', 'rakel',
+  'county_coord', 'civil_area', 'power_prep', 'food_supply', 'fuel_reserves', 'cyber_security',
+  'mcf', 'home_guard', 'gripen', 'global_eye', 'nato_art5', 'total_defense',
+];
+const V1_CLICK_IDS = ['viking', 'karolin', 'artsoppa', 'beredskap_fighter', 'minister', 'nu_javlar'];
+const V1_ACHIEVEMENT_IDS = [
+  'first_click', 'clicks_100', 'clicks_1000', 'clicks_10000', 'first_upgrade',
+  'era1_complete', 'era2_complete', 'reach_era3', 'reach_era4', 'reach_era5',
+  'first_click_upgrade', 'nu_javlar', 'kontanter', 'broschyren', 'game_complete', 'all_achievements',
+];
+
 function getSaveData() {
   return {
-    version: 1,
+    version: 2,
     fp: game.fp,
     totalFp: game.totalFp,
     fpPerClick: game.fpPerClick,
@@ -1160,9 +1270,11 @@ function getSaveData() {
     startTime: game.startTime,
     muted: game.muted,
     gameComplete: game.gameComplete,
-    upgradeCounts: upgrades.map(u => u.count),
-    clickPurchased: clickUpgrades.map(u => u.purchased),
-    achievementsUnlocked: achievements.map(a => a.unlocked),
+    upgradeCounts: Object.fromEntries(upgrades.map(u => [u.id, u.count])),
+    clickPurchased: Object.fromEntries(clickUpgrades.map(u => [u.id, u.purchased])),
+    achievementsUnlocked: Object.fromEntries(achievements.map(a => [a.id, a.unlocked])),
+    activeTab: game.activeTab,
+    tabsUnlocked: [...game.tabsUnlocked],
     savedAt: Date.now(),
   };
 }
@@ -1180,8 +1292,9 @@ function loadGame() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return false;
     const data = JSON.parse(raw);
-    if (!data || data.version !== 1) return false;
+    if (!data || !data.version) return false;
 
+    // Common fields
     game.fp = data.fp || 0;
     game.totalFp = data.totalFp || 0;
     game.fpPerClick = data.fpPerClick || 1;
@@ -1192,24 +1305,53 @@ function loadGame() {
     game.muted = data.muted || false;
     game.gameComplete = data.gameComplete || false;
 
-    if (Array.isArray(data.upgradeCounts)) {
-      for (let i = 0; i < upgrades.length && i < data.upgradeCounts.length; i++) {
-        upgrades[i].count = data.upgradeCounts[i] || 0;
+    if (data.version === 1) {
+      // v1 migration: index-based arrays → ID-based objects
+      if (Array.isArray(data.upgradeCounts)) {
+        for (let i = 0; i < V1_UPGRADE_IDS.length && i < data.upgradeCounts.length; i++) {
+          const u = upgrades.find(u => u.id === V1_UPGRADE_IDS[i]);
+          if (u) u.count = data.upgradeCounts[i] || 0;
+        }
       }
-    }
-    if (Array.isArray(data.clickPurchased)) {
-      for (let i = 0; i < clickUpgrades.length && i < data.clickPurchased.length; i++) {
-        clickUpgrades[i].purchased = !!data.clickPurchased[i];
+      if (Array.isArray(data.clickPurchased)) {
+        for (let i = 0; i < V1_CLICK_IDS.length && i < data.clickPurchased.length; i++) {
+          const u = clickUpgrades.find(u => u.id === V1_CLICK_IDS[i]);
+          if (u) u.purchased = !!data.clickPurchased[i];
+        }
       }
-    }
-    if (Array.isArray(data.achievementsUnlocked)) {
-      for (let i = 0; i < achievements.length && i < data.achievementsUnlocked.length; i++) {
-        achievements[i].unlocked = !!data.achievementsUnlocked[i];
+      if (Array.isArray(data.achievementsUnlocked)) {
+        for (let i = 0; i < V1_ACHIEVEMENT_IDS.length && i < data.achievementsUnlocked.length; i++) {
+          const a = achievements.find(a => a.id === V1_ACHIEVEMENT_IDS[i]);
+          if (a) a.unlocked = !!data.achievementsUnlocked[i];
+        }
       }
+      game.activeTab = 0;
+      game.tabsUnlocked = [true, false, false, false, false];
+    } else {
+      // v2+: ID-based objects
+      if (data.upgradeCounts && typeof data.upgradeCounts === 'object' && !Array.isArray(data.upgradeCounts)) {
+        for (const u of upgrades) u.count = data.upgradeCounts[u.id] || 0;
+      }
+      if (data.clickPurchased && typeof data.clickPurchased === 'object' && !Array.isArray(data.clickPurchased)) {
+        for (const u of clickUpgrades) u.purchased = !!data.clickPurchased[u.id];
+      }
+      if (data.achievementsUnlocked && typeof data.achievementsUnlocked === 'object' && !Array.isArray(data.achievementsUnlocked)) {
+        for (const a of achievements) a.unlocked = !!data.achievementsUnlocked[a.id];
+      }
+      game.activeTab = data.activeTab || 0;
+      game.tabsUnlocked = Array.isArray(data.tabsUnlocked) ? [...data.tabsUnlocked] : [true, false, false, false, false];
     }
 
     // Recalculate derived state
     calculateFpPerSecond();
+
+    // Recalculate tab unlocks based on current era
+    for (let i = 0; i < tabs.length; i++) {
+      if (game.currentEra >= tabs[i].unlockEra) game.tabsUnlocked[i] = true;
+    }
+
+    // Validate activeTab
+    if (!game.tabsUnlocked[game.activeTab]) game.activeTab = 0;
 
     // Apply mute state
     if (game.muted) {
@@ -1281,6 +1423,9 @@ function init() {
 
   // Load saved game
   loadGame();
+
+  // Build tabs
+  renderTabs();
 
   setupTicker();
   calculateFpPerSecond();

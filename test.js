@@ -1,4 +1,4 @@
-// === FÖRSVARSVILJA — Sprint 1-4 Tests (Node.js) ===
+// === FÖRSVARSVILJA — v2 Sprint 1 Tests (Node.js) ===
 
 let passed = 0;
 let failed = 0;
@@ -48,42 +48,47 @@ function getUpgradeCost(upgrade) {
 }
 
 function makeUpgrades() {
+  // Sorted by tab, then era, then baseCost (matches game.js sort order)
   return [
-    // Era 0: Hemberedskap
-    { id: 'water', name: 'Vattenflaskor', baseCost: 10, fpPerSecond: 0.5, count: 0, era: 0 },
-    { id: 'cans', name: 'Konservburkar', baseCost: 50, fpPerSecond: 2, count: 0, era: 0 },
-    { id: 'stove', name: 'Stormkök & bränsle', baseCost: 200, fpPerSecond: 8, count: 0, era: 0 },
-    { id: 'radio', name: 'Ficklampa, radio & batterier', baseCost: 600, fpPerSecond: 30, count: 0, era: 0 },
-    { id: 'sleeping', name: 'Sovsäck & filtar', baseCost: 1500, fpPerSecond: 100, count: 0, era: 0 },
-    { id: 'kit', name: 'Hemberedskapskit', baseCost: 5000, fpPerSecond: 300, count: 0, era: 0 },
-    // Era 1: Grannskapet
-    { id: 'neighbors', name: 'Grannsamverkan', baseCost: 8000, fpPerSecond: 500, count: 0, era: 1 },
-    { id: 'firewood', name: 'Vedförråd & gemensam eldstad', baseCost: 25000, fpPerSecond: 1500, count: 0, era: 1 },
-    { id: 'water_purifier', name: 'Vattenrenare & vattendunkar', baseCost: 75000, fpPerSecond: 5000, count: 0, era: 1 },
-    { id: 'info_meeting', name: 'Informationsmöte', baseCost: 200000, fpPerSecond: 15000, count: 0, era: 1 },
-    { id: 'local_group', name: 'Lokal beredskapsgrupp', baseCost: 500000, fpPerSecond: 40000, count: 0, era: 1 },
-    { id: 'shelter', name: 'Gemensamt skyddsrum', baseCost: 1200000, fpPerSecond: 100000, count: 0, era: 1 },
-    // Era 2: Kommunen
-    { id: 'crisis_plan', name: 'Kommunal krisplan', baseCost: 1500000, fpPerSecond: 200000, count: 0, era: 2 },
-    { id: 'prep_week', name: 'Beredskapsveckan', baseCost: 4000000, fpPerSecond: 500000, count: 0, era: 2 },
-    { id: 'water_supply', name: 'Nödvattenförsörjning', baseCost: 10000000, fpPerSecond: 1200000, count: 0, era: 2 },
-    { id: 'fire_service', name: 'Räddningstjänst-uppgradering', baseCost: 25000000, fpPerSecond: 3000000, count: 0, era: 2 },
-    { id: 'civil_duty', name: 'Civilplikt-organisering', baseCost: 60000000, fpPerSecond: 8000000, count: 0, era: 2 },
-    { id: 'rakel', name: 'Rakel-kommunikation', baseCost: 150000000, fpPerSecond: 20000000, count: 0, era: 2 },
-    // Era 3: Regionen
-    { id: 'county_coord', name: 'Länsstyrelse-samordning', baseCost: 200000000, fpPerSecond: 40000000, count: 0, era: 3 },
-    { id: 'civil_area', name: 'Regionalt civilområde', baseCost: 500000000, fpPerSecond: 100000000, count: 0, era: 3 },
-    { id: 'power_prep', name: 'Elberedskap & reservkraft', baseCost: 1500000000, fpPerSecond: 250000000, count: 0, era: 3 },
-    { id: 'food_supply', name: 'Livsmedelsförsörjning', baseCost: 4000000000, fpPerSecond: 600000000, count: 0, era: 3 },
-    { id: 'fuel_reserves', name: 'Drivmedelsreserver', baseCost: 10000000000, fpPerSecond: 1500000000, count: 0, era: 3 },
-    { id: 'cyber_security', name: 'Cybersäkerhet', baseCost: 25000000000, fpPerSecond: 4000000000, count: 0, era: 3 },
-    // Era 4: Nationen
-    { id: 'mcf', name: 'MCF', baseCost: 40000000000, fpPerSecond: 8000000000, count: 0, era: 4 },
-    { id: 'home_guard', name: 'Hemvärnet', baseCost: 100000000000, fpPerSecond: 20000000000, count: 0, era: 4 },
-    { id: 'gripen', name: 'JAS 39 Gripen', baseCost: 300000000000, fpPerSecond: 50000000000, count: 0, era: 4 },
-    { id: 'global_eye', name: 'Global Eye-flygplan', baseCost: 800000000000, fpPerSecond: 120000000000, count: 0, era: 4 },
-    { id: 'nato_art5', name: 'NATO artikel 5', baseCost: 2000000000000, fpPerSecond: 300000000000, count: 0, era: 4 },
-    { id: 'total_defense', name: 'Totalförsvar 3,5% av BNP', baseCost: 5000000000000, fpPerSecond: 800000000000, count: 0, era: 4 },
+    // Tab 0: Hemmet (era 0)
+    { id: 'water', name: 'Vattenflaskor', baseCost: 10, fpPerSecond: 0.5, count: 0, era: 0, tab: 0 },
+    { id: 'cans', name: 'Konservburkar', baseCost: 50, fpPerSecond: 2, count: 0, era: 0, tab: 0 },
+    { id: 'stove', name: 'Stormkök & bränsle', baseCost: 200, fpPerSecond: 8, count: 0, era: 0, tab: 0 },
+    { id: 'backup_power', name: 'Reservkraft', baseCost: 800, fpPerSecond: 35, count: 0, era: 0, tab: 0 },
+    { id: 'sleeping', name: 'Sovsäck & filtar', baseCost: 1500, fpPerSecond: 100, count: 0, era: 0, tab: 0 },
+    { id: 'kit', name: 'Hemberedskapskit', baseCost: 5000, fpPerSecond: 300, count: 0, era: 0, tab: 0 },
+    // Tab 1: Info & Kommunikation
+    { id: 'radio', name: 'Ficklampa, radio & batterier', baseCost: 600, fpPerSecond: 30, count: 0, era: 0, tab: 1 },
+    { id: 'neighbor_list', name: 'Grannlista', baseCost: 3000, fpPerSecond: 150, count: 0, era: 0, tab: 1 },
+    { id: 'crank_radio_net', name: 'Vevradio-nätverk', baseCost: 20000, fpPerSecond: 1000, count: 0, era: 1, tab: 1 },
+    { id: 'crisis_app', name: 'Krisapp', baseCost: 100000, fpPerSecond: 8000, count: 0, era: 2, tab: 1 },
+    { id: 'rakel', name: 'Rakel-kommunikation', baseCost: 150000000, fpPerSecond: 20000000, count: 0, era: 2, tab: 1 },
+    { id: 'cyber_security', name: 'Cybersäkerhet', baseCost: 25000000000, fpPerSecond: 4000000000, count: 0, era: 3, tab: 1 },
+    // Tab 2: Familj & Grannar (era 1)
+    { id: 'neighbors', name: 'Grannsamverkan', baseCost: 8000, fpPerSecond: 500, count: 0, era: 1, tab: 2 },
+    { id: 'firewood', name: 'Vedförråd & gemensam eldstad', baseCost: 25000, fpPerSecond: 1500, count: 0, era: 1, tab: 2 },
+    { id: 'water_purifier', name: 'Vattenrenare & vattendunkar', baseCost: 75000, fpPerSecond: 5000, count: 0, era: 1, tab: 2 },
+    { id: 'info_meeting', name: 'Informationsmöte', baseCost: 200000, fpPerSecond: 15000, count: 0, era: 1, tab: 2 },
+    { id: 'local_group', name: 'Lokal beredskapsgrupp', baseCost: 500000, fpPerSecond: 40000, count: 0, era: 1, tab: 2 },
+    { id: 'shelter', name: 'Gemensamt skyddsrum', baseCost: 1200000, fpPerSecond: 100000, count: 0, era: 1, tab: 2 },
+    // Tab 3: Kommun & Region
+    { id: 'crisis_plan', name: 'Kommunal krisplan', baseCost: 1500000, fpPerSecond: 200000, count: 0, era: 2, tab: 3 },
+    { id: 'prep_week', name: 'Beredskapsveckan', baseCost: 4000000, fpPerSecond: 500000, count: 0, era: 2, tab: 3 },
+    { id: 'water_supply', name: 'Nödvattenförsörjning', baseCost: 10000000, fpPerSecond: 1200000, count: 0, era: 2, tab: 3 },
+    { id: 'fire_service', name: 'Räddningstjänst-uppgradering', baseCost: 25000000, fpPerSecond: 3000000, count: 0, era: 2, tab: 3 },
+    { id: 'civil_duty', name: 'Civilplikt-organisering', baseCost: 60000000, fpPerSecond: 8000000, count: 0, era: 2, tab: 3 },
+    { id: 'county_coord', name: 'Länsstyrelse-samordning', baseCost: 200000000, fpPerSecond: 40000000, count: 0, era: 3, tab: 3 },
+    { id: 'civil_area', name: 'Regionalt civilområde', baseCost: 500000000, fpPerSecond: 100000000, count: 0, era: 3, tab: 3 },
+    { id: 'power_prep', name: 'Elberedskap & reservkraft', baseCost: 1500000000, fpPerSecond: 250000000, count: 0, era: 3, tab: 3 },
+    { id: 'food_supply', name: 'Livsmedelsförsörjning', baseCost: 4000000000, fpPerSecond: 600000000, count: 0, era: 3, tab: 3 },
+    { id: 'fuel_reserves', name: 'Drivmedelsreserver', baseCost: 10000000000, fpPerSecond: 1500000000, count: 0, era: 3, tab: 3 },
+    // Tab 4: Nationen (era 4)
+    { id: 'mcf', name: 'MCF', baseCost: 40000000000, fpPerSecond: 8000000000, count: 0, era: 4, tab: 4 },
+    { id: 'home_guard', name: 'Hemvärnet', baseCost: 100000000000, fpPerSecond: 20000000000, count: 0, era: 4, tab: 4 },
+    { id: 'gripen', name: 'JAS 39 Gripen', baseCost: 300000000000, fpPerSecond: 50000000000, count: 0, era: 4, tab: 4 },
+    { id: 'global_eye', name: 'Global Eye-flygplan', baseCost: 800000000000, fpPerSecond: 120000000000, count: 0, era: 4, tab: 4 },
+    { id: 'nato_art5', name: 'NATO artikel 5', baseCost: 2000000000000, fpPerSecond: 300000000000, count: 0, era: 4, tab: 4 },
+    { id: 'total_defense', name: 'Totalförsvar 3,5% av BNP', baseCost: 5000000000000, fpPerSecond: 800000000000, count: 0, era: 4, tab: 4 },
   ];
 }
 
@@ -106,6 +111,20 @@ const eras = [
   { name: 'Nationen', threshold: 50000000 },
 ];
 
+const tabs = [
+  { id: 'home', name: 'Hemmet', unlockEra: 0 },
+  { id: 'info', name: 'Info & Komm', unlockEra: 1 },
+  { id: 'family', name: 'Grannar', unlockEra: 1 },
+  { id: 'municipality', name: 'Kommun', unlockEra: 2 },
+  { id: 'nation', name: 'Nationen', unlockEra: 4 },
+];
+
+function updateSimTabs(era, tabsUnlocked) {
+  for (let i = 0; i < tabs.length; i++) {
+    if (!tabsUnlocked[i] && era >= tabs[i].unlockEra) tabsUnlocked[i] = true;
+  }
+}
+
 function getCurrentEra(totalFp) {
   let era = 0;
   for (let i = eras.length - 1; i >= 0; i--) {
@@ -120,11 +139,12 @@ function calcFpPerSecond(ups) {
   return total;
 }
 
-// Simulation helper: buy best affordable upgrade for current era
-function simBuyBest(ups, fp, currentEra) {
+// Simulation helper: buy best affordable upgrade for current era + tab
+function simBuyBest(ups, fp, currentEra, tabsUnlocked) {
   let bestIdx = -1, bestRatio = Infinity;
   for (let i = 0; i < ups.length; i++) {
     if (ups[i].era > currentEra) continue;
+    if (tabsUnlocked && !tabsUnlocked[ups[i].tab]) continue;
     const cost = getUpgradeCost(ups[i]);
     if (fp >= cost) {
       const ratio = cost / ups[i].fpPerSecond;
@@ -142,7 +162,7 @@ function simBuyBest(ups, fp, currentEra) {
 // TESTS
 // ============================================================
 
-console.log('\x1b[33m═══ FÖRSVARSVILJA — Sprint 1-4 Tests ═══\x1b[0m');
+console.log('\x1b[33m═══ FÖRSVARSVILJA — v2 Sprint 1 Tests ═══\x1b[0m');
 
 // ---- Sprint 1 Tests (preserved) ----
 
@@ -181,11 +201,11 @@ section('FP/s Calculation');
 {
   const ups = makeUpgrades();
   assertEq(calcFpPerSecond(ups), 0, 'No purchases = 0 FP/s');
-  ups[0].count = 5;
+  ups.find(u => u.id === 'water').count = 5;
   assertClose(calcFpPerSecond(ups), 2.5, 0.001, '5 water = 2.5 FP/s');
-  ups[1].count = 3;
+  ups.find(u => u.id === 'cans').count = 3;
   assertClose(calcFpPerSecond(ups), 8.5, 0.001, '5 water + 3 cans = 8.5 FP/s');
-  ups[5].count = 1;
+  ups.find(u => u.id === 'kit').count = 1;
   assertClose(calcFpPerSecond(ups), 308.5, 0.001, 'Adding 1 kit = 308.5 FP/s');
 }
 
@@ -193,23 +213,25 @@ section('Buy Logic');
 {
   let fp = 100;
   const ups = makeUpgrades();
-  const cost = getUpgradeCost(ups[0]);
+  const water = ups.find(u => u.id === 'water');
+  const kit = ups.find(u => u.id === 'kit');
+  const cost = getUpgradeCost(water);
   assert(fp >= cost, 'Can afford first water');
   fp -= cost;
-  ups[0].count++;
+  water.count++;
   assertEq(fp, 90, 'FP reduced correctly');
-  assertEq(ups[0].count, 1, 'Count incremented');
+  assertEq(water.count, 1, 'Count incremented');
 
   // Can't afford kit
-  assert(fp < getUpgradeCost(ups[5]), 'Cannot afford kit with 90 FP');
+  assert(fp < getUpgradeCost(kit), 'Cannot afford kit with 90 FP');
 
   // Buy until can't afford
-  while (fp >= getUpgradeCost(ups[0])) {
-    fp -= getUpgradeCost(ups[0]);
-    ups[0].count++;
+  while (fp >= getUpgradeCost(water)) {
+    fp -= getUpgradeCost(water);
+    water.count++;
   }
   assert(fp >= 0, 'FP never negative after buying');
-  assert(fp < getUpgradeCost(ups[0]), 'Correctly cannot afford next');
+  assert(fp < getUpgradeCost(water), 'Correctly cannot afford next');
 }
 
 section('Era Progression');
@@ -226,34 +248,32 @@ assertEq(getCurrentEra(50000000), 4, '50M = Era 4');
 section('All Upgrades Data Integrity');
 {
   const ups = makeUpgrades();
-  assertEq(ups.length, 30, '30 total upgrades (6 per era x 5 eras)');
+  assertEq(ups.length, 34, '34 total upgrades');
 
   const ids = new Set(ups.map(u => u.id));
-  assertEq(ids.size, 30, 'All upgrade IDs unique');
+  assertEq(ids.size, 34, 'All upgrade IDs unique');
 
-  // Check each era has 6 upgrades
-  for (let era = 0; era < 5; era++) {
-    const eraUps = ups.filter(u => u.era === era);
-    assertEq(eraUps.length, 6, `Era ${era} has 6 upgrades`);
-  }
+  // Check tab distribution
+  const tabCounts = [0, 0, 0, 0, 0];
+  for (const u of ups) tabCounts[u.tab]++;
+  assertEq(tabCounts[0], 6, 'Tab 0 (Hemmet) has 6 upgrades');
+  assertEq(tabCounts[1], 6, 'Tab 1 (Info) has 6 upgrades');
+  assertEq(tabCounts[2], 6, 'Tab 2 (Grannar) has 6 upgrades');
+  assertEq(tabCounts[3], 10, 'Tab 3 (Kommun) has 10 upgrades');
+  assertEq(tabCounts[4], 6, 'Tab 4 (Nationen) has 6 upgrades');
 
-  // Within each era, costs and FP/s should be ascending
-  for (let era = 0; era < 5; era++) {
-    const eraUps = ups.filter(u => u.era === era);
-    for (let i = 1; i < eraUps.length; i++) {
-      assert(eraUps[i].baseCost > eraUps[i - 1].baseCost,
-        `Era ${era}: ${eraUps[i].name} costs more than ${eraUps[i - 1].name}`);
-      assert(eraUps[i].fpPerSecond > eraUps[i - 1].fpPerSecond,
-        `Era ${era}: ${eraUps[i].name} gives more FP/s`);
+  // All upgrades have valid tab field
+  assert(ups.every(u => u.tab >= 0 && u.tab <= 4), 'All upgrades have valid tab 0-4');
+
+  // Within each tab, costs and FP/s should be ascending
+  for (let tab = 0; tab < 5; tab++) {
+    const tabUps = ups.filter(u => u.tab === tab);
+    for (let i = 1; i < tabUps.length; i++) {
+      assert(tabUps[i].baseCost > tabUps[i - 1].baseCost,
+        `Tab ${tab}: ${tabUps[i].name} costs more than ${tabUps[i - 1].name}`);
+      assert(tabUps[i].fpPerSecond > tabUps[i - 1].fpPerSecond,
+        `Tab ${tab}: ${tabUps[i].name} gives more FP/s`);
     }
-  }
-
-  // Across eras, first upgrade of next era should cost more than last of previous
-  for (let era = 1; era < 5; era++) {
-    const prevLast = ups.filter(u => u.era === era - 1).pop();
-    const currFirst = ups.filter(u => u.era === era)[0];
-    assert(currFirst.baseCost > prevLast.baseCost,
-      `Era ${era} first (${currFirst.name}) costs more than Era ${era - 1} last (${prevLast.name})`);
   }
 
   // All upgrades start with count 0
@@ -311,40 +331,113 @@ section('Click Upgrade Buy Logic');
   assert(fp < clicks[1].cost, 'Cannot afford Karolinsk with 500 FP');
 }
 
-section('Era-filtered Upgrade Visibility');
+section('Tab-filtered Upgrade Visibility');
 {
   const ups = makeUpgrades();
-  // At era 0, only era 0 upgrades visible
-  const era0visible = ups.filter(u => u.era <= 0);
-  assertEq(era0visible.length, 6, 'Era 0: 6 visible upgrades');
 
-  // At era 1, eras 0+1 visible
-  const era1visible = ups.filter(u => u.era <= 1);
-  assertEq(era1visible.length, 12, 'Era 1: 12 visible upgrades');
+  // Tab 0 at era 0: all 6 tab-0 upgrades visible (all are era 0)
+  const tab0era0 = ups.filter(u => u.tab === 0 && u.era <= 0);
+  assertEq(tab0era0.length, 6, 'Tab 0, Era 0: all 6 Hemmet upgrades visible');
 
-  // At era 2, eras 0+1+2 visible
-  const era2visible = ups.filter(u => u.era <= 2);
-  assertEq(era2visible.length, 18, 'Era 2: 18 visible upgrades');
+  // Tab 1 at era 1: radio + neighbor_list (era 0) + crank_radio_net (era 1) = 3
+  const tab1era1 = ups.filter(u => u.tab === 1 && u.era <= 1);
+  assertEq(tab1era1.length, 3, 'Tab 1, Era 1: 3 Info upgrades visible');
 
-  // At era 3, eras 0+1+2+3 visible
-  const era3visible = ups.filter(u => u.era <= 3);
-  assertEq(era3visible.length, 24, 'Era 3: 24 visible upgrades');
+  // Tab 1 at era 2: adds crisis_app + rakel = 5
+  const tab1era2 = ups.filter(u => u.tab === 1 && u.era <= 2);
+  assertEq(tab1era2.length, 5, 'Tab 1, Era 2: 5 Info upgrades visible');
 
-  // At era 4, all 30 visible
-  const era4visible = ups.filter(u => u.era <= 4);
-  assertEq(era4visible.length, 30, 'Era 4: all 30 visible');
+  // Tab 2 at era 1: all 6 (all era 1)
+  const tab2era1 = ups.filter(u => u.tab === 2 && u.era <= 1);
+  assertEq(tab2era1.length, 6, 'Tab 2, Era 1: all 6 Grannar upgrades visible');
+
+  // Tab 3 at era 2: 5 era-2 upgrades
+  const tab3era2 = ups.filter(u => u.tab === 3 && u.era <= 2);
+  assertEq(tab3era2.length, 5, 'Tab 3, Era 2: 5 Kommun upgrades visible');
+
+  // Tab 3 at era 3: all 10
+  const tab3era3 = ups.filter(u => u.tab === 3 && u.era <= 3);
+  assertEq(tab3era3.length, 10, 'Tab 3, Era 3: all 10 Kommun upgrades visible');
+
+  // Tab 4 at era 4: all 6
+  const tab4era4 = ups.filter(u => u.tab === 4 && u.era <= 4);
+  assertEq(tab4era4.length, 6, 'Tab 4, Era 4: all 6 Nationen upgrades visible');
+
+  // Total buyable at each era (across all unlocked tabs)
+  const buyableEra0 = ups.filter(u => u.era <= 0 && [0].includes(u.tab));
+  assertEq(buyableEra0.length, 6, 'Era 0 (Tab 0 only): 6 buyable upgrades');
+
+  const buyableEra1 = ups.filter(u => u.era <= 1 && [0, 1, 2].includes(u.tab));
+  assertEq(buyableEra1.length, 15, 'Era 1 (Tabs 0-2): 15 buyable upgrades');
+
+  const buyableEra4 = ups.filter(u => u.era <= 4);
+  assertEq(buyableEra4.length, 34, 'Era 4: all 34 buyable');
+}
+
+section('Tab System');
+{
+  // Tab data integrity
+  assertEq(tabs.length, 5, '5 tabs defined');
+  const tabIds = new Set(tabs.map(t => t.id));
+  assertEq(tabIds.size, 5, 'All tab IDs unique');
+
+  // Tab unlock eras are valid
+  assertEq(tabs[0].unlockEra, 0, 'Tab 0 unlocks at era 0');
+  assertEq(tabs[1].unlockEra, 1, 'Tab 1 unlocks at era 1');
+  assertEq(tabs[2].unlockEra, 1, 'Tab 2 unlocks at era 1');
+  assertEq(tabs[3].unlockEra, 2, 'Tab 3 unlocks at era 2');
+  assertEq(tabs[4].unlockEra, 4, 'Tab 4 unlocks at era 4');
+
+  // Tab unlock simulation
+  const tu = [true, false, false, false, false];
+  updateSimTabs(0, tu);
+  assert(tu[0] && !tu[1] && !tu[2] && !tu[3] && !tu[4], 'Era 0: only Tab 0 unlocked');
+
+  updateSimTabs(1, tu);
+  assert(tu[0] && tu[1] && tu[2] && !tu[3] && !tu[4], 'Era 1: Tabs 0-2 unlocked');
+
+  updateSimTabs(2, tu);
+  assert(tu[3], 'Era 2: Tab 3 unlocked');
+  assert(!tu[4], 'Era 2: Tab 4 still locked');
+
+  updateSimTabs(3, tu);
+  assert(!tu[4], 'Era 3: Tab 4 still locked');
+
+  updateSimTabs(4, tu);
+  assert(tu[4], 'Era 4: Tab 4 unlocked');
+  assert(tu.every(t => t), 'Era 4: all tabs unlocked');
+
+  // Tab switching
+  let activeTab = 0;
+  // Can switch to unlocked tab
+  const tu2 = [true, true, false, false, false];
+  if (tu2[1]) activeTab = 1;
+  assertEq(activeTab, 1, 'Can switch to unlocked tab');
+  // Cannot switch to locked tab
+  if (tu2[2]) activeTab = 2;
+  assertEq(activeTab, 1, 'Cannot switch to locked tab (stays on 1)');
+
+  // Buy blocked by locked tab
+  const ups = makeUpgrades();
+  const neighbor = ups.find(u => u.id === 'neighbors'); // tab 2
+  const tu3 = [true, true, false, false, false];
+  const canBuy = neighbor.era <= 1 && tu3[neighbor.tab];
+  assertEq(canBuy, false, 'Cannot buy upgrade in locked tab');
 }
 
 section('Balance — Era 1 Simulation (reach Era 2)');
 {
   const ups = makeUpgrades();
+  const tu = [true, false, false, false, false];
   let fp = 0, totalFp = 0, fps = 0, sec = 0;
   const CPS = 2; // casual clicks per second
 
   while (totalFp < 5000 && sec < 600) {
     fp += CPS + fps; totalFp += CPS + fps; sec++;
-    let r = simBuyBest(ups, fp, 0);
-    while (r.bought) { fp = r.fp; fps = calcFpPerSecond(ups); r = simBuyBest(ups, fp, 0); }
+    const era = getCurrentEra(totalFp);
+    updateSimTabs(era, tu);
+    let r = simBuyBest(ups, fp, era, tu);
+    while (r.bought) { fp = r.fp; fps = calcFpPerSecond(ups); r = simBuyBest(ups, fp, era, tu); }
     fp = r.fp;
   }
   const min = sec / 60;
@@ -358,8 +451,14 @@ section('Balance — Era 2 Simulation (reach Era 3)');
 {
   // Start from a state where Era 2 was just reached
   const ups = makeUpgrades();
-  // Give player a typical Era 1 setup
-  ups[0].count = 4; ups[1].count = 3; ups[2].count = 2; ups[3].count = 2; ups[4].count = 1; ups[5].count = 1;
+  const tu = [true, true, true, false, false]; // tabs 0-2 unlocked at era 1
+  // Give player a typical Era 1 setup (Tab 0 items)
+  ups.find(u => u.id === 'water').count = 4;
+  ups.find(u => u.id === 'cans').count = 3;
+  ups.find(u => u.id === 'stove').count = 2;
+  ups.find(u => u.id === 'backup_power').count = 2;
+  ups.find(u => u.id === 'sleeping').count = 1;
+  ups.find(u => u.id === 'kit').count = 1;
   let fps = calcFpPerSecond(ups);
   let fp = 1000, totalFp = 5000, sec = 0;
   const CPS = 3;
@@ -367,8 +466,9 @@ section('Balance — Era 2 Simulation (reach Era 3)');
   while (totalFp < 100000 && sec < 600) {
     fp += CPS + fps; totalFp += CPS + fps; sec++;
     let era = getCurrentEra(totalFp);
-    let r = simBuyBest(ups, fp, era);
-    while (r.bought) { fp = r.fp; fps = calcFpPerSecond(ups); r = simBuyBest(ups, fp, era); }
+    updateSimTabs(era, tu);
+    let r = simBuyBest(ups, fp, era, tu);
+    while (r.bought) { fp = r.fp; fps = calcFpPerSecond(ups); r = simBuyBest(ups, fp, era, tu); }
     fp = r.fp;
   }
   const min = sec / 60;
@@ -381,6 +481,7 @@ section('Balance — Era 2 Simulation (reach Era 3)');
 section('Balance — Full Game Simulation');
 {
   const ups = makeUpgrades();
+  const tu = [true, false, false, false, false];
   let fp = 0, totalFp = 0, fps = 0, sec = 0;
   let fpPerClick = 1;
   const clicks = makeClickUpgrades();
@@ -394,6 +495,7 @@ section('Balance — Full Game Simulation');
     sec++;
 
     let era = getCurrentEra(totalFp);
+    updateSimTabs(era, tu);
     if (era > lastEra) {
       eraTimes.push({ era, sec, min: (sec / 60).toFixed(1), fps: formatNumber(fps) });
       lastEra = era;
@@ -409,8 +511,8 @@ section('Balance — Full Game Simulation');
     }
 
     // Buy best upgrade
-    let r = simBuyBest(ups, fp, era);
-    while (r.bought) { fp = r.fp; fps = calcFpPerSecond(ups); r = simBuyBest(ups, fp, era); }
+    let r = simBuyBest(ups, fp, era, tu);
+    while (r.bought) { fp = r.fp; fps = calcFpPerSecond(ups); r = simBuyBest(ups, fp, era, tu); }
     fp = r.fp;
 
     // Check if all upgrades bought at least once
@@ -418,7 +520,7 @@ section('Balance — Full Game Simulation');
   }
 
   const totalMin = sec / 60;
-  assert(ups.every(u => u.count >= 1), 'All 30 upgrades bought at least once');
+  assert(ups.every(u => u.count >= 1), 'All 34 upgrades bought at least once');
   assert(totalMin >= 5, `Full game takes ≥5 min (${totalMin.toFixed(1)} min)`);
   assert(totalMin <= 30, `Full game takes ≤30 min (${totalMin.toFixed(1)} min)`);
 
@@ -436,30 +538,32 @@ section('Balance — Full Game Simulation');
   }
 }
 
-section('Balance — First Upgrade Per Era Affordable Quickly');
+section('Balance — Cheapest Upgrade Per Tab Affordable');
 {
   const ups = makeUpgrades();
-  // Simulate reaching each era threshold and check that first upgrade is not absurdly expensive
-  const eraFirstUpgradeCost = [];
-  for (let era = 0; era < 5; era++) {
-    const first = ups.find(u => u.era === era);
-    eraFirstUpgradeCost.push(first.baseCost);
+  // Check first upgrade in each tab is reasonably priced
+  for (let tab = 0; tab < 5; tab++) {
+    const tabUps = ups.filter(u => u.tab === tab);
+    assert(tabUps.length > 0, `Tab ${tab} has upgrades`);
+    const cheapest = tabUps[0]; // sorted by cost
+    assert(cheapest.baseCost > 0, `Tab ${tab} cheapest (${cheapest.name}) has positive cost`);
   }
 
-  // Era 1 first upgrade (water): 10 FP — easily affordable
-  assertEq(eraFirstUpgradeCost[0], 10, 'Era 1 first upgrade costs 10');
+  // Tab 0 cheapest (water): 10 FP — easily affordable at start
+  const tab0first = ups.find(u => u.tab === 0);
+  assertEq(tab0first.baseCost, 10, 'Tab 0 cheapest costs 10');
 
-  // Era 2 first upgrade should be affordable within reasonable time at ~300 FP/s
-  assert(eraFirstUpgradeCost[1] <= 50000, 'Era 2 first upgrade ≤50K (buyable quickly at ~300 FP/s)');
+  // Tab 1 cheapest (radio): 600 FP — affordable by era 1
+  const tab1first = ups.find(u => u.tab === 1);
+  assert(tab1first.baseCost <= 5000, 'Tab 1 cheapest ≤5K');
 
-  // Era 3 first upgrade should be affordable within reasonable time
-  assert(eraFirstUpgradeCost[2] <= 5000000, 'Era 3 first upgrade ≤5M');
+  // Tab 2 cheapest (neighbors): 8000 — affordable by era 1
+  const tab2first = ups.find(u => u.tab === 2);
+  assert(tab2first.baseCost <= 50000, 'Tab 2 cheapest ≤50K');
 
-  // Era 4 first upgrade
-  assert(eraFirstUpgradeCost[3] <= 500000000, 'Era 4 first upgrade ≤500M');
-
-  // Era 5 first upgrade
-  assert(eraFirstUpgradeCost[4] <= 100000000000, 'Era 5 first upgrade ≤100B');
+  // Tab 4 cheapest (mcf): affordable by era 4
+  const tab4first = ups.find(u => u.tab === 4);
+  assert(tab4first.baseCost <= 100000000000, 'Tab 4 cheapest ≤100B');
 }
 
 section('Click Upgrade Timing');
@@ -738,8 +842,8 @@ function makeAchievements(ups, clickUps, gameState) {
     { id: 'clicks_1000', name: 'Tusen klick', check: () => gameState.totalClicks >= 1000, unlocked: false },
     { id: 'clicks_10000', name: 'Tiotusen klick', check: () => gameState.totalClicks >= 10000, unlocked: false },
     { id: 'first_upgrade', name: 'Första inköpet', check: () => gameState.totalUpgradesBought >= 1, unlocked: false },
-    { id: 'era1_complete', name: 'Hemberedskapen klar', check: () => ups.filter(u => u.era === 0).every(u => u.count >= 1), unlocked: false },
-    { id: 'era2_complete', name: 'Grannen du vill ha', check: () => ups.filter(u => u.era === 1).every(u => u.count >= 1), unlocked: false },
+    { id: 'era1_complete', name: 'Hemberedskapen klar', check: () => ups.filter(u => u.tab === 0).every(u => u.count >= 1), unlocked: false },
+    { id: 'era2_complete', name: 'Grannen du vill ha', check: () => ups.filter(u => u.tab === 2).every(u => u.count >= 1), unlocked: false },
     { id: 'reach_era3', name: 'Kommunal kraft', check: () => gameState.currentEra >= 2, unlocked: false },
     { id: 'reach_era4', name: 'Regional samordning', check: () => gameState.currentEra >= 3, unlocked: false },
     { id: 'reach_era5', name: 'Nationens försvar', check: () => gameState.currentEra >= 4, unlocked: false },
@@ -834,15 +938,15 @@ section('Achievement — Upgrade Milestones');
   let unlocked = checkAchievementsTest(achs);
   assert(unlocked.includes('first_upgrade'), 'First upgrade achievement unlocks');
 
-  // Era 1 complete (all era 0 upgrades)
-  for (const u of ups.filter(u => u.era === 0)) u.count = 1;
+  // Era 1 complete (all tab 0 upgrades)
+  for (const u of ups.filter(u => u.tab === 0)) u.count = 1;
   unlocked = checkAchievementsTest(achs);
-  assert(unlocked.includes('era1_complete'), 'Era 1 complete achievement unlocks');
+  assert(unlocked.includes('era1_complete'), 'Era 1 complete achievement unlocks (tab 0)');
 
-  // Era 2 complete
-  for (const u of ups.filter(u => u.era === 1)) u.count = 1;
+  // Era 2 complete (all tab 2 upgrades)
+  for (const u of ups.filter(u => u.tab === 2)) u.count = 1;
   unlocked = checkAchievementsTest(achs);
-  assert(unlocked.includes('era2_complete'), 'Era 2 complete achievement unlocks');
+  assert(unlocked.includes('era2_complete'), 'Era 2 complete achievement unlocks (tab 2)');
 }
 
 section('Achievement — Era Milestones');
@@ -933,6 +1037,7 @@ section('Full Game Achievement Simulation');
 {
   const ups = makeUpgrades();
   const clicks = makeClickUpgrades();
+  const tu = [true, false, false, false, false];
   const gs = { totalClicks: 0, totalUpgradesBought: 0, currentEra: 0, totalFp: 0, gameComplete: false };
   const achs = makeAchievements(ups, clicks, gs);
   let fp = 0, fps = 0;
@@ -948,6 +1053,7 @@ section('Full Game Achievement Simulation');
     sec++;
 
     gs.currentEra = getCurrentEra(gs.totalFp);
+    updateSimTabs(gs.currentEra, tu);
 
     // Buy click upgrades
     for (const c of clicks) {
@@ -959,12 +1065,12 @@ section('Full Game Achievement Simulation');
     }
 
     // Buy best upgrade
-    let r = simBuyBest(ups, fp, gs.currentEra);
+    let r = simBuyBest(ups, fp, gs.currentEra, tu);
     while (r.bought) {
       fp = r.fp;
       gs.totalUpgradesBought++;
       fps = calcFpPerSecond(ups);
-      r = simBuyBest(ups, fp, gs.currentEra);
+      r = simBuyBest(ups, fp, gs.currentEra, tu);
     }
     fp = r.fp;
 
@@ -997,20 +1103,20 @@ section('Full Game Achievement Simulation');
 // SPRINT 5 TESTS — Save/Load, Reset, Edge Cases
 // ============================================================
 
-section('Save Data Serialization');
+section('Save Data Serialization (v2 format)');
 {
   const ups = makeUpgrades();
   const clicks = makeClickUpgrades();
 
   // Simulate some game state
-  ups[0].count = 5;
-  ups[1].count = 3;
-  ups[6].count = 2; // Era 1 upgrade
+  ups.find(u => u.id === 'water').count = 5;
+  ups.find(u => u.id === 'cans').count = 3;
+  ups.find(u => u.id === 'neighbors').count = 2;
   clicks[0].purchased = true;
   clicks[1].purchased = true;
 
   const saveData = {
-    version: 1,
+    version: 2,
     fp: 12345.67,
     totalFp: 99999.99,
     fpPerClick: 6,
@@ -1020,43 +1126,44 @@ section('Save Data Serialization');
     startTime: Date.now() - 60000,
     muted: false,
     gameComplete: false,
-    upgradeCounts: ups.map(u => u.count),
-    clickPurchased: clicks.map(u => u.purchased),
-    achievementsUnlocked: [true, true, false, false, true, false, false, false, false, false, false, false, false, false, false],
+    upgradeCounts: Object.fromEntries(ups.map(u => [u.id, u.count])),
+    clickPurchased: Object.fromEntries(clicks.map(c => [c.id, c.purchased])),
+    achievementsUnlocked: { first_click: true, clicks_100: true, first_upgrade: true },
+    activeTab: 1,
+    tabsUnlocked: [true, true, true, false, false],
     savedAt: Date.now(),
   };
 
   // Verify structure
-  assertEq(saveData.version, 1, 'Save data has version 1');
-  assertEq(saveData.upgradeCounts.length, 30, 'Save data has 30 upgrade counts');
-  assertEq(saveData.clickPurchased.length, 6, 'Save data has 6 click upgrade states');
-  assertEq(saveData.achievementsUnlocked.length, 15, 'Save data has 15 achievement states');
+  assertEq(saveData.version, 2, 'Save data has version 2');
+  assertEq(typeof saveData.upgradeCounts, 'object', 'upgradeCounts is an object (ID-based)');
+  assert(!Array.isArray(saveData.upgradeCounts), 'upgradeCounts is not an array');
 
   // Verify values
-  assertEq(saveData.upgradeCounts[0], 5, 'Water upgrade count saved as 5');
-  assertEq(saveData.upgradeCounts[1], 3, 'Cans upgrade count saved as 3');
-  assertEq(saveData.upgradeCounts[6], 2, 'Neighbors upgrade count saved as 2');
-  assertEq(saveData.clickPurchased[0], true, 'Viking purchased saved as true');
-  assertEq(saveData.clickPurchased[2], false, 'Artsoppa purchased saved as false');
+  assertEq(saveData.upgradeCounts.water, 5, 'Water upgrade count saved as 5');
+  assertEq(saveData.upgradeCounts.cans, 3, 'Cans upgrade count saved as 3');
+  assertEq(saveData.upgradeCounts.neighbors, 2, 'Neighbors upgrade count saved as 2');
+  assertEq(saveData.upgradeCounts.backup_power, 0, 'Backup power saved as 0');
+  assertEq(saveData.clickPurchased.viking, true, 'Viking purchased saved as true');
+  assertEq(saveData.clickPurchased.artsoppa, false, 'Artsoppa purchased saved as false');
+  assertEq(saveData.activeTab, 1, 'Active tab saved');
+  assertEq(saveData.tabsUnlocked.length, 5, 'tabsUnlocked has 5 entries');
 
   // JSON round-trip
   const json = JSON.stringify(saveData);
   const restored = JSON.parse(json);
   assertEq(restored.fp, 12345.67, 'FP survives JSON round-trip');
   assertEq(restored.totalClicks, 500, 'Total clicks survives JSON round-trip');
-  assertEq(restored.upgradeCounts[0], 5, 'Upgrade counts survive JSON round-trip');
-  assertEq(restored.clickPurchased[0], true, 'Click purchased survives JSON round-trip');
-  assertEq(restored.achievementsUnlocked[0], true, 'Achievements survive JSON round-trip');
-  assertEq(restored.achievementsUnlocked[2], false, 'Locked achievements survive JSON round-trip');
+  assertEq(restored.upgradeCounts.water, 5, 'Upgrade counts survive JSON round-trip');
+  assertEq(restored.clickPurchased.viking, true, 'Click purchased survives JSON round-trip');
+  assertEq(restored.achievementsUnlocked.first_click, true, 'Achievements survive JSON round-trip');
+  assertEq(restored.activeTab, 1, 'Active tab survives JSON round-trip');
 }
 
-section('Save Data Restoration');
+section('Save Data Restoration (v2)');
 {
-  const ups = makeUpgrades();
-  const clicks = makeClickUpgrades();
-
   const saveData = {
-    version: 1,
+    version: 2,
     fp: 50000,
     totalFp: 200000,
     fpPerClick: 30,
@@ -1066,19 +1173,16 @@ section('Save Data Restoration');
     startTime: Date.now() - 300000,
     muted: true,
     gameComplete: false,
-    upgradeCounts: ups.map(() => 0),
-    clickPurchased: clicks.map(() => false),
-    achievementsUnlocked: new Array(15).fill(false),
+    upgradeCounts: { water: 10, kit: 3 },
+    clickPurchased: { viking: true },
+    achievementsUnlocked: { first_click: true },
+    activeTab: 1,
+    tabsUnlocked: [true, true, true, true, false],
     savedAt: Date.now(),
   };
 
-  // Modify some specific values
-  saveData.upgradeCounts[0] = 10; // water
-  saveData.upgradeCounts[5] = 3;  // kit
-  saveData.clickPurchased[0] = true; // viking
-
   // Simulate restoration
-  const game = { fp: 0, totalFp: 0, fpPerClick: 1, totalClicks: 0, totalUpgradesBought: 0, currentEra: 0, muted: false, gameComplete: false };
+  const game = { fp: 0, totalFp: 0, fpPerClick: 1, totalClicks: 0, totalUpgradesBought: 0, currentEra: 0, muted: false, gameComplete: false, activeTab: 0, tabsUnlocked: [true, false, false, false, false] };
   const restoredUps = makeUpgrades();
   const restoredClicks = makeClickUpgrades();
 
@@ -1089,13 +1193,12 @@ section('Save Data Restoration');
   game.totalUpgradesBought = saveData.totalUpgradesBought;
   game.currentEra = saveData.currentEra;
   game.muted = saveData.muted;
+  game.activeTab = saveData.activeTab || 0;
+  game.tabsUnlocked = saveData.tabsUnlocked ? [...saveData.tabsUnlocked] : [true, false, false, false, false];
 
-  for (let i = 0; i < restoredUps.length && i < saveData.upgradeCounts.length; i++) {
-    restoredUps[i].count = saveData.upgradeCounts[i] || 0;
-  }
-  for (let i = 0; i < restoredClicks.length && i < saveData.clickPurchased.length; i++) {
-    restoredClicks[i].purchased = !!saveData.clickPurchased[i];
-  }
+  // v2: ID-based restore
+  for (const u of restoredUps) u.count = saveData.upgradeCounts[u.id] || 0;
+  for (const c of restoredClicks) c.purchased = !!saveData.clickPurchased[c.id];
 
   assertEq(game.fp, 50000, 'FP restored correctly');
   assertEq(game.totalFp, 200000, 'Total FP restored correctly');
@@ -1103,15 +1206,19 @@ section('Save Data Restoration');
   assertEq(game.totalClicks, 1500, 'Total clicks restored correctly');
   assertEq(game.currentEra, 2, 'Current era restored correctly');
   assertEq(game.muted, true, 'Muted state restored correctly');
-  assertEq(restoredUps[0].count, 10, 'Water count restored to 10');
-  assertEq(restoredUps[5].count, 3, 'Kit count restored to 3');
+  assertEq(game.activeTab, 1, 'Active tab restored correctly');
+  assertEq(game.tabsUnlocked[3], true, 'Tab 3 unlocked restored correctly');
+  assertEq(restoredUps.find(u => u.id === 'water').count, 10, 'Water count restored to 10');
+  assertEq(restoredUps.find(u => u.id === 'kit').count, 3, 'Kit count restored to 3');
+  assertEq(restoredUps.find(u => u.id === 'backup_power').count, 0, 'New upgrade starts at 0');
   assertEq(restoredClicks[0].purchased, true, 'Viking purchased restored');
   assertEq(restoredClicks[1].purchased, false, 'Karolin not purchased after restore');
 
   // FP/s should recalculate correctly
   const fps = calcFpPerSecond(restoredUps);
-  const expected = restoredUps[0].fpPerSecond * 10 + restoredUps[5].fpPerSecond * 3;
-  assertEq(fps, expected, 'FP/s recalculates correctly after restore');
+  const waterFps = restoredUps.find(u => u.id === 'water').fpPerSecond * 10;
+  const kitFps = restoredUps.find(u => u.id === 'kit').fpPerSecond * 3;
+  assertEq(fps, waterFps + kitFps, 'FP/s recalculates correctly after restore');
 }
 
 section('Reset Clears All State');
@@ -1120,17 +1227,23 @@ section('Reset Clears All State');
   const clicks = makeClickUpgrades();
 
   // Simulate a mid-game state
-  ups[0].count = 10;
-  ups[5].count = 5;
+  ups.find(u => u.id === 'water').count = 10;
+  ups.find(u => u.id === 'kit').count = 5;
   clicks[0].purchased = true;
+  const tabState = [true, true, true, true, false];
+  const activeTab = 2;
 
   // Reset
   for (const u of ups) u.count = 0;
   for (const c of clicks) c.purchased = false;
+  const resetTabState = [true, false, false, false, false];
+  const resetActiveTab = 0;
 
-  assertEq(ups[0].count, 0, 'Water count reset to 0');
-  assertEq(ups[5].count, 0, 'Kit count reset to 0');
+  assertEq(ups.find(u => u.id === 'water').count, 0, 'Water count reset to 0');
+  assertEq(ups.find(u => u.id === 'kit').count, 0, 'Kit count reset to 0');
   assertEq(clicks[0].purchased, false, 'Viking reset to not purchased');
+  assertEq(resetActiveTab, 0, 'Active tab reset to 0');
+  assertEq(resetTabState[1], false, 'Tab 1 re-locked after reset');
 
   const fps = calcFpPerSecond(ups);
   assertEq(fps, 0, 'FP/s is 0 after reset');
@@ -1138,19 +1251,95 @@ section('Reset Clears All State');
 
 section('Save Data Version Check');
 {
+  // Valid v2
+  const goodSave = { version: 2, fp: 100 };
+  assertEq(goodSave.version === 1 || goodSave.version === 2, true, 'Version 2 is accepted');
+
+  // Valid v1 (for migration)
+  const v1Save = { version: 1, fp: 100 };
+  assertEq(v1Save.version === 1 || v1Save.version === 2, true, 'Version 1 is accepted (for migration)');
+
   // Invalid version should be rejected
   const badSave = { version: 999, fp: 100 };
-  const isValid = badSave.version === 1;
+  const isValid = badSave.version === 1 || badSave.version === 2;
   assertEq(isValid, false, 'Version 999 is rejected');
 
   // Missing version should be rejected
   const noVersion = { fp: 100 };
-  const isValid2 = noVersion.version === 1;
+  const isValid2 = noVersion.version === 1 || noVersion.version === 2;
   assertEq(isValid2, false, 'Missing version is rejected');
 
   // Null data should be rejected
-  const isValid3 = null && null.version === 1;
+  const isValid3 = null && null.version;
   assertEq(!!isValid3, false, 'Null data is rejected');
+}
+
+section('v1 Save Migration');
+{
+  const V1_UPGRADE_IDS = [
+    'water', 'cans', 'stove', 'radio', 'sleeping', 'kit',
+    'neighbors', 'firewood', 'water_purifier', 'info_meeting', 'local_group', 'shelter',
+    'crisis_plan', 'prep_week', 'water_supply', 'fire_service', 'civil_duty', 'rakel',
+    'county_coord', 'civil_area', 'power_prep', 'food_supply', 'fuel_reserves', 'cyber_security',
+    'mcf', 'home_guard', 'gripen', 'global_eye', 'nato_art5', 'total_defense',
+  ];
+  const V1_CLICK_IDS = ['viking', 'karolin', 'artsoppa', 'beredskap_fighter', 'minister', 'nu_javlar'];
+
+  // Simulate a v1 save
+  const v1Data = {
+    version: 1,
+    fp: 50000,
+    totalFp: 150000,
+    fpPerClick: 6,
+    totalClicks: 800,
+    totalUpgradesBought: 15,
+    currentEra: 2,
+    upgradeCounts: [5, 3, 2, 2, 1, 1, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    clickPurchased: [true, true, false, false, false, false],
+    achievementsUnlocked: [true, true, false, false, true, false, false, false, false, false, false, false, false, false, false],
+  };
+
+  // Migrate: map v1 index → upgrade ID → set count
+  const ups = makeUpgrades();
+  for (let i = 0; i < V1_UPGRADE_IDS.length && i < v1Data.upgradeCounts.length; i++) {
+    const u = ups.find(u => u.id === V1_UPGRADE_IDS[i]);
+    if (u) u.count = v1Data.upgradeCounts[i] || 0;
+  }
+
+  assertEq(ups.find(u => u.id === 'water').count, 5, 'v1→v2: water count = 5');
+  assertEq(ups.find(u => u.id === 'cans').count, 3, 'v1→v2: cans count = 3');
+  assertEq(ups.find(u => u.id === 'radio').count, 2, 'v1→v2: radio count = 2');
+  assertEq(ups.find(u => u.id === 'neighbors').count, 3, 'v1→v2: neighbors count = 3');
+  assertEq(ups.find(u => u.id === 'firewood').count, 2, 'v1→v2: firewood count = 2');
+  assertEq(ups.find(u => u.id === 'backup_power').count, 0, 'v1→v2: new upgrade backup_power = 0');
+  assertEq(ups.find(u => u.id === 'neighbor_list').count, 0, 'v1→v2: new upgrade neighbor_list = 0');
+  assertEq(ups.find(u => u.id === 'crank_radio_net').count, 0, 'v1→v2: new upgrade crank_radio_net = 0');
+  assertEq(ups.find(u => u.id === 'crisis_app').count, 0, 'v1→v2: new upgrade crisis_app = 0');
+
+  // Click upgrades migration
+  const clicks = makeClickUpgrades();
+  for (let i = 0; i < V1_CLICK_IDS.length && i < v1Data.clickPurchased.length; i++) {
+    const c = clicks.find(c => c.id === V1_CLICK_IDS[i]);
+    if (c) c.purchased = !!v1Data.clickPurchased[i];
+  }
+  assertEq(clicks.find(c => c.id === 'viking').purchased, true, 'v1→v2: viking purchased');
+  assertEq(clicks.find(c => c.id === 'karolin').purchased, true, 'v1→v2: karolin purchased');
+  assertEq(clicks.find(c => c.id === 'artsoppa').purchased, false, 'v1→v2: artsoppa not purchased');
+
+  // After v1 migration, tabs should default
+  const activeTab = 0;
+  const tabsUnlocked = [true, false, false, false, false];
+  // Then recalculate based on currentEra
+  updateSimTabs(v1Data.currentEra, tabsUnlocked);
+  assertEq(tabsUnlocked[0], true, 'v1→v2: Tab 0 unlocked');
+  assertEq(tabsUnlocked[1], true, 'v1→v2: Tab 1 unlocked (era 2 >= unlockEra 1)');
+  assertEq(tabsUnlocked[2], true, 'v1→v2: Tab 2 unlocked (era 2 >= unlockEra 1)');
+  assertEq(tabsUnlocked[3], true, 'v1→v2: Tab 3 unlocked (era 2 >= unlockEra 2)');
+  assertEq(tabsUnlocked[4], false, 'v1→v2: Tab 4 still locked (era 2 < unlockEra 4)');
+
+  // FP/s should be correct after migration
+  const fps = calcFpPerSecond(ups);
+  assert(fps > 0, 'v1→v2: FP/s is positive after migration');
 }
 
 section('Edge Cases — Large Numbers in Save');
@@ -1162,17 +1351,16 @@ section('Edge Cases — Large Numbers in Save');
   assertEq(formatNumber(huge), '5.00Q', 'Very large number formats correctly');
 }
 
-section('Edge Cases — Partial Save Data');
+section('Edge Cases — Partial Save Data (v2)');
 {
-  // If save data has fewer upgrades than current (e.g., new version added upgrades)
+  // If save data has fewer upgrade IDs than current (e.g., new upgrades added)
   const ups = makeUpgrades();
-  const shortCounts = [5, 3]; // Only 2 values
-  for (let i = 0; i < ups.length && i < shortCounts.length; i++) {
-    ups[i].count = shortCounts[i] || 0;
-  }
-  assertEq(ups[0].count, 5, 'First upgrade count set from short array');
-  assertEq(ups[1].count, 3, 'Second upgrade count set from short array');
-  assertEq(ups[2].count, 0, 'Third upgrade count stays 0 (not in short array)');
+  const partialCounts = { water: 5, cans: 3 }; // Only 2 upgrades saved
+  for (const u of ups) u.count = partialCounts[u.id] || 0;
+  assertEq(ups.find(u => u.id === 'water').count, 5, 'Water count set from partial save');
+  assertEq(ups.find(u => u.id === 'cans').count, 3, 'Cans count set from partial save');
+  assertEq(ups.find(u => u.id === 'stove').count, 0, 'Stove stays 0 (not in partial save)');
+  assertEq(ups.find(u => u.id === 'backup_power').count, 0, 'New upgrade stays 0');
 }
 
 // --- Summary ---
