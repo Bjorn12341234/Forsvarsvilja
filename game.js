@@ -19,6 +19,9 @@ const game = {
   gameComplete: false,
   activeTab: 0,
   tabsUnlocked: [true, false, false, false, false],
+  threatLevel: 0,
+  threatStartTime: Date.now(),
+  resources: { supply: 80, comms: 80, community: 80 },
 };
 
 // --- Era Definitions ---
@@ -30,13 +33,25 @@ const eras = [
   { name: 'Nationen', threshold: 50000000 },
 ];
 
+// --- Threat Level Definitions ---
+const threatLevels = [
+  { id: 'vardag', name: 'Vardag', color: '#33AA55', time: 0 },
+  { id: 'oro', name: 'Oro', color: '#CCAA00', time: 300 },
+  { id: 'storning', name: 'Störning', color: '#CC7700', time: 720 },
+  { id: 'kris', name: 'Kris', color: '#CC3333', time: 1200 },
+  { id: 'uppbyggnad', name: 'Uppbyggnad', color: '#3388CC', time: 1680 },
+];
+
+// Resource drain rates per threat level (per minute)
+const drainRates = [0, 0.5, 1.5, 3, 0.5];
+
 // --- Tab Definitions (v2) ---
 const tabs = [
-  { id: 'home', name: 'Hemmet', icon: '\u{1F3E0}', unlockEra: 0 },
-  { id: 'info', name: 'Info & Komm', icon: '\u{1F4FB}', unlockEra: 1 },
-  { id: 'family', name: 'Grannar', icon: '\u{1F91D}', unlockEra: 1 },
-  { id: 'municipality', name: 'Kommun', icon: '\u{1F3DB}', unlockEra: 2 },
-  { id: 'nation', name: 'Nationen', icon: '\u2B50', unlockEra: 4 },
+  { id: 'home', name: 'Hemmet', icon: '\u{1F3E0}', unlockEra: 0, unlockThreat: 0 },
+  { id: 'info', name: 'Info & Komm', icon: '\u{1F4FB}', unlockEra: 1, unlockThreat: 1 },
+  { id: 'family', name: 'Grannar', icon: '\u{1F91D}', unlockEra: 1, unlockThreat: 2 },
+  { id: 'municipality', name: 'Kommun', icon: '\u{1F3DB}', unlockEra: 2, unlockThreat: 3 },
+  { id: 'nation', name: 'Nationen', icon: '\u2B50', unlockEra: 4, unlockThreat: 4 },
 ];
 
 // --- Upgrades (All Eras) ---
@@ -214,6 +229,42 @@ const upgrades = [
     mcf: 4, home_guard: 4, gripen: 4, global_eye: 4, nato_art5: 4, total_defense: 4,
   };
   for (const u of upgrades) u.tab = tabMap[u.id] ?? 0;
+
+  // Resource bonuses per upgrade (scaled by tab and cost tier)
+  const resourceBonuses = {
+    // Tab 0 (Hemmet) → supply
+    water: { supply: 5 }, cans: { supply: 7 }, stove: { supply: 8 },
+    sleeping: { supply: 10 }, kit: { supply: 15 },
+    // Tab 1 (Info) → comms
+    radio: { comms: 5 }, neighbor_list: { comms: 7 }, crank_radio_net: { comms: 10 },
+    crisis_app: { comms: 12 }, rakel: { comms: 15 }, cyber_security: { comms: 15 },
+    // Tab 2 (Grannar) → community
+    neighbors: { community: 5 }, firewood: { community: 7 }, water_purifier: { community: 8 },
+    info_meeting: { community: 10 }, local_group: { community: 12 }, shelter: { community: 15 },
+    // Tab 3 (Kommun) → all three
+    crisis_plan: { supply: 5, comms: 5, community: 5 },
+    prep_week: { supply: 5, comms: 5, community: 5 },
+    water_supply: { supply: 5, comms: 5, community: 5 },
+    fire_service: { supply: 5, comms: 5, community: 5 },
+    civil_duty: { supply: 5, comms: 5, community: 5 },
+    county_coord: { supply: 5, comms: 5, community: 5 },
+    civil_area: { supply: 5, comms: 5, community: 5 },
+    power_prep: { supply: 5, comms: 5, community: 5 },
+    food_supply: { supply: 5, comms: 5, community: 5 },
+    fuel_reserves: { supply: 5, comms: 5, community: 5 },
+    // Tab 4 (Nationen) → all three (smaller)
+    mcf: { supply: 3, comms: 3, community: 3 },
+    home_guard: { supply: 3, comms: 3, community: 3 },
+    gripen: { supply: 3, comms: 3, community: 3 },
+    global_eye: { supply: 3, comms: 3, community: 3 },
+    nato_art5: { supply: 3, comms: 3, community: 3 },
+    total_defense: { supply: 3, comms: 3, community: 3 },
+    // Tab 0 extra
+    backup_power: { supply: 6 },
+  };
+  for (const u of upgrades) {
+    u.resourceBonus = resourceBonuses[u.id] || null;
+  }
 
   const newUpgrades = [
     {
@@ -511,6 +562,15 @@ const dom = {
   endStatUpgrades: document.getElementById('end-stat-upgrades'),
   endStatAchievements: document.getElementById('end-stat-achievements'),
   tabBar: document.getElementById('tab-bar'),
+  threatLevelText: document.getElementById('threat-level'),
+  threatUnlockOverlay: document.getElementById('threat-unlock-overlay'),
+  threatUnlockName: document.getElementById('threat-unlock-name'),
+  resourceSupplyFill: document.getElementById('resource-supply-fill'),
+  resourceSupplyValue: document.getElementById('resource-supply-value'),
+  resourceCommsFill: document.getElementById('resource-comms-fill'),
+  resourceCommsValue: document.getElementById('resource-comms-value'),
+  resourceCommunityFill: document.getElementById('resource-community-fill'),
+  resourceCommunityValue: document.getElementById('resource-community-value'),
 };
 
 // --- Number Formatting ---
@@ -537,7 +597,11 @@ function formatNumber(n) {
 
 // --- Cost Calculation ---
 function getUpgradeCost(upgrade) {
-  return Math.ceil(upgrade.baseCost * Math.pow(1.15, upgrade.count));
+  let cost = Math.ceil(upgrade.baseCost * Math.pow(1.15, upgrade.count));
+  if (game.resources.community === 0) {
+    cost = Math.ceil(cost * 1.5);
+  }
+  return cost;
 }
 
 // --- FP/s Calculation ---
@@ -545,6 +609,9 @@ function calculateFpPerSecond() {
   let total = 0;
   for (const u of upgrades) {
     total += u.fpPerSecond * u.count;
+  }
+  if (game.resources.supply === 0) {
+    total *= 0.5;
   }
   game.fpPerSecond = total;
 }
@@ -630,12 +697,93 @@ function renderTabs() {
 function updateTabUnlocks() {
   let anyNew = false;
   for (let i = 0; i < tabs.length; i++) {
-    if (!game.tabsUnlocked[i] && game.currentEra >= tabs[i].unlockEra) {
+    if (!game.tabsUnlocked[i] && game.threatLevel >= tabs[i].unlockThreat) {
       game.tabsUnlocked[i] = true;
       anyNew = true;
     }
   }
   if (anyNew) renderTabs();
+}
+
+// --- Threat Level System ---
+function updateThreatLevel() {
+  const elapsed = (Date.now() - game.threatStartTime) / 1000;
+  let newLevel = 0;
+  for (let i = threatLevels.length - 1; i >= 0; i--) {
+    if (elapsed >= threatLevels[i].time) {
+      newLevel = i;
+      break;
+    }
+  }
+  if (newLevel > game.threatLevel) {
+    game.threatLevel = newLevel;
+    playSound('threat');
+    showThreatNotification(newLevel);
+    updateTabUnlocks();
+    calculateFpPerSecond();
+  }
+}
+
+function showThreatNotification(levelIndex) {
+  const level = threatLevels[levelIndex];
+  dom.threatUnlockName.textContent = level.name;
+  dom.threatUnlockName.style.color = level.color;
+  dom.threatUnlockOverlay.classList.add('visible');
+  setTimeout(() => {
+    dom.threatUnlockOverlay.classList.remove('visible');
+  }, 2500);
+}
+
+// --- Resource System ---
+function updateResources() {
+  const drain = drainRates[game.threatLevel] / 60 / 10; // per tick (100ms)
+  if (drain > 0) {
+    const wasDepleted = {
+      supply: game.resources.supply === 0,
+      comms: game.resources.comms === 0,
+      community: game.resources.community === 0,
+    };
+    game.resources.supply = Math.max(0, game.resources.supply - drain);
+    game.resources.comms = Math.max(0, game.resources.comms - drain);
+    game.resources.community = Math.max(0, game.resources.community - drain);
+    // Recalculate FP/s if supply just hit 0 or recovered
+    if (wasDepleted.supply !== (game.resources.supply === 0)) {
+      calculateFpPerSecond();
+    }
+  }
+}
+
+function updateResourceMeters() {
+  const resources = ['supply', 'comms', 'community'];
+  for (const res of resources) {
+    const val = game.resources[res];
+    const fill = dom['resource' + res.charAt(0).toUpperCase() + res.slice(1) + 'Fill'];
+    const valueEl = dom['resource' + res.charAt(0).toUpperCase() + res.slice(1) + 'Value'];
+    if (fill) {
+      fill.style.width = val + '%';
+      // Color coding
+      if (val > 60) {
+        fill.className = 'resource-fill resource-green';
+      } else if (val > 30) {
+        fill.className = 'resource-fill resource-yellow';
+      } else if (val > 15) {
+        fill.className = 'resource-fill resource-red';
+      } else {
+        fill.className = 'resource-fill resource-critical';
+      }
+    }
+    if (valueEl) {
+      valueEl.textContent = Math.round(val);
+    }
+  }
+}
+
+function updateThreatDisplay() {
+  const level = threatLevels[game.threatLevel];
+  if (dom.threatLevelText) {
+    dom.threatLevelText.textContent = level.name;
+    dom.threatLevelText.style.color = level.color;
+  }
 }
 
 // --- Particle Effects ---
@@ -756,6 +904,19 @@ function playSound(type) {
       osc.start(now + offset);
       osc.stop(now + offset + 0.4);
     });
+  } else if (type === 'threat') {
+    // Ascending ominous two-note sound
+    [0, 0.15].forEach((offset, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime([220, 330][i], now + offset);
+      gain.gain.setValueAtTime(0.1, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.3);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.3);
+    });
   } else if (type === 'event') {
     // Two quick notes
     [0, 0.08].forEach((offset, i) => {
@@ -806,6 +967,14 @@ function buyUpgrade(id) {
   game.fp -= cost;
   upgrade.count++;
   game.totalUpgradesBought++;
+
+  // Apply resource bonus
+  if (upgrade.resourceBonus) {
+    for (const [res, val] of Object.entries(upgrade.resourceBonus)) {
+      game.resources[res] = Math.min(100, game.resources[res] + val);
+    }
+  }
+
   calculateFpPerSecond();
   markUpgradesDirty();
   playSound('buy');
@@ -956,6 +1125,8 @@ function updateUI() {
   updateEra();
   refreshUpgrades();
   refreshClickUpgrades();
+  updateResourceMeters();
+  updateThreatDisplay();
 }
 
 // --- News Ticker ---
@@ -976,6 +1147,7 @@ function setupTicker() {
 
 // --- Event System ---
 function getEventBonus(event, ups) {
+  if (game.resources.comms === 0) return 0;
   if (event.type === 'bonus') {
     // Instant FP bonus: value seconds of current FP/s
     return game.fpPerSecond * event.value;
@@ -1215,6 +1387,9 @@ function resetGame() {
   game.gameComplete = false;
   game.activeTab = 0;
   game.tabsUnlocked = [true, false, false, false, false];
+  game.threatLevel = 0;
+  game.threatStartTime = Date.now();
+  game.resources = { supply: 80, comms: 80, community: 80 };
 
   // Reset upgrades
   for (const u of upgrades) u.count = 0;
@@ -1228,6 +1403,7 @@ function resetGame() {
   dom.endScreen.classList.remove('visible');
   dom.activeBonus.classList.remove('visible');
   dom.eventOverlay.classList.remove('visible');
+  dom.threatUnlockOverlay.classList.remove('visible');
 
   calculateFpPerSecond();
   markUpgradesDirty();
@@ -1275,6 +1451,9 @@ function getSaveData() {
     achievementsUnlocked: Object.fromEntries(achievements.map(a => [a.id, a.unlocked])),
     activeTab: game.activeTab,
     tabsUnlocked: [...game.tabsUnlocked],
+    threatLevel: game.threatLevel,
+    threatStartTime: game.threatStartTime,
+    resources: { ...game.resources },
     savedAt: Date.now(),
   };
 }
@@ -1340,14 +1519,27 @@ function loadGame() {
       }
       game.activeTab = data.activeTab || 0;
       game.tabsUnlocked = Array.isArray(data.tabsUnlocked) ? [...data.tabsUnlocked] : [true, false, false, false, false];
+
+      // Sprint 2 fields (may be missing in older v2 saves)
+      game.threatLevel = data.threatLevel || 0;
+      game.threatStartTime = data.threatStartTime || Date.now();
+      if (data.resources && typeof data.resources === 'object') {
+        game.resources = {
+          supply: data.resources.supply ?? 80,
+          comms: data.resources.comms ?? 80,
+          community: data.resources.community ?? 80,
+        };
+      } else {
+        game.resources = { supply: 80, comms: 80, community: 80 };
+      }
     }
 
     // Recalculate derived state
     calculateFpPerSecond();
 
-    // Recalculate tab unlocks based on current era
+    // Recalculate tab unlocks based on threat level
     for (let i = 0; i < tabs.length; i++) {
-      if (game.currentEra >= tabs[i].unlockEra) game.tabsUnlocked[i] = true;
+      if (game.threatLevel >= tabs[i].unlockThreat) game.tabsUnlocked[i] = true;
     }
 
     // Validate activeTab
@@ -1377,12 +1569,16 @@ function deleteSave() {
 // --- Game Loop ---
 function startGameLoop() {
   setInterval(() => {
+    updateThreatLevel();
+    updateResources();
     if (game.fpPerSecond > 0) {
       const gain = (game.fpPerSecond * game.eventMultiplier) / 10;
       game.fp += gain;
       game.totalFp += gain;
       updateUI();
     }
+    updateResourceMeters();
+    updateThreatDisplay();
     updateActiveBonus();
   }, 100);
 

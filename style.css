@@ -1005,6 +1005,113 @@ main {
   box-shadow: 0 0 20px rgba(254, 204, 2, 0.4);
 }
 
+/* === THREAT INDICATOR === */
+
+.threat-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.threat-label {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.threat-level {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #33AA55;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* === RESOURCE METERS === */
+
+.resource-meters {
+  display: flex;
+  gap: 16px;
+  padding: 8px 24px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.resource-meter {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.resource-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.resource-name {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-weight: 600;
+  white-space: nowrap;
+  min-width: 70px;
+}
+
+.resource-bar {
+  flex: 1;
+  height: 10px;
+  background: var(--bg-card);
+  border-radius: 5px;
+  overflow: hidden;
+  min-width: 40px;
+}
+
+.resource-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.resource-fill.resource-green {
+  background: linear-gradient(90deg, #2D8A4E, #33AA55);
+}
+
+.resource-fill.resource-yellow {
+  background: linear-gradient(90deg, #B8960A, #CCAA00);
+}
+
+.resource-fill.resource-red {
+  background: linear-gradient(90deg, #AA2222, #CC3333);
+}
+
+.resource-fill.resource-critical {
+  background: linear-gradient(90deg, #AA2222, #CC3333);
+  animation: resource-pulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes resource-pulse {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.resource-value {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-weight: 600;
+  min-width: 22px;
+  text-align: right;
+}
+
+/* === THREAT UNLOCK OVERLAY === */
+
+.threat-unlock-content {
+  box-shadow: 0 0 60px rgba(204, 51, 51, 0.3), 0 0 120px rgba(204, 51, 51, 0.1);
+  border-color: var(--danger);
+}
+
 /* === RESPONSIVE — Tablet (768–1024px) === */
 
 @media (max-width: 1024px) {
@@ -1074,6 +1181,21 @@ main {
 
   #era-name {
     font-size: 0.75rem;
+  }
+
+  .threat-indicator {
+    order: 2;
+  }
+
+  .resource-meters {
+    flex-direction: column;
+    gap: 6px;
+    padding: 6px 12px;
+  }
+
+  .resource-name {
+    min-width: 58px;
+    font-size: 0.68rem;
   }
 
   .click-hint {
