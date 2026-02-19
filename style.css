@@ -1039,6 +1039,103 @@ main {
   letter-spacing: 1px;
 }
 
+/* === END SCREEN SECTIONS === */
+
+.end-section-title {
+  font-size: 0.8rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--yellow-dim);
+  margin: 28px 0 12px;
+  font-weight: 700;
+}
+
+.end-report {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  margin-bottom: 12px;
+}
+
+.end-report-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.end-report-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+
+.end-report-label {
+  color: var(--text-dim);
+  flex: 1;
+}
+
+.end-report-value {
+  color: var(--text-bright);
+  font-weight: 600;
+  min-width: 40px;
+  text-align: right;
+}
+
+.end-report-value.good { color: var(--success); }
+.end-report-value.bad { color: var(--danger); }
+
+.end-dilemma-recap {
+  text-align: left;
+  margin-bottom: 8px;
+}
+
+.end-dilemma-recap p {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  padding: 4px 10px;
+  line-height: 1.4;
+}
+
+.end-facts {
+  text-align: left;
+  margin-bottom: 8px;
+}
+
+.end-fact {
+  font-size: 0.85rem;
+  color: var(--text);
+  padding: 6px 10px;
+  border-left: 2px solid var(--yellow-dim);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.end-reflections {
+  text-align: left;
+  margin-bottom: 8px;
+}
+
+.end-reflection {
+  font-size: 0.88rem;
+  color: var(--text);
+  padding: 6px 10px;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.end-cta {
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  margin-top: 24px;
+  margin-bottom: 4px;
+}
+
 .end-quote {
   font-size: 2rem;
   font-weight: 800;

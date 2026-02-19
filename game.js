@@ -724,6 +724,24 @@ const achievements = [
     unlocked: false,
   },
   {
+    id: 'pragmatiker', name: 'Pragmatiker',
+    description: 'Valt alternativ B i minst 5 dilemman',
+    check: () => game.dilemmaHistory.filter(d => d.choice === 'b').length >= 5,
+    unlocked: false,
+  },
+  {
+    id: 'gemenskapsmastare', name: 'Gemenskapsmästare',
+    description: 'Samhörighet sjönk aldrig under 30',
+    check: () => game.gameComplete && game.resourceMin.community >= 30,
+    unlocked: false,
+  },
+  {
+    id: 'balanserad', name: 'Balanserad',
+    description: 'Alla resurser över 50 vid spelets slut',
+    check: () => game.gameComplete && game.resources.supply > 50 && game.resources.comms > 50 && game.resources.community > 50,
+    unlocked: false,
+  },
+  {
     id: 'all_achievements', name: 'Fullständig beredskap',
     description: 'Alla andra achievements upplåsta — du är helt beredd',
     check: () => achievements.filter(a => a.id !== 'all_achievements').every(a => a.unlocked),
@@ -770,6 +788,13 @@ const dom = {
   endStatFp: document.getElementById('end-stat-fp'),
   endStatUpgrades: document.getElementById('end-stat-upgrades'),
   endStatAchievements: document.getElementById('end-stat-achievements'),
+  endSupplyMin: document.getElementById('end-supply-min'),
+  endCommsMin: document.getElementById('end-comms-min'),
+  endCommunityMin: document.getElementById('end-community-min'),
+  endZeroCount: document.getElementById('end-zero-count'),
+  endCrisesTotal: document.getElementById('end-crises-total'),
+  endDilemmaCount: document.getElementById('end-dilemma-count'),
+  endDilemmaRecap: document.getElementById('end-dilemma-recap'),
   tabBar: document.getElementById('tab-bar'),
   threatLevelText: document.getElementById('threat-level'),
   threatUnlockOverlay: document.getElementById('threat-unlock-overlay'),
@@ -1783,6 +1808,31 @@ function renderAchievementPanel() {
 }
 
 // --- End Screen ---
+function buildDilemmaRecap() {
+  const dilemmaNames = {};
+  for (const d of dilemmaEvents) {
+    dilemmaNames[d.id] = { name: d.name, a: d.choiceA.label, b: d.choiceB.label };
+  }
+  const history = game.dilemmaHistory;
+  if (history.length === 0) return '';
+
+  const lines = [];
+  const counts = {};
+  for (const entry of history) {
+    const key = entry.eventId + '_' + entry.choice;
+    counts[key] = (counts[key] || 0) + 1;
+  }
+  for (const [key, count] of Object.entries(counts)) {
+    const [eventId, choice] = [key.substring(0, key.lastIndexOf('_')), key.substring(key.lastIndexOf('_') + 1)];
+    const info = dilemmaNames[eventId];
+    if (!info) continue;
+    const choiceLabel = choice === 'a' ? info.a : info.b;
+    const suffix = count > 1 ? ` (${count} ggr)` : '';
+    lines.push(`${info.name}: ${choiceLabel}${suffix}`);
+  }
+  return lines.map(l => `<p>${l}</p>`).join('');
+}
+
 function showEndScreen() {
   if (game.gameComplete) return;
   game.gameComplete = true;
@@ -1792,11 +1842,38 @@ function showEndScreen() {
   const minutes = Math.floor(elapsed / 60);
   const seconds = elapsed % 60;
 
+  // Section 1: Game stats
   dom.endStatClicks.textContent = game.totalClicks.toLocaleString();
   dom.endStatTime.textContent = `${minutes} min ${seconds} sek`;
   dom.endStatFp.textContent = formatNumber(game.totalFp);
   dom.endStatUpgrades.textContent = game.totalUpgradesBought;
   dom.endStatAchievements.textContent = `${achievements.filter(a => a.unlocked).length}/${achievements.length}`;
+
+  // Section 2: Beredskapsrapport
+  const setMinValue = (el, val) => {
+    if (!el) return;
+    const rounded = Math.round(val);
+    el.textContent = rounded;
+    el.className = 'end-report-value ' + (rounded > 50 ? 'good' : rounded > 20 ? '' : 'bad');
+  };
+  setMinValue(dom.endSupplyMin, game.resourceMin.supply);
+  setMinValue(dom.endCommsMin, game.resourceMin.comms);
+  setMinValue(dom.endCommunityMin, game.resourceMin.community);
+
+  const totalZeros = game.resourceZeroCount.supply + game.resourceZeroCount.comms + game.resourceZeroCount.community;
+  if (dom.endZeroCount) {
+    dom.endZeroCount.textContent = totalZeros + ' gånger';
+    dom.endZeroCount.className = 'end-report-value ' + (totalZeros === 0 ? 'good' : 'bad');
+  }
+  if (dom.endCrisesTotal) {
+    dom.endCrisesTotal.textContent = game.crisesTotal;
+  }
+  if (dom.endDilemmaCount) {
+    dom.endDilemmaCount.textContent = game.dilemmaHistory.length;
+  }
+  if (dom.endDilemmaRecap) {
+    dom.endDilemmaRecap.innerHTML = buildDilemmaRecap();
+  }
 
   // Delay to let the buy animation finish
   setTimeout(() => {

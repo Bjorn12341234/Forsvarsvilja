@@ -27,7 +27,7 @@
       <span class="threat-label">Beredskap:</span>
       <span id="threat-level" class="threat-level">Vardag</span>
     </div>
-    <button id="achievement-btn" class="achievement-btn" aria-label="Achievements" title="Achievements">&#127942; <span id="achievement-count">0/22</span></button>
+    <button id="achievement-btn" class="achievement-btn" aria-label="Achievements" title="Achievements">&#127942; <span id="achievement-count">0/25</span></button>
     <button id="mute-btn" class="mute-btn" aria-label="Ljud på/av" title="Ljud på/av">&#128266;</button>
     <button id="reset-btn" class="reset-btn" aria-label="Nollställ spelet" title="Nollställ spelet">&#8635;</button>
   </header>
@@ -149,7 +149,7 @@
   <!-- Achievement Panel -->
   <div id="achievement-panel" class="achievement-panel">
     <div class="achievement-panel-inner">
-      <h2>Meriter <span id="achievement-progress" class="achievement-progress-text">0 / 22</span></h2>
+      <h2>Meriter <span id="achievement-progress" class="achievement-progress-text">0 / 25</span></h2>
       <div id="achievement-list" class="achievement-list"></div>
     </div>
   </div>
@@ -160,9 +160,12 @@
       <div class="end-label">SPELET KLART</div>
       <h2 class="end-title">Du har byggt Sveriges totalförsvar</h2>
       <p class="end-text">
-        Från vattenflaskor i skafferiet till NATO-samarbete och 3,5&nbsp;% av BNP
-        i försvarsbudget. Du har visat att försvarsvilja börjar hos var och en av oss.
+        Fr&aring;n vattenflaskor i skafferiet till NATO-samarbete och 3,5&nbsp;% av BNP
+        i f&ouml;rsvarsbudget. Du har visat att f&ouml;rsvarsvilja b&ouml;rjar hos var och en av oss.
       </p>
+
+      <!-- Section 1: Spelstatistik -->
+      <h3 class="end-section-title">Spelstatistik</h3>
       <div class="end-stats">
         <div class="end-stat"><span class="end-stat-value" id="end-stat-clicks">0</span><span class="end-stat-label">Klick</span></div>
         <div class="end-stat"><span class="end-stat-value" id="end-stat-time">0</span><span class="end-stat-label">Speltid</span></div>
@@ -170,13 +173,73 @@
         <div class="end-stat"><span class="end-stat-value" id="end-stat-upgrades">0</span><span class="end-stat-label">Uppgraderingar</span></div>
         <div class="end-stat"><span class="end-stat-value" id="end-stat-achievements">0</span><span class="end-stat-label">Meriter</span></div>
       </div>
-      <p class="end-quote">Nu jävlar.</p>
+
+      <!-- Section 2: Beredskapsrapport -->
+      <h3 class="end-section-title">Din beredskapsrapport</h3>
+      <div class="end-report">
+        <div class="end-report-row">
+          <span class="end-report-icon">&#128230;</span>
+          <span class="end-report-label">F&ouml;rs&ouml;rjning l&auml;gst:</span>
+          <span class="end-report-value" id="end-supply-min">—</span>
+        </div>
+        <div class="end-report-row">
+          <span class="end-report-icon">&#128225;</span>
+          <span class="end-report-label">Samband l&auml;gst:</span>
+          <span class="end-report-value" id="end-comms-min">—</span>
+        </div>
+        <div class="end-report-row">
+          <span class="end-report-icon">&#129309;</span>
+          <span class="end-report-label">Samh&ouml;righet l&auml;gst:</span>
+          <span class="end-report-value" id="end-community-min">—</span>
+        </div>
+        <div class="end-report-row">
+          <span class="end-report-icon">&#9888;&#65039;</span>
+          <span class="end-report-label">Resurser n&aring;dde noll:</span>
+          <span class="end-report-value" id="end-zero-count">—</span>
+        </div>
+        <div class="end-report-row">
+          <span class="end-report-icon">&#127785;</span>
+          <span class="end-report-label">Kriser genomlidna:</span>
+          <span class="end-report-value" id="end-crises-total">—</span>
+        </div>
+        <div class="end-report-row">
+          <span class="end-report-icon">&#9878;&#65039;</span>
+          <span class="end-report-label">Dilemman hanterade:</span>
+          <span class="end-report-value" id="end-dilemma-count">—</span>
+        </div>
+      </div>
+      <div id="end-dilemma-recap" class="end-dilemma-recap"></div>
+
+      <!-- Section 3: Verklighetscheck -->
+      <h3 class="end-section-title">Verklighetscheck</h3>
+      <div class="end-facts">
+        <p class="end-fact">MCF rekommenderar att du ska kunna klara dig i minst en vecka utan samh&auml;llets hj&auml;lp &mdash; det g&auml;ller vatten, mat, v&auml;rme och information.</p>
+        <p class="end-fact">Vid h&ouml;jd beredskap kan allm&auml;n tj&auml;nsteplikt aktiveras. Alla mellan 16 och 70 &aring;r kan kallas in f&ouml;r att tj&auml;nstg&ouml;ra d&auml;r samh&auml;llet beh&ouml;ver dig.</p>
+        <p class="end-fact">Totalf&ouml;rsvar = milit&auml;rt f&ouml;rsvar + civilt f&ouml;rsvar. Du &auml;r en del av det. Din beredskap hemma &auml;r grunden som allt annat vilar p&aring;.</p>
+        <p class="end-fact">Sverige har cirka 65&nbsp;000 skyddsrum. F&ouml;rsvarsbudgeten ska n&aring; 3,5&nbsp;% av BNP till 2030 &mdash; den kraftfullaste f&ouml;rst&auml;rkningen sedan kalla kriget.</p>
+        <p class="end-fact">Broschyren &ldquo;Om krisen eller kriget kommer&rdquo; skickades till 5,2 miljoner hush&aring;ll. Den inneh&aring;ller konkreta r&aring;d om vad du beh&ouml;ver hemma och hur du agerar vid h&ouml;jd beredskap.</p>
+      </div>
+
+      <!-- Section 4: Reflektionsfrågor -->
+      <h3 class="end-section-title">Fr&aring;gor att fundera p&aring;</h3>
+      <div class="end-reflections">
+        <p class="end-reflection">Har du vatten och mat hemma f&ouml;r minst en vecka &mdash; f&ouml;r alla i familjen?</p>
+        <p class="end-reflection">Om du krigsplaceras eller kallas in &mdash; vem tar hand om din familj?</p>
+        <p class="end-reflection">Vet du var ditt n&auml;rmaste skyddsrum ligger?</p>
+        <p class="end-reflection">Har du pratat med dina grannar om vad ni g&ouml;r vid en kris?</p>
+        <p class="end-reflection">Har du en plan med din familj f&ouml;r var ni tr&auml;ffas om ni tappar kontakten?</p>
+        <p class="end-reflection">Hur f&ouml;rberedd &auml;r du, p&aring; riktigt?</p>
+      </div>
+
+      <!-- Section 5: Nu jävlar + Länkar -->
+      <p class="end-cta">Det h&auml;r var ett spel. Men fr&aring;gorna &auml;r verkliga.<br>Sveriges f&ouml;rsvar b&ouml;rjar med dig.</p>
+      <p class="end-quote">Nu j&auml;vlar.</p>
       <div class="end-links">
-        <p class="end-links-label">Vill du göra något på riktigt?</p>
-        <a href="https://www.mcf.se" target="_blank" rel="noopener">MCF — Myndigheten för civilt försvar</a>
-        <a href="https://www.forsvarsmakten.se" target="_blank" rel="noopener">Försvarsmakten</a>
-        <a href="https://www.hemvarnet.se" target="_blank" rel="noopener">Hemvärnet</a>
-        <a href="https://www.mcf.se/sv/rad-till-privatpersoner/broschyren-om-krisen-eller-kriget-kommer/" target="_blank" rel="noopener">"Om krisen eller kriget kommer"</a>
+        <p class="end-links-label">Vill du g&ouml;ra n&aring;got p&aring; riktigt?</p>
+        <a href="https://www.mcf.se" target="_blank" rel="noopener">MCF &mdash; Myndigheten f&ouml;r civilt f&ouml;rsvar</a>
+        <a href="https://www.forsvarsmakten.se" target="_blank" rel="noopener">F&ouml;rsvarsmakten</a>
+        <a href="https://www.hemvarnet.se" target="_blank" rel="noopener">Hemv&auml;rnet</a>
+        <a href="https://www.mcf.se/sv/rad-till-privatpersoner/broschyren-om-krisen-eller-kriget-kommer/" target="_blank" rel="noopener">&ldquo;Om krisen eller kriget kommer&rdquo;</a>
       </div>
       <button id="play-again-btn" class="play-again-btn">Spela igen</button>
     </div>

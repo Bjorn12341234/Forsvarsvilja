@@ -925,6 +925,10 @@ function makeAchievements(ups, clickUps, gameState) {
     { id: 'informerad', name: 'Informerad', check: () => ups.filter(u => u.tab === 1).every(u => u.count >= 1), unlocked: false },
     { id: 'nollgangar', name: 'Nollgångar', check: () => gameState.gameComplete && (gameState.resourceZeroCount?.supply >= 3 || gameState.resourceZeroCount?.comms >= 3 || gameState.resourceZeroCount?.community >= 3), unlocked: false },
     { id: 'synergi', name: 'Synergieffekt', check: () => [0, 1, 2, 3, 4].every(tab => getTabUpgradeCount(ups, tab) >= 3), unlocked: false },
+    // Sprint 5 achievements
+    { id: 'pragmatiker', name: 'Pragmatiker', check: () => (gameState.dilemmaHistory || []).filter(d => d.choice === 'b').length >= 5, unlocked: false },
+    { id: 'gemenskapsmastare', name: 'Gemenskapsmästare', check: () => gameState.gameComplete && (gameState.resourceMin?.community ?? 80) >= 30, unlocked: false },
+    { id: 'balanserad', name: 'Balanserad', check: () => gameState.gameComplete && (gameState.resources?.supply ?? 0) > 50 && (gameState.resources?.comms ?? 0) > 50 && (gameState.resources?.community ?? 0) > 50, unlocked: false },
   ];
   // Note: 'all_achievements' is excluded from tests because it references the array itself
 }
@@ -947,10 +951,10 @@ section('Achievement Data Integrity');
   const gs = { totalClicks: 0, totalUpgradesBought: 0, currentEra: 0, totalFp: 0, gameComplete: false };
   const achs = makeAchievements(ups, clicks, gs);
 
-  assertEq(achs.length, 21, '21 testable achievements (22 including meta)');
+  assertEq(achs.length, 24, '24 testable achievements (25 including meta)');
 
   const ids = new Set(achs.map(a => a.id));
-  assertEq(ids.size, 21, 'All achievement IDs unique');
+  assertEq(ids.size, 24, 'All achievement IDs unique');
 
   // All start unlocked = false
   assert(achs.every(a => a.unlocked === false), 'All achievements start locked');
@@ -2494,6 +2498,331 @@ section('Sprint 4: Upgrade Data Integrity');
   const clicks = makeClickUpgrades();
   const clickIds = clicks.map(u => u.id);
   assertEq(clickIds.length, new Set(clickIds).size, 'No duplicate click upgrade IDs');
+}
+
+// ========================================
+// SPRINT 5: End Screen & Polish Tests
+// ========================================
+
+// ---- 5.1 New Achievements ----
+section('Sprint 5: New Achievements');
+{
+  // Pragmatiker: choice 'b' in >= 5 dilemmas
+  const history5b = [
+    { choice: 'b' }, { choice: 'b' }, { choice: 'b' }, { choice: 'b' }, { choice: 'b' },
+  ];
+  const history4b = [
+    { choice: 'b' }, { choice: 'b' }, { choice: 'b' }, { choice: 'b' }, { choice: 'a' },
+  ];
+  assertEq(history5b.filter(d => d.choice === 'b').length >= 5, true, 'Pragmatiker: 5 choice-b passes');
+  assertEq(history4b.filter(d => d.choice === 'b').length >= 5, false, 'Pragmatiker: 4 choice-b fails');
+
+  // Gemenskapsmästare: community min >= 30 at game end
+  const minGood = { supply: 10, comms: 10, community: 30 };
+  const minBad = { supply: 10, comms: 10, community: 29 };
+  assert(minGood.community >= 30, 'Gemenskapsmästare: community min 30 passes');
+  assert(!(minBad.community >= 30), 'Gemenskapsmästare: community min 29 fails');
+
+  // Balanserad: all resources > 50 at game end
+  const resGood = { supply: 51, comms: 60, community: 70 };
+  const resBad = { supply: 50, comms: 60, community: 70 };
+  assert(resGood.supply > 50 && resGood.comms > 50 && resGood.community > 50, 'Balanserad: all > 50 passes');
+  assert(!(resBad.supply > 50 && resBad.comms > 50 && resBad.community > 50), 'Balanserad: supply = 50 fails');
+}
+
+// ---- 5.2 Achievement Integration ----
+section('Sprint 5: Achievement Integration');
+{
+  const ups = makeUpgrades();
+  const clicks = makeClickUpgrades();
+  const gs = {
+    totalClicks: 0, totalUpgradesBought: 0, currentEra: 0, totalFp: 0,
+    gameComplete: true,
+    dilemmaHistory: [
+      { choice: 'b' }, { choice: 'b' }, { choice: 'b' }, { choice: 'b' }, { choice: 'b' },
+    ],
+    resourceMin: { supply: 60, comms: 60, community: 35 },
+    resources: { supply: 55, comms: 55, community: 55 },
+    resourceZeroCount: { supply: 0, comms: 0, community: 0 },
+    crisesTotal: 0,
+  };
+  const achs = makeAchievements(ups, clicks, gs);
+
+  let unlocked = checkAchievementsTest(achs);
+  assert(unlocked.includes('pragmatiker'), 'Pragmatiker triggers with 5 b-choices');
+  assert(unlocked.includes('gemenskapsmastare'), 'Gemenskapsmästare triggers with min community 35');
+  assert(unlocked.includes('balanserad'), 'Balanserad triggers with all resources > 50');
+
+  // Test that gemenskapsmastare fails with low community min
+  const gs2 = { ...gs, resourceMin: { supply: 60, comms: 60, community: 29 } };
+  const achs2 = makeAchievements(ups, clicks, gs2);
+  checkAchievementsTest(achs2);
+  assert(!achs2.find(a => a.id === 'gemenskapsmastare').unlocked, 'Gemenskapsmästare locked at min 29');
+
+  // Test that balanserad fails when game is not complete
+  const gs3 = { ...gs, gameComplete: false, resources: { supply: 55, comms: 55, community: 55 } };
+  const achs3 = makeAchievements(ups, clicks, gs3);
+  checkAchievementsTest(achs3);
+  assert(!achs3.find(a => a.id === 'balanserad').unlocked, 'Balanserad locked when game not complete');
+}
+
+// ---- 5.3 Dilemma Recap Builder ----
+section('Sprint 5: Dilemma Recap');
+{
+  // Simulate dilemma recap logic (from buildDilemmaRecap)
+  const dilemmaEvents = [
+    { id: 'dilemma_vatten_granne', name: 'Grannen behöver vatten', choiceA: { label: 'Dela' }, choiceB: { label: 'Behåll' } },
+    { id: 'dilemma_rykten', name: 'Rykten om förorenat vatten', choiceA: { label: 'Kolla fakta' }, choiceB: { label: 'Hamstra' } },
+    { id: 'dilemma_frivilliga', name: 'Kommunen söker frivilliga', choiceA: { label: 'Ställ upp' }, choiceB: { label: 'Avböj' } },
+  ];
+
+  function buildRecapTest(history) {
+    const dilemmaNames = {};
+    for (const d of dilemmaEvents) {
+      dilemmaNames[d.id] = { name: d.name, a: d.choiceA.label, b: d.choiceB.label };
+    }
+    if (history.length === 0) return [];
+    const counts = {};
+    for (const entry of history) {
+      const key = entry.eventId + '_' + entry.choice;
+      counts[key] = (counts[key] || 0) + 1;
+    }
+    const lines = [];
+    for (const [key, count] of Object.entries(counts)) {
+      const eventId = key.substring(0, key.lastIndexOf('_'));
+      const choice = key.substring(key.lastIndexOf('_') + 1);
+      const info = dilemmaNames[eventId];
+      if (!info) continue;
+      const choiceLabel = choice === 'a' ? info.a : info.b;
+      const suffix = count > 1 ? ` (${count} ggr)` : '';
+      lines.push(`${info.name}: ${choiceLabel}${suffix}`);
+    }
+    return lines;
+  }
+
+  // Empty history
+  const emptyRecap = buildRecapTest([]);
+  assertEq(emptyRecap.length, 0, 'Empty history gives empty recap');
+
+  // Single choice
+  const single = buildRecapTest([{ eventId: 'dilemma_vatten_granne', choice: 'a' }]);
+  assertEq(single.length, 1, 'Single dilemma gives 1 recap line');
+  assert(single[0].includes('Dela'), 'Recap shows choice A label');
+  assert(single[0].includes('Grannen behöver vatten'), 'Recap shows dilemma name');
+
+  // Repeated same choice
+  const repeated = buildRecapTest([
+    { eventId: 'dilemma_vatten_granne', choice: 'a' },
+    { eventId: 'dilemma_vatten_granne', choice: 'a' },
+    { eventId: 'dilemma_vatten_granne', choice: 'a' },
+  ]);
+  assertEq(repeated.length, 1, 'Repeated same choice gives 1 line');
+  assert(repeated[0].includes('3 ggr'), 'Repeated choice shows count');
+
+  // Multiple different dilemmas
+  const mixed = buildRecapTest([
+    { eventId: 'dilemma_vatten_granne', choice: 'a' },
+    { eventId: 'dilemma_rykten', choice: 'b' },
+    { eventId: 'dilemma_frivilliga', choice: 'a' },
+  ]);
+  assertEq(mixed.length, 3, 'Three different dilemmas give 3 lines');
+  assert(mixed[1].includes('Hamstra'), 'Second line shows choice B label');
+
+  // Unknown dilemma ID is skipped
+  const unknown = buildRecapTest([{ eventId: 'dilemma_unknown', choice: 'a' }]);
+  assertEq(unknown.length, 0, 'Unknown dilemma ID produces no recap line');
+}
+
+// ---- 5.4 End Screen Report Values ----
+section('Sprint 5: End Screen Report Values');
+{
+  // Test color classification for report values
+  function getValueClass(val) {
+    if (val > 50) return 'good';
+    if (val > 20) return '';
+    return 'bad';
+  }
+
+  assertEq(getValueClass(51), 'good', 'Value > 50 is good');
+  assertEq(getValueClass(50), '', 'Value = 50 is neutral');
+  assertEq(getValueClass(21), '', 'Value = 21 is neutral');
+  assertEq(getValueClass(20), 'bad', 'Value = 20 is bad');
+  assertEq(getValueClass(0), 'bad', 'Value = 0 is bad');
+
+  // Total zero count
+  const zeros = { supply: 2, comms: 1, community: 3 };
+  const totalZeros = zeros.supply + zeros.comms + zeros.community;
+  assertEq(totalZeros, 6, 'Total zeros sums correctly');
+}
+
+// ---- 5.5 Achievement Count Updated ----
+section('Sprint 5: Achievement Count');
+{
+  const ups = makeUpgrades();
+  const clicks = makeClickUpgrades();
+  const gs = { totalClicks: 0, totalUpgradesBought: 0, currentEra: 0, totalFp: 0, gameComplete: false };
+  const achs = makeAchievements(ups, clicks, gs);
+
+  // Total should be 24 testable (25 total with all_achievements meta)
+  assertEq(achs.length, 24, 'Total testable achievements = 24');
+
+  // Check all unique
+  const ids = new Set(achs.map(a => a.id));
+  assertEq(ids.size, 24, 'All 24 achievement IDs unique');
+
+  // Verify Sprint 5 IDs exist
+  assert(achs.some(a => a.id === 'pragmatiker'), 'Pragmatiker achievement exists');
+  assert(achs.some(a => a.id === 'gemenskapsmastare'), 'Gemenskapsmästare achievement exists');
+  assert(achs.some(a => a.id === 'balanserad'), 'Balanserad achievement exists');
+}
+
+// ---- 5.6 Resource tracking edge cases ----
+section('Sprint 5: Resource Tracking Edge Cases');
+{
+  // ResourceMin should track lowest value
+  let resourceMin = { supply: 80, comms: 80, community: 80 };
+  let resources = { supply: 80, comms: 80, community: 80 };
+
+  // Simulate drain
+  resources.supply = 45;
+  if (resources.supply < resourceMin.supply) resourceMin.supply = resources.supply;
+  assertEq(resourceMin.supply, 45, 'ResourceMin tracks drain to 45');
+
+  // Recover
+  resources.supply = 70;
+  if (resources.supply < resourceMin.supply) resourceMin.supply = resources.supply;
+  assertEq(resourceMin.supply, 45, 'ResourceMin stays at 45 after recovery to 70');
+
+  // Further drain
+  resources.supply = 10;
+  if (resources.supply < resourceMin.supply) resourceMin.supply = resources.supply;
+  assertEq(resourceMin.supply, 10, 'ResourceMin updates to new low of 10');
+
+  // Zero count transitions
+  let zeroCount = { supply: 0, comms: 0, community: 0 };
+  let wasDepleted = false;
+  resources.supply = 0;
+  if (!wasDepleted && resources.supply === 0) zeroCount.supply++;
+  wasDepleted = true;
+  assertEq(zeroCount.supply, 1, 'Zero count increments on first depletion');
+
+  // Stay at zero — should NOT count again
+  if (!wasDepleted && resources.supply === 0) zeroCount.supply++;
+  assertEq(zeroCount.supply, 1, 'Zero count does not re-increment while still at 0');
+
+  // Recover and deplete again
+  resources.supply = 50;
+  wasDepleted = false;
+  resources.supply = 0;
+  if (!wasDepleted && resources.supply === 0) zeroCount.supply++;
+  assertEq(zeroCount.supply, 2, 'Zero count increments on second depletion');
+}
+
+// ---- 5.7 End screen data integrity ----
+section('Sprint 5: End Screen Data Integrity');
+{
+  // Verify that all tracking fields exist in initial game state
+  const initialState = {
+    resourceMin: { supply: 80, comms: 80, community: 80 },
+    resourceZeroCount: { supply: 0, comms: 0, community: 0 },
+    crisesTotal: 0,
+    dilemmaHistory: [],
+    resources: { supply: 80, comms: 80, community: 80 },
+  };
+
+  assert(typeof initialState.resourceMin === 'object', 'resourceMin is object');
+  assert(typeof initialState.resourceZeroCount === 'object', 'resourceZeroCount is object');
+  assert(typeof initialState.crisesTotal === 'number', 'crisesTotal is number');
+  assert(Array.isArray(initialState.dilemmaHistory), 'dilemmaHistory is array');
+
+  assertEq(initialState.resourceMin.supply, 80, 'Initial supply min is 80');
+  assertEq(initialState.resourceMin.comms, 80, 'Initial comms min is 80');
+  assertEq(initialState.resourceMin.community, 80, 'Initial community min is 80');
+  assertEq(initialState.resourceZeroCount.supply, 0, 'Initial supply zero count is 0');
+  assertEq(initialState.resourceZeroCount.comms, 0, 'Initial comms zero count is 0');
+  assertEq(initialState.resourceZeroCount.community, 0, 'Initial community zero count is 0');
+  assertEq(initialState.crisesTotal, 0, 'Initial crises total is 0');
+  assertEq(initialState.dilemmaHistory.length, 0, 'Initial dilemma history is empty');
+}
+
+// ---- 5.8 Save/Load with Sprint 5 fields ----
+section('Sprint 5: Save/Load');
+{
+  const saveData = {
+    version: 2,
+    resourceMin: { supply: 5, comms: 12, community: 28 },
+    resourceZeroCount: { supply: 4, comms: 0, community: 1 },
+    crisesTotal: 18,
+    resources: { supply: 60, comms: 70, community: 55 },
+    dilemmaHistory: [
+      { eventId: 'dilemma_vatten_granne', choice: 'a', time: 1000 },
+      { eventId: 'dilemma_rykten', choice: 'b', time: 2000 },
+      { eventId: 'dilemma_frivilliga', choice: 'a', time: 3000 },
+    ],
+  };
+
+  const json = JSON.stringify(saveData);
+  const restored = JSON.parse(json);
+
+  assertEq(restored.resourceMin.supply, 5, 'Save/load preserves resourceMin.supply');
+  assertEq(restored.resourceMin.community, 28, 'Save/load preserves resourceMin.community');
+  assertEq(restored.resourceZeroCount.supply, 4, 'Save/load preserves zeroCount.supply');
+  assertEq(restored.crisesTotal, 18, 'Save/load preserves crisesTotal');
+  assertEq(restored.resources.supply, 60, 'Save/load preserves current resources');
+  assertEq(restored.dilemmaHistory.length, 3, 'Save/load preserves dilemma history length');
+  assertEq(restored.dilemmaHistory[0].choice, 'a', 'Save/load preserves dilemma choice');
+  assertEq(restored.dilemmaHistory[1].eventId, 'dilemma_rykten', 'Save/load preserves dilemma eventId');
+}
+
+// ---- 5.9 Reset clears Sprint 5 tracking ----
+section('Sprint 5: Reset Clears Tracking');
+{
+  // Simulate game state after play
+  const gs = {
+    resourceMin: { supply: 5, comms: 0, community: 20 },
+    resourceZeroCount: { supply: 3, comms: 5, community: 1 },
+    crisesTotal: 15,
+    dilemmaHistory: [{ eventId: 'd1', choice: 'a' }],
+    resources: { supply: 30, comms: 40, community: 50 },
+  };
+
+  // Simulate reset
+  gs.resourceMin = { supply: 80, comms: 80, community: 80 };
+  gs.resourceZeroCount = { supply: 0, comms: 0, community: 0 };
+  gs.crisesTotal = 0;
+  gs.dilemmaHistory = [];
+  gs.resources = { supply: 80, comms: 80, community: 80 };
+
+  assertEq(gs.resourceMin.supply, 80, 'Reset restores resourceMin.supply to 80');
+  assertEq(gs.resourceZeroCount.supply, 0, 'Reset restores zeroCount.supply to 0');
+  assertEq(gs.crisesTotal, 0, 'Reset restores crisesTotal to 0');
+  assertEq(gs.dilemmaHistory.length, 0, 'Reset clears dilemma history');
+  assertEq(gs.resources.supply, 80, 'Reset restores resources to 80');
+}
+
+// ---- 5.10 Upgrade data integrity (including Sprint 5 count) ----
+section('Sprint 5: Data Integrity');
+{
+  const ups = makeUpgrades();
+  // 37 upgrades total (6+7+8+10+6 per tab)
+  assertEq(ups.length, 37, 'Total upgrades: 37');
+
+  const clicks = makeClickUpgrades();
+  assertEq(clicks.length, 7, 'Total click upgrades: 7');
+
+  // Achievement count including Sprint 5
+  const gs = { totalClicks: 0, totalUpgradesBought: 0, currentEra: 0, totalFp: 0, gameComplete: false };
+  const achs = makeAchievements(ups, clicks, gs);
+  assertEq(achs.length, 24, 'Total testable achievements: 24 (+ all_achievements = 25)');
+
+  // Verify all tab assignments
+  const tabCounts = [0, 0, 0, 0, 0];
+  for (const u of ups) tabCounts[u.tab]++;
+  assertEq(tabCounts[0], 6, 'Tab 0 has 6 upgrades');
+  assertEq(tabCounts[1], 7, 'Tab 1 has 7 upgrades');
+  assertEq(tabCounts[2], 8, 'Tab 2 has 8 upgrades');
+  assertEq(tabCounts[3], 10, 'Tab 3 has 10 upgrades');
+  assertEq(tabCounts[4], 6, 'Tab 4 has 6 upgrades');
 }
 
 // --- Summary ---
