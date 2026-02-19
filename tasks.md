@@ -55,81 +55,82 @@
 - [x] Använd genomgående i UI (FP, kostnader, FP/s)
 
 ### 1.7 Tester ✅
-- [x] test.js: 55 automatiserade tester (Node.js)
+- [x] test.js: 147 automatiserade tester (Node.js) — utökat i Sprint 2
 - [x] test.html: Webbläsarbaserad testrunner
 - [x] Testar: formatering, kostnad, FP/s, köplogik, era-progression, dataintegritet, balanssimuleringar
 - [x] Balans verifierad: Era 2 nås på ~3.7 min (2 cps), alla upgrades x1 på ~7.3 min (3 cps)
 
 ---
 
-## Sprint 2: Progression
+## Sprint 2: Progression ✅
 
-### 2.1 Alla eror och uppgraderingar
+### 2.1 Alla eror och uppgraderingar ✅
 
 **Era 1: Hemberedskap** (redan i Sprint 1)
-- [ ] Vattenflaskor ("3 liter/person/dag i minst en vecka")
-- [ ] Konservburkar ("Mat som inte behöver kylskåp")
-- [ ] Stormkök & bränsle ("Laga mat utan el")
-- [ ] Ficklampa, radio & batterier ("Vevradio = guld värt vid strömavbrott")
-- [ ] Sovsäck & filtar ("Håll värmen om elementen slutar fungera")
-- [ ] Hemberedskapskit ("Kontanter, mediciner, viktiga dokument, första hjälpen")
+- [x] Vattenflaskor (cost 10, 0.5 FP/s)
+- [x] Konservburkar (cost 50, 2 FP/s)
+- [x] Stormkök & bränsle (cost 200, 8 FP/s)
+- [x] Ficklampa, radio & batterier (cost 600, 30 FP/s)
+- [x] Sovsäck & filtar (cost 1500, 100 FP/s)
+- [x] Hemberedskapskit (cost 5000, 300 FP/s)
 
-**Era 2: Grannskapet**
-- [ ] Grannsamverkan ("Kolla till varandra vid kris")
-- [ ] Vedförråd & gemensam eldstad ("Värme till hela kvarteret")
-- [ ] Vattenrenare & vattendunkar ("Rent vatten även om kranen slutar fungera")
-- [ ] Informationsmöte ("Prata igenom: vad gör vi om strömmen går?")
-- [ ] Lokal beredskapsgrupp ("Organisera roller: vem har generator? Vem kan första hjälpen?")
-- [ ] Gemensamt skyddsrum ("Sverige har ~65 000 skyddsrum")
+**Era 2: Grannskapet** (threshold 5K)
+- [x] Grannsamverkan (cost 8K, 500 FP/s)
+- [x] Vedförråd & gemensam eldstad (cost 25K, 1.5K FP/s)
+- [x] Vattenrenare & vattendunkar (cost 75K, 5K FP/s)
+- [x] Informationsmöte (cost 200K, 15K FP/s)
+- [x] Lokal beredskapsgrupp (cost 500K, 40K FP/s)
+- [x] Gemensamt skyddsrum (cost 1.2M, 100K FP/s)
 
-**Era 3: Kommunen**
-- [ ] Kommunal krisplan ("Varje kommun ska ha en plan för höjd beredskap")
-- [ ] Beredskapsveckan ("Årlig övning sedan 2017")
-- [ ] Nödvattenförsörjning ("Drickvattenberedskap för hela kommunen")
-- [ ] Räddningstjänst-uppgradering
-- [ ] Civilplikt-organisering ("Alla yrken kan krigsplaceras")
-- [ ] Rakel-kommunikation ("Radiosystem som fungerar när mobilnätet är nere")
+**Era 3: Kommunen** (threshold 100K)
+- [x] Kommunal krisplan (cost 1.5M, 200K FP/s)
+- [x] Beredskapsveckan (cost 4M, 500K FP/s)
+- [x] Nödvattenförsörjning (cost 10M, 1.2M FP/s)
+- [x] Räddningstjänst-uppgradering (cost 25M, 3M FP/s)
+- [x] Civilplikt-organisering (cost 60M, 8M FP/s)
+- [x] Rakel-kommunikation (cost 150M, 20M FP/s)
 
-**Era 4: Regionen**
-- [ ] Länsstyrelse-samordning ("Sex civilområden i Sverige")
-- [ ] Regionalt civilområde
-- [ ] Elberedskap & reservkraft ("Håll elnätet igång eller bygg alternativ")
-- [ ] Livsmedelsförsörjning ("Centrallager och dagligvaruhandel vid kris")
-- [ ] Drivmedelsreserver ("Samhället stannar utan bränsle")
-- [ ] Cybersäkerhet ("IT-incidenthantering och skydd mot cyberhot")
+**Era 4: Regionen** (threshold 2M)
+- [x] Länsstyrelse-samordning (cost 200M, 40M FP/s)
+- [x] Regionalt civilområde (cost 500M, 100M FP/s)
+- [x] Elberedskap & reservkraft (cost 1.5B, 250M FP/s)
+- [x] Livsmedelsförsörjning (cost 4B, 600M FP/s)
+- [x] Drivmedelsreserver (cost 10B, 1.5B FP/s)
+- [x] Cybersäkerhet (cost 25B, 4B FP/s)
 
-**Era 5: Nationen**
-- [ ] MCF (Myndigheten för civilt försvar)
-- [ ] Hemvärnet
-- [ ] JAS 39 Gripen
-- [ ] Global Eye-flygplan
-- [ ] NATO artikel 5
-- [ ] Totalförsvar 3,5% av BNP (sista uppgraderingen)
+**Era 5: Nationen** (threshold 50M)
+- [x] MCF (cost 40B, 8B FP/s)
+- [x] Hemvärnet (cost 100B, 20B FP/s)
+- [x] JAS 39 Gripen (cost 300B, 50B FP/s)
+- [x] Global Eye-flygplan (cost 800B, 120B FP/s)
+- [x] NATO artikel 5 (cost 2T, 300B FP/s)
+- [x] Totalförsvar 3,5% av BNP (cost 5T, 800B FP/s)
 
-### 2.2 Era-progression
-- [ ] Definiera FP-trösklar för att låsa upp varje era
-- [ ] Progress bar som visar avstånd till nästa era
-- [ ] Visuell "unlock"-animation vid ny era
-- [ ] Uppgraderingar för nya eror synliggörs först vid unlock
-- [ ] Era-namn och beskrivning visas i UI
+### 2.2 Era-progression ✅
+- [x] FP-trösklar: 0, 5K, 100K, 2M, 50M
+- [x] Progress bar visar avstånd till nästa era
+- [x] Visuell "unlock"-animation vid ny era (overlay med puls-animation)
+- [x] Uppgraderingar för nya eror synliggörs först vid unlock
+- [x] Era-namn med headers i upgrade-listan
 
-### 2.3 Klickkraft-uppgraderingar
-- [ ] Separat sektion i UI för klickkraft-upgrades
-- [ ] Engångsköp (kan bara köpas en gång)
-- [ ] ~6 uppgraderingar:
-  - Vikingblod (2x klick)
-  - Karolinsk beslutsamhet (3x klick)
-  - Ärtsoppekraft (5x klick)
-  - Beredskapskämpe (10x klick)
-  - Försvarsminister-handslag (25x klick)
-  - "NU JÄVLAR"-knappen (100x klick)
-- [ ] Markera som köpt efter köp (grå + bock)
+### 2.3 Klickkraft-uppgraderingar ✅
+- [x] Separat sektion i UI ("Klickkraft")
+- [x] Engångsköp (kan bara köpas en gång)
+- [x] 6 uppgraderingar:
+  - Vikingblod (2x, cost 500)
+  - Karolinsk beslutsamhet (3x, cost 15K)
+  - Ärtsoppekraft (5x, cost 250K)
+  - Beredskapskämpe (10x, cost 5M)
+  - Försvarsminister-handslag (25x, cost 100M)
+  - "NU JÄVLAR"-knappen (100x, cost 5B)
+- [x] Markera som köpt (grön bakgrund + ✓)
 
-### 2.4 Balansering
-- [ ] Sätt baskostad och FP/s för alla ~22 uppgraderingar
-- [ ] Testa att progressionen känns bra (inte för snabb, inte för långsam)
-- [ ] Kalibrera era-trösklar så varje era tar ~2-5 min
-- [ ] Klickkraft-priser balanserade mot passiv inkomst
+### 2.4 Balansering ✅
+- [x] Baskostad och FP/s för alla 30 uppgraderingar
+- [x] Progression verifierad via 147 automatiserade tester
+- [x] Era-timing: ~3.2, 3.7, 3.8, 5.4 min per era
+- [x] Full genomspelning: ~23 min (3 cps)
+- [x] Klickkraft: 500 → 5B FP (750,000x total multiplikator)
 
 ---
 

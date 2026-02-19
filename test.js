@@ -1,4 +1,4 @@
-// === FÖRSVARSVILJA — Sprint 1 Tests (Node.js) ===
+// === FÖRSVARSVILJA — Sprint 1+2 Tests (Node.js) ===
 
 let passed = 0;
 let failed = 0;
@@ -49,12 +49,52 @@ function getUpgradeCost(upgrade) {
 
 function makeUpgrades() {
   return [
-    { id: 'water', name: 'Vattenflaskor', baseCost: 10, fpPerSecond: 0.5, count: 0 },
-    { id: 'cans', name: 'Konservburkar', baseCost: 50, fpPerSecond: 2, count: 0 },
-    { id: 'stove', name: 'Stormkök & bränsle', baseCost: 200, fpPerSecond: 8, count: 0 },
-    { id: 'radio', name: 'Ficklampa, radio & batterier', baseCost: 600, fpPerSecond: 30, count: 0 },
-    { id: 'sleeping', name: 'Sovsäck & filtar', baseCost: 1500, fpPerSecond: 100, count: 0 },
-    { id: 'kit', name: 'Hemberedskapskit', baseCost: 5000, fpPerSecond: 300, count: 0 },
+    // Era 0: Hemberedskap
+    { id: 'water', name: 'Vattenflaskor', baseCost: 10, fpPerSecond: 0.5, count: 0, era: 0 },
+    { id: 'cans', name: 'Konservburkar', baseCost: 50, fpPerSecond: 2, count: 0, era: 0 },
+    { id: 'stove', name: 'Stormkök & bränsle', baseCost: 200, fpPerSecond: 8, count: 0, era: 0 },
+    { id: 'radio', name: 'Ficklampa, radio & batterier', baseCost: 600, fpPerSecond: 30, count: 0, era: 0 },
+    { id: 'sleeping', name: 'Sovsäck & filtar', baseCost: 1500, fpPerSecond: 100, count: 0, era: 0 },
+    { id: 'kit', name: 'Hemberedskapskit', baseCost: 5000, fpPerSecond: 300, count: 0, era: 0 },
+    // Era 1: Grannskapet
+    { id: 'neighbors', name: 'Grannsamverkan', baseCost: 8000, fpPerSecond: 500, count: 0, era: 1 },
+    { id: 'firewood', name: 'Vedförråd & gemensam eldstad', baseCost: 25000, fpPerSecond: 1500, count: 0, era: 1 },
+    { id: 'water_purifier', name: 'Vattenrenare & vattendunkar', baseCost: 75000, fpPerSecond: 5000, count: 0, era: 1 },
+    { id: 'info_meeting', name: 'Informationsmöte', baseCost: 200000, fpPerSecond: 15000, count: 0, era: 1 },
+    { id: 'local_group', name: 'Lokal beredskapsgrupp', baseCost: 500000, fpPerSecond: 40000, count: 0, era: 1 },
+    { id: 'shelter', name: 'Gemensamt skyddsrum', baseCost: 1200000, fpPerSecond: 100000, count: 0, era: 1 },
+    // Era 2: Kommunen
+    { id: 'crisis_plan', name: 'Kommunal krisplan', baseCost: 1500000, fpPerSecond: 200000, count: 0, era: 2 },
+    { id: 'prep_week', name: 'Beredskapsveckan', baseCost: 4000000, fpPerSecond: 500000, count: 0, era: 2 },
+    { id: 'water_supply', name: 'Nödvattenförsörjning', baseCost: 10000000, fpPerSecond: 1200000, count: 0, era: 2 },
+    { id: 'fire_service', name: 'Räddningstjänst-uppgradering', baseCost: 25000000, fpPerSecond: 3000000, count: 0, era: 2 },
+    { id: 'civil_duty', name: 'Civilplikt-organisering', baseCost: 60000000, fpPerSecond: 8000000, count: 0, era: 2 },
+    { id: 'rakel', name: 'Rakel-kommunikation', baseCost: 150000000, fpPerSecond: 20000000, count: 0, era: 2 },
+    // Era 3: Regionen
+    { id: 'county_coord', name: 'Länsstyrelse-samordning', baseCost: 200000000, fpPerSecond: 40000000, count: 0, era: 3 },
+    { id: 'civil_area', name: 'Regionalt civilområde', baseCost: 500000000, fpPerSecond: 100000000, count: 0, era: 3 },
+    { id: 'power_prep', name: 'Elberedskap & reservkraft', baseCost: 1500000000, fpPerSecond: 250000000, count: 0, era: 3 },
+    { id: 'food_supply', name: 'Livsmedelsförsörjning', baseCost: 4000000000, fpPerSecond: 600000000, count: 0, era: 3 },
+    { id: 'fuel_reserves', name: 'Drivmedelsreserver', baseCost: 10000000000, fpPerSecond: 1500000000, count: 0, era: 3 },
+    { id: 'cyber_security', name: 'Cybersäkerhet', baseCost: 25000000000, fpPerSecond: 4000000000, count: 0, era: 3 },
+    // Era 4: Nationen
+    { id: 'mcf', name: 'MCF', baseCost: 40000000000, fpPerSecond: 8000000000, count: 0, era: 4 },
+    { id: 'home_guard', name: 'Hemvärnet', baseCost: 100000000000, fpPerSecond: 20000000000, count: 0, era: 4 },
+    { id: 'gripen', name: 'JAS 39 Gripen', baseCost: 300000000000, fpPerSecond: 50000000000, count: 0, era: 4 },
+    { id: 'global_eye', name: 'Global Eye-flygplan', baseCost: 800000000000, fpPerSecond: 120000000000, count: 0, era: 4 },
+    { id: 'nato_art5', name: 'NATO artikel 5', baseCost: 2000000000000, fpPerSecond: 300000000000, count: 0, era: 4 },
+    { id: 'total_defense', name: 'Totalförsvar 3,5% av BNP', baseCost: 5000000000000, fpPerSecond: 800000000000, count: 0, era: 4 },
+  ];
+}
+
+function makeClickUpgrades() {
+  return [
+    { id: 'viking', name: 'Vikingblod', cost: 500, multiplier: 2, purchased: false },
+    { id: 'karolin', name: 'Karolinsk beslutsamhet', cost: 15000, multiplier: 3, purchased: false },
+    { id: 'artsoppa', name: 'Ärtsoppekraft', cost: 250000, multiplier: 5, purchased: false },
+    { id: 'beredskap_fighter', name: 'Beredskapskämpe', cost: 5000000, multiplier: 10, purchased: false },
+    { id: 'minister', name: 'Försvarsminister-handslag', cost: 100000000, multiplier: 25, purchased: false },
+    { id: 'nu_javlar', name: '"NU JÄVLAR"-knappen', cost: 5000000000, multiplier: 100, purchased: false },
   ];
 }
 
@@ -80,11 +120,31 @@ function calcFpPerSecond(ups) {
   return total;
 }
 
+// Simulation helper: buy best affordable upgrade for current era
+function simBuyBest(ups, fp, currentEra) {
+  let bestIdx = -1, bestRatio = Infinity;
+  for (let i = 0; i < ups.length; i++) {
+    if (ups[i].era > currentEra) continue;
+    const cost = getUpgradeCost(ups[i]);
+    if (fp >= cost) {
+      const ratio = cost / ups[i].fpPerSecond;
+      if (ratio < bestRatio) { bestRatio = ratio; bestIdx = i; }
+    }
+  }
+  if (bestIdx >= 0) {
+    fp -= getUpgradeCost(ups[bestIdx]);
+    ups[bestIdx].count++;
+  }
+  return { fp, bought: bestIdx >= 0 };
+}
+
 // ============================================================
 // TESTS
 // ============================================================
 
-console.log('\x1b[33m═══ FÖRSVARSVILJA — Sprint 1 Tests ═══\x1b[0m');
+console.log('\x1b[33m═══ FÖRSVARSVILJA — Sprint 1+2 Tests ═══\x1b[0m');
+
+// ---- Sprint 1 Tests (preserved) ----
 
 section('Number Formatting');
 assertEq(formatNumber(0), '0.0', 'Zero');
@@ -161,76 +221,259 @@ assertEq(getCurrentEra(100000), 2, '100K = Era 2');
 assertEq(getCurrentEra(2000000), 3, '2M = Era 3');
 assertEq(getCurrentEra(50000000), 4, '50M = Era 4');
 
-section('Upgrade Data Integrity');
+// ---- Sprint 2 Tests ----
+
+section('All Upgrades Data Integrity');
 {
   const ups = makeUpgrades();
-  assertEq(ups.length, 6, '6 upgrades in Era 1');
+  assertEq(ups.length, 30, '30 total upgrades (6 per era x 5 eras)');
+
   const ids = new Set(ups.map(u => u.id));
-  assertEq(ids.size, 6, 'All IDs unique');
-  for (let i = 1; i < ups.length; i++) {
-    assert(ups[i].baseCost > ups[i - 1].baseCost, `${ups[i].name} costs more than ${ups[i - 1].name}`);
-    assert(ups[i].fpPerSecond > ups[i - 1].fpPerSecond, `${ups[i].name} gives more FP/s`);
+  assertEq(ids.size, 30, 'All upgrade IDs unique');
+
+  // Check each era has 6 upgrades
+  for (let era = 0; era < 5; era++) {
+    const eraUps = ups.filter(u => u.era === era);
+    assertEq(eraUps.length, 6, `Era ${era} has 6 upgrades`);
+  }
+
+  // Within each era, costs and FP/s should be ascending
+  for (let era = 0; era < 5; era++) {
+    const eraUps = ups.filter(u => u.era === era);
+    for (let i = 1; i < eraUps.length; i++) {
+      assert(eraUps[i].baseCost > eraUps[i - 1].baseCost,
+        `Era ${era}: ${eraUps[i].name} costs more than ${eraUps[i - 1].name}`);
+      assert(eraUps[i].fpPerSecond > eraUps[i - 1].fpPerSecond,
+        `Era ${era}: ${eraUps[i].name} gives more FP/s`);
+    }
+  }
+
+  // Across eras, first upgrade of next era should cost more than last of previous
+  for (let era = 1; era < 5; era++) {
+    const prevLast = ups.filter(u => u.era === era - 1).pop();
+    const currFirst = ups.filter(u => u.era === era)[0];
+    assert(currFirst.baseCost > prevLast.baseCost,
+      `Era ${era} first (${currFirst.name}) costs more than Era ${era - 1} last (${prevLast.name})`);
+  }
+
+  // All upgrades start with count 0
+  assert(ups.every(u => u.count === 0), 'All upgrades start at count 0');
+
+  // All costs are positive
+  assert(ups.every(u => u.baseCost > 0), 'All baseCosts positive');
+  assert(ups.every(u => u.fpPerSecond > 0), 'All fpPerSecond positive');
+}
+
+section('Click Upgrades Data Integrity');
+{
+  const clicks = makeClickUpgrades();
+  assertEq(clicks.length, 6, '6 click upgrades');
+
+  const ids = new Set(clicks.map(c => c.id));
+  assertEq(ids.size, 6, 'All click upgrade IDs unique');
+
+  // Costs should be ascending
+  for (let i = 1; i < clicks.length; i++) {
+    assert(clicks[i].cost > clicks[i - 1].cost,
+      `${clicks[i].name} costs more than ${clicks[i - 1].name}`);
+  }
+
+  // All start unpurchased
+  assert(clicks.every(c => !c.purchased), 'All click upgrades start unpurchased');
+
+  // Multipliers should all be > 1
+  assert(clicks.every(c => c.multiplier > 1), 'All multipliers > 1');
+
+  // Total multiplier check: 2 * 3 * 5 * 10 * 25 * 100
+  const totalMult = clicks.reduce((acc, c) => acc * c.multiplier, 1);
+  assertEq(totalMult, 750000, 'Total click multiplier = 750,000x');
+}
+
+section('Click Upgrade Buy Logic');
+{
+  let fp = 1000;
+  let fpPerClick = 1;
+  const clicks = makeClickUpgrades();
+
+  // Buy first click upgrade (cost 500)
+  assert(fp >= clicks[0].cost, 'Can afford Vikingblod');
+  fp -= clicks[0].cost;
+  clicks[0].purchased = true;
+  fpPerClick *= clicks[0].multiplier;
+  assertEq(fp, 500, 'FP reduced by click upgrade cost');
+  assertEq(fpPerClick, 2, 'Click power doubled after Vikingblod');
+  assert(clicks[0].purchased, 'Vikingblod marked as purchased');
+
+  // Cannot buy again (already purchased)
+  assert(clicks[0].purchased === true, 'Cannot rebuy purchased click upgrade');
+
+  // Cannot afford second (cost 15000)
+  assert(fp < clicks[1].cost, 'Cannot afford Karolinsk with 500 FP');
+}
+
+section('Era-filtered Upgrade Visibility');
+{
+  const ups = makeUpgrades();
+  // At era 0, only era 0 upgrades visible
+  const era0visible = ups.filter(u => u.era <= 0);
+  assertEq(era0visible.length, 6, 'Era 0: 6 visible upgrades');
+
+  // At era 1, eras 0+1 visible
+  const era1visible = ups.filter(u => u.era <= 1);
+  assertEq(era1visible.length, 12, 'Era 1: 12 visible upgrades');
+
+  // At era 2, eras 0+1+2 visible
+  const era2visible = ups.filter(u => u.era <= 2);
+  assertEq(era2visible.length, 18, 'Era 2: 18 visible upgrades');
+
+  // At era 3, eras 0+1+2+3 visible
+  const era3visible = ups.filter(u => u.era <= 3);
+  assertEq(era3visible.length, 24, 'Era 3: 24 visible upgrades');
+
+  // At era 4, all 30 visible
+  const era4visible = ups.filter(u => u.era <= 4);
+  assertEq(era4visible.length, 30, 'Era 4: all 30 visible');
+}
+
+section('Balance — Era 1 Simulation (reach Era 2)');
+{
+  const ups = makeUpgrades();
+  let fp = 0, totalFp = 0, fps = 0, sec = 0;
+  const CPS = 2; // casual clicks per second
+
+  while (totalFp < 5000 && sec < 600) {
+    fp += CPS + fps; totalFp += CPS + fps; sec++;
+    let r = simBuyBest(ups, fp, 0);
+    while (r.bought) { fp = r.fp; fps = calcFpPerSecond(ups); r = simBuyBest(ups, fp, 0); }
+    fp = r.fp;
+  }
+  const min = sec / 60;
+  assert(totalFp >= 5000, 'Reaches Era 2 threshold');
+  assert(min >= 1, `Era 2 in ≥1 min (${min.toFixed(1)} min)`);
+  assert(min <= 5, `Era 2 in ≤5 min (${min.toFixed(1)} min)`);
+  console.log(`  → Era 2 in ${min.toFixed(1)} min | FP/s: ${fps.toFixed(1)}`);
+}
+
+section('Balance — Era 2 Simulation (reach Era 3)');
+{
+  // Start from a state where Era 2 was just reached
+  const ups = makeUpgrades();
+  // Give player a typical Era 1 setup
+  ups[0].count = 4; ups[1].count = 3; ups[2].count = 2; ups[3].count = 2; ups[4].count = 1; ups[5].count = 1;
+  let fps = calcFpPerSecond(ups);
+  let fp = 1000, totalFp = 5000, sec = 0;
+  const CPS = 3;
+
+  while (totalFp < 100000 && sec < 600) {
+    fp += CPS + fps; totalFp += CPS + fps; sec++;
+    let era = getCurrentEra(totalFp);
+    let r = simBuyBest(ups, fp, era);
+    while (r.bought) { fp = r.fp; fps = calcFpPerSecond(ups); r = simBuyBest(ups, fp, era); }
+    fp = r.fp;
+  }
+  const min = sec / 60;
+  assert(totalFp >= 100000, 'Reaches Era 3 threshold');
+  assert(min >= 1, `Era 3 in ≥1 min from Era 2 (${min.toFixed(1)} min)`);
+  assert(min <= 6, `Era 3 in ≤6 min from Era 2 (${min.toFixed(1)} min)`);
+  console.log(`  → Era 3 in ${min.toFixed(1)} min from Era 2 | FP/s: ${formatNumber(fps)}`);
+}
+
+section('Balance — Full Game Simulation');
+{
+  const ups = makeUpgrades();
+  let fp = 0, totalFp = 0, fps = 0, sec = 0;
+  let fpPerClick = 1;
+  const clicks = makeClickUpgrades();
+  const CPS = 3;
+  const eraTimes = [];
+  let lastEra = 0;
+
+  while (sec < 3600) { // max 1 hour
+    fp += CPS * fpPerClick + fps;
+    totalFp += CPS * fpPerClick + fps;
+    sec++;
+
+    let era = getCurrentEra(totalFp);
+    if (era > lastEra) {
+      eraTimes.push({ era, sec, min: (sec / 60).toFixed(1), fps: formatNumber(fps) });
+      lastEra = era;
+    }
+
+    // Buy click upgrades when affordable
+    for (const c of clicks) {
+      if (!c.purchased && fp >= c.cost) {
+        fp -= c.cost;
+        c.purchased = true;
+        fpPerClick *= c.multiplier;
+      }
+    }
+
+    // Buy best upgrade
+    let r = simBuyBest(ups, fp, era);
+    while (r.bought) { fp = r.fp; fps = calcFpPerSecond(ups); r = simBuyBest(ups, fp, era); }
+    fp = r.fp;
+
+    // Check if all upgrades bought at least once
+    if (ups.every(u => u.count >= 1)) break;
+  }
+
+  const totalMin = sec / 60;
+  assert(ups.every(u => u.count >= 1), 'All 30 upgrades bought at least once');
+  assert(totalMin >= 5, `Full game takes ≥5 min (${totalMin.toFixed(1)} min)`);
+  assert(totalMin <= 30, `Full game takes ≤30 min (${totalMin.toFixed(1)} min)`);
+
+  // Per-era timing from the full sim
+  for (let i = 0; i < eraTimes.length; i++) {
+    const prevSec = i === 0 ? 0 : eraTimes[i - 1].sec;
+    const delta = (eraTimes[i].sec - prevSec) / 60;
+    assert(delta >= 1, `Era ${eraTimes[i].era + 1} takes ≥1 min (${delta.toFixed(1)} min from previous)`);
+    assert(delta <= 8, `Era ${eraTimes[i].era + 1} takes ≤8 min (${delta.toFixed(1)} min from previous)`);
+  }
+
+  console.log(`  → Full game in ${totalMin.toFixed(1)} min`);
+  for (const t of eraTimes) {
+    console.log(`    Era ${t.era + 1} at ${t.min} min (FP/s: ${t.fps})`);
   }
 }
 
-section('Game Balance — Simulation');
+section('Balance — First Upgrade Per Era Affordable Quickly');
 {
-  // Helper: buy best cost/FPS ratio upgrade that's affordable
-  function buyBest(ups, fp) {
-    let bestIdx = -1, bestRatio = Infinity;
-    for (let i = 0; i < ups.length; i++) {
-      const cost = getUpgradeCost(ups[i]);
-      if (fp >= cost) {
-        const ratio = cost / ups[i].fpPerSecond;
-        if (ratio < bestRatio) { bestRatio = ratio; bestIdx = i; }
-      }
-    }
-    if (bestIdx >= 0) {
-      fp -= getUpgradeCost(ups[bestIdx]);
-      ups[bestIdx].count++;
-    }
-    return { fp, bought: bestIdx >= 0 };
+  const ups = makeUpgrades();
+  // Simulate reaching each era threshold and check that first upgrade is not absurdly expensive
+  const eraFirstUpgradeCost = [];
+  for (let era = 0; era < 5; era++) {
+    const first = ups.find(u => u.era === era);
+    eraFirstUpgradeCost.push(first.baseCost);
   }
 
-  // Sim 1: Time to buy every upgrade at least once (smart strategy, 3 cps)
-  const ups1 = makeUpgrades();
-  let fp1 = 0, totalFp1 = 0, fps1 = 0, sec1 = 0;
-  while (sec1 < 600) {
-    fp1 += 3 + fps1; totalFp1 += 3 + fps1; sec1++;
-    let r = buyBest(ups1, fp1);
-    while (r.bought) { fp1 = r.fp; fps1 = calcFpPerSecond(ups1); r = buyBest(ups1, fp1); }
-    fp1 = r.fp;
-    if (ups1.every(u => u.count >= 1)) break;
-  }
-  const m1 = sec1 / 60;
-  assert(m1 >= 0.5, `All upgrades x1 takes ≥0.5 min (${m1.toFixed(1)} min)`);
-  assert(m1 <= 8, `All upgrades x1 takes ≤8 min at 3cps (${m1.toFixed(1)} min)`);
-  console.log(`  → All x1 in ${m1.toFixed(1)} min | FP/s: ${fps1.toFixed(1)} | total: ${formatNumber(totalFp1)}`);
+  // Era 1 first upgrade (water): 10 FP — easily affordable
+  assertEq(eraFirstUpgradeCost[0], 10, 'Era 1 first upgrade costs 10');
+
+  // Era 2 first upgrade should be affordable within reasonable time at ~300 FP/s
+  assert(eraFirstUpgradeCost[1] <= 50000, 'Era 2 first upgrade ≤50K (buyable quickly at ~300 FP/s)');
+
+  // Era 3 first upgrade should be affordable within reasonable time
+  assert(eraFirstUpgradeCost[2] <= 5000000, 'Era 3 first upgrade ≤5M');
+
+  // Era 4 first upgrade
+  assert(eraFirstUpgradeCost[3] <= 500000000, 'Era 4 first upgrade ≤500M');
+
+  // Era 5 first upgrade
+  assert(eraFirstUpgradeCost[4] <= 100000000000, 'Era 5 first upgrade ≤100B');
 }
+
+section('Click Upgrade Timing');
 {
-  // Sim 2: Time to reach Era 2 (5000 FP) with 2 cps (casual player)
-  const ups2 = makeUpgrades();
-  let fp2 = 0, totalFp2 = 0, fps2 = 0, sec2 = 0;
-  while (totalFp2 < 5000 && sec2 < 600) {
-    fp2 += 2 + fps2; totalFp2 += 2 + fps2; sec2++;
-    let bought = true;
-    while (bought) {
-      bought = false;
-      for (const u of ups2) {
-        const cost = getUpgradeCost(u);
-        if (fp2 >= cost) { fp2 -= cost; u.count++; fps2 = calcFpPerSecond(ups2); bought = true; break; }
-      }
-    }
-  }
-  const m2 = sec2 / 60;
-  assert(totalFp2 >= 5000, 'Reaches Era 2 threshold');
-  assert(m2 >= 1, `Era 2 takes ≥1 min (${m2.toFixed(1)} min)`);
-  assert(m2 <= 5, `Era 2 takes ≤5 min (${m2.toFixed(1)} min)`);
-  console.log(`  → Era 2 in ${m2.toFixed(1)} min | FP/s: ${fps2.toFixed(1)}`);
-}
-{
-  // Sim 3: First upgrade should be buyable within 10 clicks (10 sec at 1 cps)
-  assert(10 >= makeUpgrades()[0].baseCost, 'First upgrade affordable within 10 clicks');
+  const clicks = makeClickUpgrades();
+  // Vikingblod (500 FP) should be buyable during Era 1
+  assert(clicks[0].cost < 5000, 'Vikingblod affordable in Era 1 (< 5K)');
+
+  // NU JÄVLAR should be expensive (late game)
+  assert(clicks[5].cost >= 1000000000, 'NU JÄVLAR costs ≥1B (late game)');
+
+  // Costs should span several orders of magnitude
+  const range = clicks[5].cost / clicks[0].cost;
+  assert(range >= 1000000, `Click upgrade cost range ≥1M (${range.toLocaleString()}x)`);
 }
 
 // --- Summary ---

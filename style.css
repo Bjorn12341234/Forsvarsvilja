@@ -209,6 +209,7 @@ main {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  overflow-y: auto;
 }
 
 .upgrades-panel h2 {
@@ -218,12 +219,37 @@ main {
   padding: 14px 16px;
   border-bottom: 1px solid var(--border);
   letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+.upgrades-panel h2.section-divider {
+  border-top: 2px solid var(--border);
+  margin-top: 4px;
 }
 
 #upgrades-list {
-  flex: 1;
-  overflow-y: auto;
   padding: 8px;
+}
+
+#click-upgrades-list {
+  padding: 8px;
+}
+
+/* === ERA HEADERS === */
+
+.era-header {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--yellow-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 10px 8px 4px;
+  border-bottom: 1px solid rgba(254, 204, 2, 0.15);
+  margin-bottom: 4px;
+}
+
+.era-header:first-child {
+  padding-top: 4px;
 }
 
 /* === UPGRADE CARDS === */
@@ -243,12 +269,12 @@ main {
   user-select: none;
 }
 
-.upgrade-card:hover:not(.disabled) {
+.upgrade-card:hover:not(.disabled):not(.purchased) {
   background: var(--bg-card-hover);
   border-color: var(--yellow-dim);
 }
 
-.upgrade-card:active:not(.disabled) {
+.upgrade-card:active:not(.disabled):not(.purchased) {
   transform: scale(0.98);
 }
 
@@ -256,6 +282,23 @@ main {
   opacity: 0.45;
   cursor: default;
 }
+
+/* === PURCHASED CLICK UPGRADES === */
+
+.upgrade-card.purchased {
+  opacity: 0.5;
+  cursor: default;
+  background: rgba(51, 170, 85, 0.08);
+  border-color: rgba(51, 170, 85, 0.2);
+}
+
+.purchased-check {
+  color: var(--success);
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+/* === UPGRADE CARD CONTENT === */
 
 .upgrade-name {
   font-size: 0.9rem;
@@ -302,6 +345,58 @@ main {
   color: var(--danger);
 }
 
+/* === ERA UNLOCK OVERLAY === */
+
+.era-unlock-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.era-unlock-overlay.visible {
+  opacity: 1;
+}
+
+.era-unlock-content {
+  text-align: center;
+  background: rgba(10, 22, 40, 0.92);
+  border: 2px solid var(--yellow);
+  border-radius: 12px;
+  padding: 32px 48px;
+  box-shadow: 0 0 60px rgba(254, 204, 2, 0.3), 0 0 120px rgba(254, 204, 2, 0.1);
+  animation: era-unlock-pulse 0.6s ease;
+}
+
+.era-unlock-label {
+  font-size: 0.8rem;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.era-unlock-name {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--yellow);
+  text-shadow: 0 0 20px rgba(254, 204, 2, 0.5);
+}
+
+@keyframes era-unlock-pulse {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 /* === NEWS TICKER === */
 
 .news-ticker {
@@ -333,15 +428,21 @@ main {
 
 /* === SCROLLBAR === */
 
-#upgrades-list::-webkit-scrollbar {
+.upgrades-panel::-webkit-scrollbar,
+#upgrades-list::-webkit-scrollbar,
+#click-upgrades-list::-webkit-scrollbar {
   width: 6px;
 }
 
-#upgrades-list::-webkit-scrollbar-track {
+.upgrades-panel::-webkit-scrollbar-track,
+#upgrades-list::-webkit-scrollbar-track,
+#click-upgrades-list::-webkit-scrollbar-track {
   background: transparent;
 }
 
-#upgrades-list::-webkit-scrollbar-thumb {
+.upgrades-panel::-webkit-scrollbar-thumb,
+#upgrades-list::-webkit-scrollbar-thumb,
+#click-upgrades-list::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 3px;
 }
@@ -378,5 +479,13 @@ main {
     flex-direction: column;
     gap: 8px;
     padding: 10px 16px;
+  }
+
+  .era-unlock-content {
+    padding: 24px 32px;
+  }
+
+  .era-unlock-name {
+    font-size: 1.4rem;
   }
 }
