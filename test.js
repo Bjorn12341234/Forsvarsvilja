@@ -1832,6 +1832,149 @@ section('Threat Timing — Matches Game Duration');
   assert(uppbyggnadTime <= 35, `Uppbyggnad at ${uppbyggnadTime.toFixed(0)} min (≤35 min)`);
 }
 
+// ---- Sprint 3 Tests ----
+
+section('Sprint 3 — Event Category Weights');
+{
+  const cfg = [
+    { weights: { bonus: 0.8, crisis: 0.2, dilemma: 0.0 }, delayRange: [45, 90] },
+    { weights: { bonus: 0.5, crisis: 0.4, dilemma: 0.1 }, delayRange: [30, 60] },
+    { weights: { bonus: 0.2, crisis: 0.4, dilemma: 0.4 }, delayRange: [20, 45] },
+    { weights: { bonus: 0.1, crisis: 0.5, dilemma: 0.4 }, delayRange: [15, 30] },
+    { weights: { bonus: 0.4, crisis: 0.2, dilemma: 0.4 }, delayRange: [30, 60] },
+  ];
+
+  const expectedRanges = [
+    [45, 90], [30, 60], [20, 45], [15, 30], [30, 60],
+  ];
+
+  for (let i = 0; i < cfg.length; i++) {
+    const sum = cfg[i].weights.bonus + cfg[i].weights.crisis + cfg[i].weights.dilemma;
+    assertClose(sum, 1, 0.0001, `Threat ${i} weight sum = 1`);
+    assertEq(cfg[i].delayRange[0], expectedRanges[i][0], `Threat ${i} min delay`);
+    assertEq(cfg[i].delayRange[1], expectedRanges[i][1], `Threat ${i} max delay`);
+  }
+}
+
+section('Sprint 3 — Crisis Resource Effects');
+{
+  function applyDelta(resources, delta) {
+    const r = { ...resources };
+    for (const k of ['supply', 'comms', 'community']) {
+      if (typeof delta[k] === 'number') r[k] = Math.max(0, Math.min(100, r[k] + delta[k]));
+    }
+    return r;
+  }
+
+  // Base crisis
+  const base = { supply: 50, comms: 50, community: 50 };
+  const storm = applyDelta(base, { supply: -10, comms: -10, community: -10 });
+  assertEq(storm.supply, 40, 'Storm crisis reduces supply');
+  assertEq(storm.comms, 40, 'Storm crisis reduces comms');
+  assertEq(storm.community, 40, 'Storm crisis reduces community');
+
+  // Conditional crisis: Kyla utan el (extra damage when supply < 30)
+  let low = { supply: 25, comms: 50, community: 50 };
+  low = applyDelta(low, { supply: -20 });
+  if (low.supply < 30) low = applyDelta(low, { supply: -10 });
+  assertEq(low.supply, 0, 'Conditional crisis applies extra supply damage and clamps to 0');
+
+  let ok = { supply: 60, comms: 50, community: 50 };
+  ok = applyDelta(ok, { supply: -20 });
+  if (ok.supply < 30) ok = applyDelta(ok, { supply: -10 });
+  assertEq(ok.supply, 40, 'Conditional crisis does not trigger extra when supply remains >=30');
+}
+
+section('Sprint 3 — Dilemma Choice Application');
+{
+  function applyChoice(gs, choice, eventId, key) {
+    const out = {
+      fp: gs.fp,
+      totalFp: gs.totalFp,
+      resources: { ...gs.resources },
+      dilemmaHistory: [...gs.dilemmaHistory],
+      dilemmaFpMultiplier: gs.dilemmaFpMultiplier,
+      dilemmaFpMultiplierEnd: gs.dilemmaFpMultiplierEnd,
+      now: gs.now,
+    };
+
+    if (choice.effects?.resources) {
+      for (const k of ['supply', 'comms', 'community']) {
+        if (typeof choice.effects.resources[k] === 'number') {
+          out.resources[k] = Math.max(0, Math.min(100, out.resources[k] + choice.effects.resources[k]));
+        }
+      }
+    }
+
+    if (typeof choice.effects?.fp === 'number') {
+      out.fp = Math.max(0, out.fp + choice.effects.fp);
+      out.totalFp = Math.max(0, out.totalFp + Math.max(0, choice.effects.fp));
+    }
+
+    if (typeof choice.effects?.tempFpMultiplier === 'number') {
+      out.dilemmaFpMultiplier = choice.effects.tempFpMultiplier;
+      out.dilemmaFpMultiplierEnd = out.now + choice.effects.duration * 1000;
+    }
+
+    out.dilemmaHistory.push({ eventId, choice: key, time: out.now });
+    return out;
+  }
+
+  const base = {
+    fp: 100,
+    totalFp: 1000,
+    resources: { supply: 50, comms: 50, community: 50 },
+    dilemmaHistory: [],
+    dilemmaFpMultiplier: 1,
+    dilemmaFpMultiplierEnd: 0,
+    now: 123456,
+  };
+
+  const shareWater = {
+    effects: { resources: { supply: -10, community: +15 } },
+  };
+  const afterShare = applyChoice(base, shareWater, 'dilemma_vatten_granne', 'a');
+  assertEq(afterShare.resources.supply, 40, 'Choice A lowers supply');
+  assertEq(afterShare.resources.community, 65, 'Choice A raises community');
+  assertEq(afterShare.dilemmaHistory.length, 1, 'Dilemma choice logged');
+  assertEq(afterShare.dilemmaHistory[0].choice, 'a', 'Choice key stored');
+
+  const goWork = {
+    effects: { tempFpMultiplier: 1.2, duration: 60, resources: { community: -10 } },
+  };
+  const afterWork = applyChoice(base, goWork, 'dilemma_arbetsgivare', 'a');
+  assertEq(afterWork.dilemmaFpMultiplier, 1.2, 'Timed FP multiplier set');
+  assertEq(afterWork.dilemmaFpMultiplierEnd, base.now + 60000, 'Timed FP multiplier end time set');
+  assertEq(afterWork.resources.community, 40, 'Choice modifies community');
+}
+
+section('Sprint 3 — Save/Load Dilemma History');
+{
+  const saveData = {
+    version: 2,
+    dilemmaHistory: [
+      { eventId: 'dilemma_vatten_granne', choice: 'a', time: 1000 },
+      { eventId: 'dilemma_arbetsgivare', choice: 'b', time: 2000 },
+    ],
+  };
+
+  const json = JSON.stringify(saveData);
+  const restored = JSON.parse(json);
+  const gs = {
+    dilemmaHistory: Array.isArray(restored.dilemmaHistory) ? [...restored.dilemmaHistory] : [],
+  };
+
+  assertEq(gs.dilemmaHistory.length, 2, 'Dilemma history restored');
+  assertEq(gs.dilemmaHistory[0].eventId, 'dilemma_vatten_granne', 'First dilemma event id restored');
+  assertEq(gs.dilemmaHistory[1].choice, 'b', 'Second dilemma choice restored');
+
+  const oldSave = { version: 2 };
+  const gsOld = {
+    dilemmaHistory: Array.isArray(oldSave.dilemmaHistory) ? [...oldSave.dilemmaHistory] : [],
+  };
+  assertEq(gsOld.dilemmaHistory.length, 0, 'Missing dilemma history defaults to empty array');
+}
+
 // --- Summary ---
 console.log('');
 const total = passed + failed;

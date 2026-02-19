@@ -22,6 +22,9 @@ const game = {
   threatLevel: 0,
   threatStartTime: Date.now(),
   resources: { supply: 80, comms: 80, community: 80 },
+  dilemmaHistory: [],
+  dilemmaFpMultiplier: 1,
+  dilemmaFpMultiplierEnd: 0,
 };
 
 // --- Era Definitions ---
@@ -356,75 +359,184 @@ const tickerMessages = [
 ];
 
 // --- Random Events ---
-const events = [
+const bonusEvents = [
   {
-    id: 'stromavbrott', name: 'Strömavbrott!',
+    id: 'bonus_stromavbrott', category: 'bonus',
+    name: 'Strömavbrott!',
     description: 'Elnätet är nere. De med radio klarar sig bättre!',
     type: 'conditional', duration: 0, value: 15,
     relatedUpgrade: 'radio',
     bonusDescription: 'Radio-bonus: +{value}s av FP/s',
   },
   {
-    id: 'vattenledning', name: 'Vattenledningen brast!',
+    id: 'bonus_vattenledning', category: 'bonus',
+    name: 'Vattenledningen brast!',
     description: 'Vattnet är avstängt. Har du vatten hemma?',
     type: 'conditional', duration: 0, value: 10,
     relatedUpgrade: 'water',
     bonusDescription: 'Vattenförråd-bonus: +{value}s av FP/s',
   },
   {
-    id: 'beredskapslarm', name: 'Beredskapslarm!',
+    id: 'bonus_beredskapslarm', category: 'bonus',
+    name: 'Beredskapslarm!',
     description: 'Hesa Fredrik ljuder — alla mobiliserar!',
     type: 'multiplier', duration: 30, value: 2,
   },
   {
-    id: 'jas_flyby', name: 'JAS-flyby!',
+    id: 'bonus_jas_flyby', category: 'bonus',
+    name: 'JAS-flyby!',
     description: 'Ett JAS 39 Gripen dundrar över himlen — moralen stiger!',
     type: 'bonus', duration: 0, value: 10,
   },
   {
-    id: 'hemvarnsovning', name: 'Hemvärnsövning',
+    id: 'bonus_hemvarnsovning', category: 'bonus',
+    name: 'Hemvärnsövning',
     description: 'Hemvärnet övar i ditt område — extra beredskap!',
     type: 'multiplier', duration: 60, value: 1.5,
   },
   {
-    id: 'desinformation', name: 'Desinformationsattack!',
+    id: 'bonus_desinformation', category: 'bonus',
+    name: 'Desinformationsattack!',
     description: 'Falsk information sprids! Klicka snabbt för att motverka!',
     type: 'click_bonus', duration: 15, value: 3,
   },
   {
-    id: 'om_krisen_kommer', name: '"Om krisen kommer"-utskick',
-    description: 'MSB:s broschyr inspirerar hela befolkningen!',
+    id: 'bonus_broschyr', category: 'bonus',
+    name: '"Om krisen kommer"-utskick',
+    description: 'Broschyren inspirerar hela befolkningen!',
     type: 'bonus', duration: 0, value: 20,
   },
   {
-    id: 'artsoppetorsdag', name: 'Ärtsoppetorsdag!',
+    id: 'bonus_artsoppetorsdag', category: 'bonus',
+    name: 'Ärtsoppetorsdag!',
     description: 'Traditionen stärker banden — och beredskapen!',
     type: 'multiplier', duration: 30, value: 2,
   },
   {
-    id: 'nato_ovning', name: 'NATO-övning',
+    id: 'bonus_nato_ovning', category: 'bonus',
+    name: 'NATO-övning',
     description: 'Allierade övar tillsammans — massiv förstärkning!',
     type: 'multiplier', duration: 20, value: 3,
   },
   {
-    id: 'frivilligvag', name: 'Frivilligvåg!',
+    id: 'bonus_frivilligvag', category: 'bonus',
+    name: 'Frivilligvåg!',
     description: 'Rekordmånga anmäler sig som frivilliga!',
     type: 'upgrade_bonus', duration: 0, value: 0.5,
   },
   {
-    id: 'kall_vinter', name: 'Kall vinter',
+    id: 'bonus_kall_vinter', category: 'bonus',
+    name: 'Kall vinter',
     description: 'Temperaturen faller. Har du sovsäck och filtar?',
     type: 'conditional', duration: 0, value: 12,
     relatedUpgrade: 'sleeping',
     bonusDescription: 'Sovsäck-bonus: +{value}s av FP/s',
   },
   {
-    id: 'mobilnat_nere', name: 'Mobilnätet nere!',
+    id: 'bonus_mobilnat_nere', category: 'bonus',
+    name: 'Mobilnätet nere!',
     description: 'Inga samtal, inget internet. Radio är enda kontakten.',
     type: 'conditional', duration: 0, value: 15,
     relatedUpgrade: 'radio',
     bonusDescription: 'Radio-bonus: +{value}s av FP/s',
   },
+];
+
+const crisisEvents = [
+  { id: 'crisis_strom', category: 'crisis', name: 'Strömavbrott', description: 'Elen försvinner i hela området.', effects: { supply: -20 } },
+  { id: 'crisis_vatten', category: 'crisis', name: 'Vattenledning brast', description: 'Dricksvattenleveransen avbryts.', effects: { supply: -25 } },
+  { id: 'crisis_mobilnat', category: 'crisis', name: 'Mobilnätet nere', description: 'Ingen når varandra via mobilnätet.', effects: { comms: -30 } },
+  { id: 'crisis_storm', category: 'crisis', name: 'Stormen Gudrun 2.0', description: 'Kraftiga skador i flera län.', effects: { supply: -10, comms: -10, community: -10 } },
+  { id: 'crisis_matbrist', category: 'crisis', name: 'Matbrist i butikerna', description: 'Tomma hyllor skapar oro.', effects: { supply: -15, community: -5 } },
+  { id: 'crisis_cyber', category: 'crisis', name: 'Cyberangrepp mot myndigheter', description: 'Viktiga system ligger nere.', effects: { comms: -25 } },
+  { id: 'crisis_desinfo', category: 'crisis', name: 'Desinformationsvåg', description: 'Falska rykten splittrar människor.', effects: { comms: -15, community: -10 } },
+  {
+    id: 'crisis_kyla', category: 'crisis', name: 'Kyla utan el',
+    description: 'Kylan tränger in när värmen försvinner.',
+    effects: { supply: -20 },
+    conditional: { resource: 'supply', lt: 30, effects: { supply: -10 }, text: 'Låga reserver förvärrar läget: extra -10 Försörjning.' },
+  },
+  { id: 'crisis_grannbrak', category: 'crisis', name: 'Grannbråk om resurser', description: 'Spänningar i bostadsområdet ökar.', effects: { community: -20 } },
+  { id: 'crisis_sjukdom', category: 'crisis', name: 'Sjukdomsutbrott', description: 'Många blir sjuka samtidigt.', effects: { supply: -15, community: -10 } },
+  { id: 'crisis_bransle', category: 'crisis', name: 'Bränslebrist', description: 'Transporter stannar av.', effects: { supply: -15 } },
+  { id: 'crisis_felalarm', category: 'crisis', name: 'Felaktigt larm', description: 'Förvirring om vad som gäller skadar tilliten.', effects: { comms: -10, community: -10 } },
+];
+
+const dilemmaEvents = [
+  {
+    id: 'dilemma_vatten_granne', category: 'dilemma', name: 'Grannen behöver vatten',
+    description: 'En granne ber om en del av ditt vattenlager.',
+    choiceA: { label: 'Dela', preview: '-10 Försörjning, +15 Samhörighet', effects: { resources: { supply: -10, community: +15 } } },
+    choiceB: { label: 'Behåll', preview: '-5 Samhörighet', effects: { resources: { community: -5 } } },
+  },
+  {
+    id: 'dilemma_rykten', category: 'dilemma', name: 'Rykten om förorenat vatten',
+    description: 'Gruppchatten fylls av motstridiga uppgifter.',
+    choiceA: { label: 'Kolla fakta', preview: '-5 Samband', effects: { resources: { comms: -5 } } },
+    choiceB: { label: 'Hamstra', preview: '-20 FP, +10 Försörjning', effects: { fp: -20, resources: { supply: +10 } } },
+  },
+  {
+    id: 'dilemma_frivilliga', category: 'dilemma', name: 'Kommunen söker frivilliga',
+    description: 'De behöver folk till ett akut bemanningspass.',
+    choiceA: { label: 'Ställ upp', preview: 'FP/s -20% i 60s, +20 Samhörighet', effects: { tempFpMultiplier: 0.8, duration: 60, resources: { community: +20 } } },
+    choiceB: { label: 'Avböj', preview: 'Ingen direkt effekt', effects: {} },
+  },
+  {
+    id: 'dilemma_okand_hjalp', category: 'dilemma', name: 'Okänd bankar på',
+    description: 'En okänd person ber om hjälp med mat.',
+    choiceA: { label: 'Öppna', preview: '-10 Försörjning, +10 Samhörighet', effects: { resources: { supply: -10, community: +10 } } },
+    choiceB: { label: 'Ignorera', preview: '-5 Samhörighet', effects: { resources: { community: -5 } } },
+  },
+  {
+    id: 'dilemma_tonaring', category: 'dilemma', name: 'Tonåringen vill hjälpa grannar',
+    description: 'Du tvekar mellan oro och ansvar.',
+    choiceA: { label: 'Tillåt', preview: '+5 Samhörighet', effects: { resources: { community: +5 } } },
+    choiceB: { label: 'Neka', preview: '-10 Samhörighet', effects: { resources: { community: -10 } } },
+  },
+  {
+    id: 'dilemma_bensin_mat', category: 'dilemma', name: 'Bensin mot mat',
+    description: 'Grannen vill byta bränsle mot konserver.',
+    choiceA: { label: 'Byt', preview: '+5 Försörjning, +10 Samhörighet', effects: { resources: { supply: +5, community: +10 } } },
+    choiceB: { label: 'Avböj', preview: 'Ingen direkt effekt', effects: {} },
+  },
+  {
+    id: 'dilemma_falsk_info', category: 'dilemma', name: 'Falsk info i gruppen',
+    description: 'Någon driver en uppenbart falsk berättelse.',
+    choiceA: { label: 'Konfrontera', preview: '-10 Samhörighet, +15 Samband', effects: { resources: { community: -10, comms: +15 } } },
+    choiceB: { label: 'Ignorera', preview: '-10 Samband', effects: { resources: { comms: -10 } } },
+  },
+  {
+    id: 'dilemma_arbetsgivare', category: 'dilemma', name: 'Arbetsgivaren kallar in dig',
+    description: 'Du behövs på plats trots oroligt läge.',
+    choiceA: { label: 'Gå', preview: 'FP/s +20% i 60s, -10 Samhörighet', effects: { tempFpMultiplier: 1.2, duration: 60, resources: { community: -10 } } },
+    choiceB: { label: 'Stanna hemma', preview: '+10 Samhörighet', effects: { resources: { community: +10 } } },
+  },
+  {
+    id: 'dilemma_medicin', category: 'dilemma', name: 'Äldre granne behöver medicin',
+    description: 'Du har extra läkemedel hemma.',
+    choiceA: { label: 'Dela', preview: '-10 Försörjning, +15 Samhörighet', effects: { resources: { supply: -10, community: +15 } } },
+    choiceB: { label: 'Behåll', preview: '-5 Samhörighet', effects: { resources: { community: -5 } } },
+  },
+  {
+    id: 'dilemma_fordon', category: 'dilemma', name: 'Räddningstjänsten behöver ditt fordon',
+    description: 'Din bil kan användas för akut transporter.',
+    choiceA: { label: 'Lämna ut', preview: '-15 Försörjning, +20 Samhörighet, +100 FP', effects: { resources: { supply: -15, community: +20 }, fp: +100 } },
+    choiceB: { label: 'Neka', preview: '-10 Samhörighet', effects: { resources: { community: -10 } } },
+  },
+];
+
+const eventPools = {
+  bonus: bonusEvents,
+  crisis: crisisEvents,
+  dilemma: dilemmaEvents,
+};
+
+const threatEventConfig = [
+  { weights: { bonus: 0.8, crisis: 0.2, dilemma: 0.0 }, delayRange: [45, 90] },
+  { weights: { bonus: 0.5, crisis: 0.4, dilemma: 0.1 }, delayRange: [30, 60] },
+  { weights: { bonus: 0.2, crisis: 0.4, dilemma: 0.4 }, delayRange: [20, 45] },
+  { weights: { bonus: 0.1, crisis: 0.5, dilemma: 0.4 }, delayRange: [15, 30] },
+  { weights: { bonus: 0.4, crisis: 0.2, dilemma: 0.4 }, delayRange: [30, 60] },
 ];
 
 // --- Achievements ---
@@ -543,9 +655,14 @@ const dom = {
   eraUnlockName: document.getElementById('era-unlock-name'),
   muteBtn: document.getElementById('mute-btn'),
   eventOverlay: document.getElementById('event-overlay'),
+  eventCard: document.querySelector('#event-overlay .event-card'),
   eventName: document.getElementById('event-name'),
   eventDesc: document.getElementById('event-desc'),
   eventTimerFill: document.getElementById('event-timer-fill'),
+  eventChoices: document.getElementById('event-choices'),
+  eventChoiceA: document.getElementById('event-choice-a'),
+  eventChoiceB: document.getElementById('event-choice-b'),
+  eventConsequence: document.getElementById('event-consequence'),
   activeBonus: document.getElementById('active-bonus'),
   activeBonusText: document.getElementById('active-bonus-text'),
   activeBonusTime: document.getElementById('active-bonus-time'),
@@ -930,6 +1047,30 @@ function playSound(type) {
       osc.start(now + offset);
       osc.stop(now + offset + 0.12);
     });
+  } else if (type === 'crisis') {
+    [0, 0.12].forEach((offset, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime([260, 170][i], now + offset);
+      gain.gain.setValueAtTime(0.11, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.25);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.25);
+    });
+  } else if (type === 'dilemma') {
+    [0, 0.1].forEach((offset, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime([420, 480][i], now + offset);
+      gain.gain.setValueAtTime(0.09, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.2);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.2);
+    });
   }
 }
 
@@ -1168,16 +1309,129 @@ function getEventBonus(event, ups) {
   return 0;
 }
 
+function getThreatEventConfig() {
+  return threatEventConfig[game.threatLevel] || threatEventConfig[0];
+}
+
+function chooseWeightedCategory(weights) {
+  const roll = Math.random();
+  let sum = 0;
+  for (const key of ['bonus', 'crisis', 'dilemma']) {
+    sum += weights[key] || 0;
+    if (roll <= sum) return key;
+  }
+  return 'bonus';
+}
+
+function pickRandom(list) {
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+function pickEventForThreat() {
+  const cfg = getThreatEventConfig();
+  let category = chooseWeightedCategory(cfg.weights);
+  if (!eventPools[category] || eventPools[category].length === 0) category = 'bonus';
+  const pool = eventPools[category] || bonusEvents;
+  return pickRandom(pool);
+}
+
+function getEventDelayMs() {
+  const cfg = getThreatEventConfig();
+  const [minSec, maxSec] = cfg.delayRange;
+  return (minSec + Math.random() * (maxSec - minSec)) * 1000;
+}
+
+function applyResourceDelta(delta) {
+  if (!delta) return;
+  const wasSupplyZero = game.resources.supply === 0;
+  for (const key of ['supply', 'comms', 'community']) {
+    if (typeof delta[key] === 'number') {
+      game.resources[key] = Math.max(0, Math.min(100, game.resources[key] + delta[key]));
+    }
+  }
+  if (wasSupplyZero !== (game.resources.supply === 0)) {
+    calculateFpPerSecond();
+  }
+}
+
+function formatResourceDeltaText(delta) {
+  const names = { supply: 'Försörjning', comms: 'Samband', community: 'Samhörighet' };
+  const parts = [];
+  for (const key of ['supply', 'comms', 'community']) {
+    if (typeof delta[key] === 'number' && delta[key] !== 0) {
+      const sign = delta[key] > 0 ? '+' : '';
+      parts.push(`${sign}${Math.round(delta[key])} ${names[key]}`);
+    }
+  }
+  return parts.join(', ');
+}
+
+function setEventMode(event) {
+  dom.eventOverlay.classList.remove('dilemma-mode');
+  dom.eventCard.classList.remove('crisis', 'dilemma');
+  if (event.category === 'crisis') dom.eventCard.classList.add('crisis');
+  if (event.category === 'dilemma') {
+    dom.eventCard.classList.add('dilemma');
+    dom.eventOverlay.classList.add('dilemma-mode');
+  }
+}
+
+function resolveDilemma(choiceKey) {
+  if (!game.activeEvent || game.activeEvent.category !== 'dilemma') return;
+  const event = game.activeEvent;
+  const choice = choiceKey === 'a' ? event.choiceA : event.choiceB;
+  if (!choice) return;
+
+  let consequenceText = '';
+  if (choice.effects?.resources) {
+    applyResourceDelta(choice.effects.resources);
+    const deltaText = formatResourceDeltaText(choice.effects.resources);
+    if (deltaText) consequenceText = deltaText;
+  }
+
+  if (typeof choice.effects?.fp === 'number' && choice.effects.fp !== 0) {
+    const fpChange = choice.effects.fp;
+    game.fp = Math.max(0, game.fp + fpChange);
+    game.totalFp = Math.max(0, game.totalFp + Math.max(0, fpChange));
+    const fpText = `${fpChange > 0 ? '+' : ''}${Math.round(fpChange)} FP`;
+    consequenceText = consequenceText ? `${consequenceText}, ${fpText}` : fpText;
+  }
+
+  if (typeof choice.effects?.tempFpMultiplier === 'number' && typeof choice.effects?.duration === 'number') {
+    game.dilemmaFpMultiplier = choice.effects.tempFpMultiplier;
+    game.dilemmaFpMultiplierEnd = Date.now() + choice.effects.duration * 1000;
+    showActiveBonus(`${choice.effects.tempFpMultiplier}x FP/s`, choice.effects.duration);
+  }
+
+  game.dilemmaHistory.push({
+    eventId: event.id,
+    choice: choiceKey,
+    time: Date.now(),
+  });
+
+  dom.eventConsequence.textContent = consequenceText ? `Konsekvens: ${consequenceText}` : 'Val registrerat.';
+  dom.eventChoiceA.disabled = true;
+  dom.eventChoiceB.disabled = true;
+  updateUI();
+
+  setTimeout(() => {
+    endEvent();
+  }, 900);
+}
+
 function triggerEvent(event) {
   game.activeEvent = event;
-  playSound('event');
+  playSound(event.category || 'event');
+  clearTimeout(game._eventDismissTimer);
 
-  // Show overlay
+  setEventMode(event);
   dom.eventName.textContent = event.name;
+  dom.eventConsequence.textContent = '';
+  dom.eventChoiceA.disabled = false;
+  dom.eventChoiceB.disabled = false;
 
-  // Build description
   let desc = event.description;
-  if (event.type === 'conditional') {
+  if (event.category === 'bonus' && event.type === 'conditional') {
     const upgrade = upgrades.find(u => u.id === event.relatedUpgrade);
     if (upgrade && upgrade.count > 0) {
       desc += '\n' + event.bonusDescription.replace('{value}', event.value);
@@ -1185,10 +1439,34 @@ function triggerEvent(event) {
       desc += '\nIngen bonus — du saknar rätt utrustning!';
     }
   }
+  if (event.category === 'crisis' && event.conditional) {
+    desc += '\n' + event.conditional.text;
+  }
   dom.eventDesc.textContent = desc;
 
-  // Apply effect
-  if (event.type === 'multiplier') {
+  dom.eventTimerFill.style.width = '0%';
+  dom.eventChoiceA.onclick = null;
+  dom.eventChoiceB.onclick = null;
+
+  if (event.category === 'dilemma') {
+    dom.eventChoiceA.textContent = `${event.choiceA.label}: ${event.choiceA.preview}`;
+    dom.eventChoiceB.textContent = `${event.choiceB.label}: ${event.choiceB.preview}`;
+    dom.eventChoiceA.onclick = () => resolveDilemma('a');
+    dom.eventChoiceB.onclick = () => resolveDilemma('b');
+    game.eventEndTime = 0;
+  } else if (event.category === 'crisis') {
+    applyResourceDelta(event.effects);
+    let extraText = '';
+    if (event.conditional) {
+      const res = event.conditional.resource;
+      if (game.resources[res] < event.conditional.lt) {
+        applyResourceDelta(event.conditional.effects);
+        extraText = ` Extra effekt: ${formatResourceDeltaText(event.conditional.effects)}.`;
+      }
+    }
+    game.eventEndTime = 0;
+    dom.eventConsequence.textContent = `Resurseffekt: ${formatResourceDeltaText(event.effects)}.${extraText}`.trim();
+  } else if (event.type === 'multiplier') {
     game.eventMultiplier = event.value;
     game.eventEndTime = Date.now() + event.duration * 1000;
     dom.eventTimerFill.style.width = '100%';
@@ -1199,27 +1477,25 @@ function triggerEvent(event) {
     game.eventEndTime = Date.now() + event.duration * 1000;
     dom.eventTimerFill.style.width = '100%';
     showActiveBonus(event.value + 'x klick', event.duration);
-    // Store original multiplier for restoration
     game._clickBonusValue = event.value;
   } else {
-    // Instant effects (bonus, conditional, upgrade_bonus)
     const bonus = getEventBonus(event, upgrades);
     if (bonus > 0) {
       game.fp += bonus;
       game.totalFp += bonus;
+      dom.eventConsequence.textContent = `Bonus: +${formatNumber(bonus)} FP`;
     }
-    dom.eventTimerFill.style.width = '0%';
     game.eventEndTime = 0;
   }
 
   dom.eventOverlay.classList.add('visible');
 
-  // Auto-dismiss after 4s for instant events, or after duration for timed
-  const dismissTime = event.duration > 0 ? Math.min(event.duration * 1000, 4000) : 4000;
-  clearTimeout(game._eventDismissTimer);
-  game._eventDismissTimer = setTimeout(() => {
-    dom.eventOverlay.classList.remove('visible');
-  }, dismissTime);
+  if (event.category !== 'dilemma') {
+    const dismissTime = event.duration > 0 ? Math.min(event.duration * 1000, 4000) : 4000;
+    game._eventDismissTimer = setTimeout(() => {
+      dom.eventOverlay.classList.remove('visible');
+    }, dismissTime);
+  }
 }
 
 function endEvent() {
@@ -1235,6 +1511,10 @@ function endEvent() {
 
   game.activeEvent = null;
   game.eventEndTime = 0;
+  dom.eventChoiceA.onclick = null;
+  dom.eventChoiceB.onclick = null;
+  dom.eventOverlay.classList.remove('dilemma-mode');
+  dom.eventCard.classList.remove('crisis', 'dilemma');
   dom.activeBonus.classList.remove('visible');
   dom.eventOverlay.classList.remove('visible');
 }
@@ -1246,6 +1526,16 @@ function showActiveBonus(text, duration) {
 }
 
 function updateActiveBonus() {
+  if (game.dilemmaFpMultiplierEnd > 0) {
+    const remainingDilemma = Math.max(0, Math.ceil((game.dilemmaFpMultiplierEnd - Date.now()) / 1000));
+    if (remainingDilemma <= 0) {
+      game.dilemmaFpMultiplier = 1;
+      game.dilemmaFpMultiplierEnd = 0;
+      dom.activeBonus.classList.remove('visible');
+    } else if (!game.activeEvent || game.eventEndTime <= 0) {
+      dom.activeBonusTime.textContent = remainingDilemma + 's';
+    }
+  }
   if (!game.activeEvent || game.eventEndTime <= 0) return;
   const remaining = Math.max(0, Math.ceil((game.eventEndTime - Date.now()) / 1000));
   dom.activeBonusTime.textContent = remaining + 's';
@@ -1263,10 +1553,10 @@ function updateActiveBonus() {
 }
 
 function scheduleNextEvent() {
-  const delay = (45 + Math.random() * 45) * 1000; // 45-90 seconds
+  const delay = getEventDelayMs();
   game.eventTimer = setTimeout(() => {
     if (!game.activeEvent) {
-      const event = events[Math.floor(Math.random() * events.length)];
+      const event = pickEventForThreat();
       triggerEvent(event);
     }
     scheduleNextEvent();
@@ -1390,6 +1680,9 @@ function resetGame() {
   game.threatLevel = 0;
   game.threatStartTime = Date.now();
   game.resources = { supply: 80, comms: 80, community: 80 };
+  game.dilemmaHistory = [];
+  game.dilemmaFpMultiplier = 1;
+  game.dilemmaFpMultiplierEnd = 0;
 
   // Reset upgrades
   for (const u of upgrades) u.count = 0;
@@ -1454,6 +1747,7 @@ function getSaveData() {
     threatLevel: game.threatLevel,
     threatStartTime: game.threatStartTime,
     resources: { ...game.resources },
+    dilemmaHistory: [...game.dilemmaHistory],
     savedAt: Date.now(),
   };
 }
@@ -1483,6 +1777,9 @@ function loadGame() {
     game.startTime = data.startTime || Date.now();
     game.muted = data.muted || false;
     game.gameComplete = data.gameComplete || false;
+    game.dilemmaHistory = [];
+    game.dilemmaFpMultiplier = 1;
+    game.dilemmaFpMultiplierEnd = 0;
 
     if (data.version === 1) {
       // v1 migration: index-based arrays → ID-based objects
@@ -1532,6 +1829,7 @@ function loadGame() {
       } else {
         game.resources = { supply: 80, comms: 80, community: 80 };
       }
+      game.dilemmaHistory = Array.isArray(data.dilemmaHistory) ? [...data.dilemmaHistory] : [];
     }
 
     // Recalculate derived state
@@ -1572,7 +1870,7 @@ function startGameLoop() {
     updateThreatLevel();
     updateResources();
     if (game.fpPerSecond > 0) {
-      const gain = (game.fpPerSecond * game.eventMultiplier) / 10;
+      const gain = (game.fpPerSecond * game.eventMultiplier * game.dilemmaFpMultiplier) / 10;
       game.fp += gain;
       game.totalFp += gain;
       updateUI();
@@ -1608,6 +1906,7 @@ function init() {
     if (e.target === dom.achievementPanel) dom.achievementPanel.classList.remove('visible');
   });
   dom.eventOverlay.addEventListener('click', () => {
+    if (game.activeEvent && game.activeEvent.category === 'dilemma') return;
     dom.eventOverlay.classList.remove('visible');
   });
   document.getElementById('play-again-btn').addEventListener('click', resetGame);
