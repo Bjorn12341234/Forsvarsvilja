@@ -17,6 +17,7 @@
       </div>
       <span id="era-progress-text" class="era-progress-text"></span>
     </div>
+    <button id="achievement-btn" class="achievement-btn" aria-label="Achievements" title="Achievements">&#127942; <span id="achievement-count">0/16</span></button>
     <button id="mute-btn" class="mute-btn" aria-label="Ljud på/av" title="Ljud på/av">&#128266;</button>
   </header>
 
@@ -94,6 +95,45 @@
     <div class="era-unlock-content">
       <div class="era-unlock-label">NY ERA UPPLÅST</div>
       <div id="era-unlock-name" class="era-unlock-name"></div>
+    </div>
+  </div>
+
+  <!-- Achievement Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Achievement Panel -->
+  <div id="achievement-panel" class="achievement-panel">
+    <div class="achievement-panel-inner">
+      <h2>Meriter <span id="achievement-progress" class="achievement-progress-text">0 / 16</span></h2>
+      <div id="achievement-list" class="achievement-list"></div>
+    </div>
+  </div>
+
+  <!-- End Screen -->
+  <div id="end-screen" class="end-screen">
+    <div class="end-screen-inner">
+      <div class="end-label">SPELET KLART</div>
+      <h2 class="end-title">Du har byggt Sveriges totalförsvar</h2>
+      <p class="end-text">
+        Från vattenflaskor i skafferiet till NATO-samarbete och 3,5&nbsp;% av BNP
+        i försvarsbudget. Du har visat att försvarsvilja börjar hos var och en av oss.
+      </p>
+      <div class="end-stats">
+        <div class="end-stat"><span class="end-stat-value" id="end-stat-clicks">0</span><span class="end-stat-label">Klick</span></div>
+        <div class="end-stat"><span class="end-stat-value" id="end-stat-time">0</span><span class="end-stat-label">Speltid</span></div>
+        <div class="end-stat"><span class="end-stat-value" id="end-stat-fp">0</span><span class="end-stat-label">Totalt FP</span></div>
+        <div class="end-stat"><span class="end-stat-value" id="end-stat-upgrades">0</span><span class="end-stat-label">Uppgraderingar</span></div>
+        <div class="end-stat"><span class="end-stat-value" id="end-stat-achievements">0</span><span class="end-stat-label">Meriter</span></div>
+      </div>
+      <p class="end-quote">Nu jävlar.</p>
+      <div class="end-links">
+        <p class="end-links-label">Vill du göra något på riktigt?</p>
+        <a href="https://www.mcf.se" target="_blank" rel="noopener">MCF — Myndigheten för civilt försvar</a>
+        <a href="https://www.forsvarsmakten.se" target="_blank" rel="noopener">Försvarsmakten</a>
+        <a href="https://www.hemvarnet.se" target="_blank" rel="noopener">Hemvärnet</a>
+        <a href="https://www.mcf.se/sv/rad-till-privatpersoner/broschyren-om-krisen-eller-kriget-kommer/" target="_blank" rel="noopener">"Om krisen eller kriget kommer"</a>
+      </div>
+      <button id="play-again-btn" class="play-again-btn">Spela igen</button>
     </div>
   </div>
 

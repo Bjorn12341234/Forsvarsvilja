@@ -174,58 +174,57 @@
 
 ---
 
-## Sprint 4: Achievements & Slutspel
+## Sprint 4: Achievements & Slutspel ✅
 
-### 4.1 Achievement-system
-- [ ] Datastruktur: `{ id, name, description, condition, unlocked }`
-- [ ] ~16 achievements:
-  - Första klicket
-  - 100 klick
-  - 1 000 klick
-  - 10 000 klick
-  - Första uppgraderingen
-  - "Hemberedskapen klar" (alla Era 1-uppgraderingar — "Du klarar en vecka utan samhällets hjälp!")
+### 4.1 Achievement-system ✅
+- [x] Datastruktur: `{ id, name, description, check, unlocked }`
+- [x] 16 achievements:
+  - Första steget (1 klick)
+  - Hundra klick (100 klick)
+  - Tusen klick (1 000 klick)
+  - Tiotusen klick (10 000 klick)
+  - Första inköpet (första uppgradering)
+  - "Hemberedskapen klar" (alla Era 1-uppgraderingar)
   - "Grannen du vill ha" (alla Era 2-uppgraderingar)
-  - Nå Era 3, 4, 5
-  - "Prepper deluxe" (alla beredskapsrelaterade upgrades köpta)
-  - Köp första klickkraft-uppgraderingen
-  - "NU JÄVLAR"-knappen köpt
-  - "Survivalist" (klara 3 kris-events med rätt upgrade)
-  - Alla achievements unlockade (meta)
-  - Slutför spelet
-  - "Har du läst broschyren?" (easter egg)
-  - "Kontanter?!" (nå 10 000 FP — "Swish fungerar inte utan el")
-- [ ] Kontrollera achievements varje sekund / vid relevanta events
-- [ ] Spara unlockade achievements
+  - Kommunal kraft (nå Era 3)
+  - Regional samordning (nå Era 4)
+  - Nationens försvar (nå Era 5)
+  - Klickkraftare (första klickkraft-uppgradering)
+  - "NU JÄVLAR" (NU JÄVLAR-knappen köpt)
+  - "Kontanter?!" (nå 10 000 FP)
+  - "Har du läst broschyren?" (nå 5 200 000 FP)
+  - Totalförsvaret komplett (slutför spelet)
+  - Fullständig beredskap (alla andra achievements — meta)
+- [x] Kontrollera achievements varje sekund
+- [x] Achievement sound (triumphant arpeggio)
 
-### 4.2 Achievement-toasts
-- [ ] Toast-notifikation som glider in vid unlock
-- [ ] Visa achievement-namn och ikon
-- [ ] Försvinner efter ~3 sekunder
-- [ ] Stacka om flera triggas samtidigt
+### 4.2 Achievement-toasts ✅
+- [x] Toast-notifikation som glider in från höger vid unlock
+- [x] Visa achievement-namn, beskrivning och trophy-ikon
+- [x] Försvinner efter 3 sekunder
+- [x] Queue-system — stackar om flera triggas
 
-### 4.3 Achievement-display
-- [ ] Panel/modal med alla achievements
-- [ ] Unlockade visas med guldram, låsta visas gråa
-- [ ] Visa progress (X/14 unlockade)
+### 4.3 Achievement-display ✅
+- [x] Panel/modal med alla achievements (klickbar knapp i header)
+- [x] Unlockade visas med guld trophy-ikon, låsta visas gråa med lås
+- [x] Visa progress (X/16 unlockade)
+- [x] Stäng genom att klicka utanför
 
-### 4.4 Slutskärm
-- [ ] Triggas vid köp av sista uppgraderingen ("Totalförsvar 3,5% av BNP")
-- [ ] Overlay som täcker spelet
-- [ ] Spelstatistik:
-  - Totala klick
-  - Total speltid
-  - Totala FP tjänade
-  - Antal uppgraderingar köpta
-  - Antal achievements
-- [ ] Reflekterande text om försvarsvilja ("Nu vet du lite mer...")
-- [ ] Avslutas med "Nu jävlar."
-- [ ] Länkar till riktiga resurser:
-  - MCF: https://www.mcf.se
-  - Försvarsmakten: https://www.forsvarsmakten.se
-  - Hemvärnet: https://www.hemvarnet.se
-  - "Om krisen eller kriget kommer": https://www.mcf.se/sv/rad-till-privatpersoner/broschyren-om-krisen-eller-kriget-kommer/
-- [ ] "Spela igen"-knapp
+### 4.4 Slutskärm ✅
+- [x] Triggas vid köp av sista uppgraderingen ("Totalförsvar 3,5% av BNP")
+- [x] Overlay som täcker spelet med fade-in animation
+- [x] Spelstatistik: klick, speltid, totalt FP, uppgraderingar, meriter
+- [x] Reflekterande text om försvarsvilja
+- [x] Avslutas med "Nu jävlar."
+- [x] Grand fanfare sound
+- [x] Länkar till riktiga resurser (MCF, Försvarsmakten, Hemvärnet, broschyren)
+- [x] "Spela igen"-knapp (full game reset)
+
+### 4.5 Tester ✅
+- [x] 355 automatiserade tester (77 nya achievement/endgame-tester)
+- [x] Achievement data integrity, click milestones, upgrade milestones, era milestones
+- [x] Click upgrade achievements, FP milestones, game complete detection
+- [x] Full game achievement simulation (15/15 unlock in ~55 min)
 
 ---
 

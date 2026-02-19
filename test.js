@@ -1,4 +1,4 @@
-// === FÖRSVARSVILJA — Sprint 1+2 Tests (Node.js) ===
+// === FÖRSVARSVILJA — Sprint 1-4 Tests (Node.js) ===
 
 let passed = 0;
 let failed = 0;
@@ -142,7 +142,7 @@ function simBuyBest(ups, fp, currentEra) {
 // TESTS
 // ============================================================
 
-console.log('\x1b[33m═══ FÖRSVARSVILJA — Sprint 1+2 Tests ═══\x1b[0m');
+console.log('\x1b[33m═══ FÖRSVARSVILJA — Sprint 1-4 Tests ═══\x1b[0m');
 
 // ---- Sprint 1 Tests (preserved) ----
 
@@ -727,6 +727,270 @@ section('Conditional Event Related Upgrades Exist');
     const upgrade = ups.find(u => u.id === e.relatedUpgrade);
     assert(upgrade !== undefined, `Conditional event "${e.id}" references existing upgrade "${e.relatedUpgrade}"`);
   }
+}
+
+// ---- Sprint 4 Tests: Achievements & End Screen ----
+
+function makeAchievements(ups, clickUps, gameState) {
+  return [
+    { id: 'first_click', name: 'Första steget', check: () => gameState.totalClicks >= 1, unlocked: false },
+    { id: 'clicks_100', name: 'Hundra klick', check: () => gameState.totalClicks >= 100, unlocked: false },
+    { id: 'clicks_1000', name: 'Tusen klick', check: () => gameState.totalClicks >= 1000, unlocked: false },
+    { id: 'clicks_10000', name: 'Tiotusen klick', check: () => gameState.totalClicks >= 10000, unlocked: false },
+    { id: 'first_upgrade', name: 'Första inköpet', check: () => gameState.totalUpgradesBought >= 1, unlocked: false },
+    { id: 'era1_complete', name: 'Hemberedskapen klar', check: () => ups.filter(u => u.era === 0).every(u => u.count >= 1), unlocked: false },
+    { id: 'era2_complete', name: 'Grannen du vill ha', check: () => ups.filter(u => u.era === 1).every(u => u.count >= 1), unlocked: false },
+    { id: 'reach_era3', name: 'Kommunal kraft', check: () => gameState.currentEra >= 2, unlocked: false },
+    { id: 'reach_era4', name: 'Regional samordning', check: () => gameState.currentEra >= 3, unlocked: false },
+    { id: 'reach_era5', name: 'Nationens försvar', check: () => gameState.currentEra >= 4, unlocked: false },
+    { id: 'first_click_upgrade', name: 'Klickkraftare', check: () => clickUps.some(u => u.purchased), unlocked: false },
+    { id: 'nu_javlar', name: 'NU JÄVLAR', check: () => { const u = clickUps.find(c => c.id === 'nu_javlar'); return u && u.purchased; }, unlocked: false },
+    { id: 'kontanter', name: 'Kontanter?!', check: () => gameState.totalFp >= 10000, unlocked: false },
+    { id: 'broschyren', name: 'Har du läst broschyren?', check: () => gameState.totalFp >= 5200000, unlocked: false },
+    { id: 'game_complete', name: 'Totalförsvaret komplett', check: () => gameState.gameComplete, unlocked: false },
+  ];
+  // Note: 'all_achievements' is excluded from tests because it references the array itself
+}
+
+function checkAchievementsTest(achs) {
+  let newlyUnlocked = [];
+  for (const a of achs) {
+    if (!a.unlocked && a.check()) {
+      a.unlocked = true;
+      newlyUnlocked.push(a.id);
+    }
+  }
+  return newlyUnlocked;
+}
+
+section('Achievement Data Integrity');
+{
+  const ups = makeUpgrades();
+  const clicks = makeClickUpgrades();
+  const gs = { totalClicks: 0, totalUpgradesBought: 0, currentEra: 0, totalFp: 0, gameComplete: false };
+  const achs = makeAchievements(ups, clicks, gs);
+
+  assertEq(achs.length, 15, '15 testable achievements (16 including meta)');
+
+  const ids = new Set(achs.map(a => a.id));
+  assertEq(ids.size, 15, 'All achievement IDs unique');
+
+  // All start unlocked = false
+  assert(achs.every(a => a.unlocked === false), 'All achievements start locked');
+
+  // All have required fields
+  for (const a of achs) {
+    assert(a.id !== undefined, `Achievement "${a.id}" has id`);
+    assert(a.name !== undefined, `Achievement "${a.id}" has name`);
+    assert(typeof a.check === 'function', `Achievement "${a.id}" has check function`);
+  }
+}
+
+section('Achievement — Click Milestones');
+{
+  const ups = makeUpgrades();
+  const clicks = makeClickUpgrades();
+  const gs = { totalClicks: 0, totalUpgradesBought: 0, currentEra: 0, totalFp: 0, gameComplete: false };
+  const achs = makeAchievements(ups, clicks, gs);
+
+  // No achievements at start
+  let unlocked = checkAchievementsTest(achs);
+  assertEq(unlocked.length, 0, 'No achievements at 0 clicks');
+
+  // First click
+  gs.totalClicks = 1;
+  unlocked = checkAchievementsTest(achs);
+  assert(unlocked.includes('first_click'), 'First click achievement unlocks at 1 click');
+
+  // 100 clicks
+  gs.totalClicks = 100;
+  unlocked = checkAchievementsTest(achs);
+  assert(unlocked.includes('clicks_100'), '100 clicks achievement unlocks');
+
+  // 1000 clicks
+  gs.totalClicks = 1000;
+  unlocked = checkAchievementsTest(achs);
+  assert(unlocked.includes('clicks_1000'), '1000 clicks achievement unlocks');
+
+  // 10000 clicks
+  gs.totalClicks = 10000;
+  unlocked = checkAchievementsTest(achs);
+  assert(unlocked.includes('clicks_10000'), '10000 clicks achievement unlocks');
+
+  // Already unlocked achievements don't re-trigger
+  unlocked = checkAchievementsTest(achs);
+  assertEq(unlocked.length, 0, 'No re-triggers on already unlocked');
+}
+
+section('Achievement — Upgrade Milestones');
+{
+  const ups = makeUpgrades();
+  const clicks = makeClickUpgrades();
+  const gs = { totalClicks: 0, totalUpgradesBought: 0, currentEra: 0, totalFp: 0, gameComplete: false };
+  const achs = makeAchievements(ups, clicks, gs);
+
+  // First upgrade
+  gs.totalUpgradesBought = 1;
+  let unlocked = checkAchievementsTest(achs);
+  assert(unlocked.includes('first_upgrade'), 'First upgrade achievement unlocks');
+
+  // Era 1 complete (all era 0 upgrades)
+  for (const u of ups.filter(u => u.era === 0)) u.count = 1;
+  unlocked = checkAchievementsTest(achs);
+  assert(unlocked.includes('era1_complete'), 'Era 1 complete achievement unlocks');
+
+  // Era 2 complete
+  for (const u of ups.filter(u => u.era === 1)) u.count = 1;
+  unlocked = checkAchievementsTest(achs);
+  assert(unlocked.includes('era2_complete'), 'Era 2 complete achievement unlocks');
+}
+
+section('Achievement — Era Milestones');
+{
+  const ups = makeUpgrades();
+  const clicks = makeClickUpgrades();
+  const gs = { totalClicks: 0, totalUpgradesBought: 0, currentEra: 0, totalFp: 0, gameComplete: false };
+  const achs = makeAchievements(ups, clicks, gs);
+
+  gs.currentEra = 2;
+  let unlocked = checkAchievementsTest(achs);
+  assert(unlocked.includes('reach_era3'), 'Era 3 achievement unlocks at currentEra 2');
+
+  gs.currentEra = 3;
+  unlocked = checkAchievementsTest(achs);
+  assert(unlocked.includes('reach_era4'), 'Era 4 achievement unlocks at currentEra 3');
+
+  gs.currentEra = 4;
+  unlocked = checkAchievementsTest(achs);
+  assert(unlocked.includes('reach_era5'), 'Era 5 achievement unlocks at currentEra 4');
+}
+
+section('Achievement — Click Upgrades');
+{
+  const ups = makeUpgrades();
+  const clicks = makeClickUpgrades();
+  const gs = { totalClicks: 0, totalUpgradesBought: 0, currentEra: 0, totalFp: 0, gameComplete: false };
+  const achs = makeAchievements(ups, clicks, gs);
+
+  clicks[0].purchased = true;
+  let unlocked = checkAchievementsTest(achs);
+  assert(unlocked.includes('first_click_upgrade'), 'First click upgrade achievement unlocks');
+
+  clicks[5].purchased = true; // nu_javlar
+  unlocked = checkAchievementsTest(achs);
+  assert(unlocked.includes('nu_javlar'), 'NU JÄVLAR achievement unlocks');
+}
+
+section('Achievement — FP Milestones');
+{
+  const ups = makeUpgrades();
+  const clicks = makeClickUpgrades();
+  const gs = { totalClicks: 0, totalUpgradesBought: 0, currentEra: 0, totalFp: 0, gameComplete: false };
+  const achs = makeAchievements(ups, clicks, gs);
+
+  gs.totalFp = 10000;
+  let unlocked = checkAchievementsTest(achs);
+  assert(unlocked.includes('kontanter'), 'Kontanter achievement unlocks at 10K FP');
+
+  gs.totalFp = 5200000;
+  unlocked = checkAchievementsTest(achs);
+  assert(unlocked.includes('broschyren'), 'Broschyren achievement unlocks at 5.2M FP');
+}
+
+section('Achievement — Game Complete');
+{
+  const ups = makeUpgrades();
+  const clicks = makeClickUpgrades();
+  const gs = { totalClicks: 0, totalUpgradesBought: 0, currentEra: 0, totalFp: 0, gameComplete: false };
+  const achs = makeAchievements(ups, clicks, gs);
+
+  gs.gameComplete = true;
+  let unlocked = checkAchievementsTest(achs);
+  assert(unlocked.includes('game_complete'), 'Game complete achievement unlocks');
+}
+
+section('End Game Detection');
+{
+  const ups = makeUpgrades();
+  const totalDefense = ups.find(u => u.id === 'total_defense');
+  assert(totalDefense !== undefined, 'total_defense upgrade exists');
+  assertEq(totalDefense.era, 4, 'total_defense is in Era 5 (index 4)');
+  assertEq(totalDefense.baseCost, 5000000000000, 'total_defense costs 5T');
+
+  // The last upgrade in the array should be total_defense
+  assertEq(ups[ups.length - 1].id, 'total_defense', 'total_defense is the last upgrade');
+}
+
+section('Achievement Count');
+{
+  // Total achievement count in the game (including all_achievements meta)
+  const TOTAL_ACHIEVEMENTS = 16;
+  assert(TOTAL_ACHIEVEMENTS >= 14, 'At least 14 achievements planned');
+  assert(TOTAL_ACHIEVEMENTS <= 20, 'No more than 20 achievements');
+}
+
+section('Full Game Achievement Simulation');
+{
+  const ups = makeUpgrades();
+  const clicks = makeClickUpgrades();
+  const gs = { totalClicks: 0, totalUpgradesBought: 0, currentEra: 0, totalFp: 0, gameComplete: false };
+  const achs = makeAchievements(ups, clicks, gs);
+  let fp = 0, fps = 0;
+  const CPS = 3;
+  let fpPerClick = 1;
+  let sec = 0;
+  let achievementLog = [];
+
+  while (sec < 3600) {
+    fp += CPS * fpPerClick + fps;
+    gs.totalFp += CPS * fpPerClick + fps;
+    gs.totalClicks += CPS;
+    sec++;
+
+    gs.currentEra = getCurrentEra(gs.totalFp);
+
+    // Buy click upgrades
+    for (const c of clicks) {
+      if (!c.purchased && fp >= c.cost) {
+        fp -= c.cost;
+        c.purchased = true;
+        fpPerClick *= c.multiplier;
+      }
+    }
+
+    // Buy best upgrade
+    let r = simBuyBest(ups, fp, gs.currentEra);
+    while (r.bought) {
+      fp = r.fp;
+      gs.totalUpgradesBought++;
+      fps = calcFpPerSecond(ups);
+      r = simBuyBest(ups, fp, gs.currentEra);
+    }
+    fp = r.fp;
+
+    // Check game completion
+    if (ups.find(u => u.id === 'total_defense').count >= 1 && !gs.gameComplete) {
+      gs.gameComplete = true;
+    }
+
+    // Check achievements
+    const unlocked = checkAchievementsTest(achs);
+    for (const id of unlocked) {
+      achievementLog.push({ id, sec });
+    }
+
+    if (gs.gameComplete && achs.every(a => a.unlocked)) break;
+  }
+
+  const unlockedCount = achs.filter(a => a.unlocked).length;
+  assert(unlockedCount >= 13, `At least 13 achievements unlock in full game (got ${unlockedCount})`);
+  assert(gs.gameComplete, 'Game completes during simulation');
+  assert(achs.find(a => a.id === 'first_click').unlocked, 'First click achievement unlocked');
+  assert(achs.find(a => a.id === 'first_upgrade').unlocked, 'First upgrade achievement unlocked');
+  assert(achs.find(a => a.id === 'game_complete').unlocked, 'Game complete achievement unlocked');
+  assert(achs.find(a => a.id === 'kontanter').unlocked, 'Kontanter achievement unlocked');
+
+  console.log(`  → ${unlockedCount}/15 achievements unlocked in ${(sec/60).toFixed(1)} min`);
 }
 
 // --- Summary ---

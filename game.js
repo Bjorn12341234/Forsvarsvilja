@@ -7,6 +7,7 @@ const game = {
   fpPerClick: 1,
   fpPerSecond: 0,
   totalClicks: 0,
+  totalUpgradesBought: 0,
   currentEra: 0,
   lastEra: 0,
   startTime: Date.now(),
@@ -15,6 +16,7 @@ const game = {
   eventMultiplier: 1,
   eventTimer: null,
   eventEndTime: 0,
+  gameComplete: false,
 };
 
 // --- Era Definitions ---
@@ -320,6 +322,106 @@ const events = [
   },
 ];
 
+// --- Achievements ---
+const achievements = [
+  {
+    id: 'first_click', name: 'Första steget',
+    description: 'Gör ditt första klick',
+    check: () => game.totalClicks >= 1,
+    unlocked: false,
+  },
+  {
+    id: 'clicks_100', name: 'Hundra klick',
+    description: '100 klick — du menar allvar!',
+    check: () => game.totalClicks >= 100,
+    unlocked: false,
+  },
+  {
+    id: 'clicks_1000', name: 'Tusen klick',
+    description: '1 000 klick — fingret darrar',
+    check: () => game.totalClicks >= 1000,
+    unlocked: false,
+  },
+  {
+    id: 'clicks_10000', name: 'Tiotusen klick',
+    description: '10 000 klick — ren försvarsvilja',
+    check: () => game.totalClicks >= 10000,
+    unlocked: false,
+  },
+  {
+    id: 'first_upgrade', name: 'Första inköpet',
+    description: 'Köp din första uppgradering',
+    check: () => game.totalUpgradesBought >= 1,
+    unlocked: false,
+  },
+  {
+    id: 'era1_complete', name: 'Hemberedskapen klar',
+    description: 'Alla Era 1-uppgraderingar — du klarar en vecka utan samhällets hjälp!',
+    check: () => upgrades.filter(u => u.era === 0).every(u => u.count >= 1),
+    unlocked: false,
+  },
+  {
+    id: 'era2_complete', name: 'Grannen du vill ha',
+    description: 'Alla Era 2-uppgraderingar — hela kvarteret är tryggare',
+    check: () => upgrades.filter(u => u.era === 1).every(u => u.count >= 1),
+    unlocked: false,
+  },
+  {
+    id: 'reach_era3', name: 'Kommunal kraft',
+    description: 'Nå Era 3: Kommunen',
+    check: () => game.currentEra >= 2,
+    unlocked: false,
+  },
+  {
+    id: 'reach_era4', name: 'Regional samordning',
+    description: 'Nå Era 4: Regionen',
+    check: () => game.currentEra >= 3,
+    unlocked: false,
+  },
+  {
+    id: 'reach_era5', name: 'Nationens försvar',
+    description: 'Nå Era 5: Nationen',
+    check: () => game.currentEra >= 4,
+    unlocked: false,
+  },
+  {
+    id: 'first_click_upgrade', name: 'Klickkraftare',
+    description: 'Köp din första klickkraft-uppgradering',
+    check: () => clickUpgrades.some(u => u.purchased),
+    unlocked: false,
+  },
+  {
+    id: 'nu_javlar', name: 'NU JÄVLAR',
+    description: '"NU JÄVLAR"-knappen köpt — nu jävlar.',
+    check: () => clickUpgrades.find(u => u.id === 'nu_javlar')?.purchased === true,
+    unlocked: false,
+  },
+  {
+    id: 'kontanter', name: 'Kontanter?!',
+    description: 'Nå 10 000 FP — Swish fungerar inte utan el',
+    check: () => game.totalFp >= 10000,
+    unlocked: false,
+  },
+  {
+    id: 'broschyren', name: 'Har du läst broschyren?',
+    description: 'Nå 5 200 000 FP — en för varje hushåll',
+    check: () => game.totalFp >= 5200000,
+    unlocked: false,
+  },
+  {
+    id: 'game_complete', name: 'Totalförsvaret komplett',
+    description: 'Slutför spelet — du har byggt Sveriges totalförsvar!',
+    check: () => game.gameComplete,
+    unlocked: false,
+  },
+  {
+    id: 'all_achievements', name: 'Fullständig beredskap',
+    description: 'Alla andra achievements upplåsta — du är helt beredd',
+    check: () => achievements.filter(a => a.id !== 'all_achievements').every(a => a.unlocked),
+    unlocked: false,
+  },
+];
+
 // --- DOM References ---
 const dom = {
   fpCount: document.getElementById('fp-count'),
@@ -342,6 +444,18 @@ const dom = {
   activeBonus: document.getElementById('active-bonus'),
   activeBonusText: document.getElementById('active-bonus-text'),
   activeBonusTime: document.getElementById('active-bonus-time'),
+  achievementBtn: document.getElementById('achievement-btn'),
+  achievementCount: document.getElementById('achievement-count'),
+  achievementPanel: document.getElementById('achievement-panel'),
+  achievementList: document.getElementById('achievement-list'),
+  achievementProgress: document.getElementById('achievement-progress'),
+  toastContainer: document.getElementById('toast-container'),
+  endScreen: document.getElementById('end-screen'),
+  endStatClicks: document.getElementById('end-stat-clicks'),
+  endStatTime: document.getElementById('end-stat-time'),
+  endStatFp: document.getElementById('end-stat-fp'),
+  endStatUpgrades: document.getElementById('end-stat-upgrades'),
+  endStatAchievements: document.getElementById('end-stat-achievements'),
 };
 
 // --- Number Formatting ---
@@ -516,6 +630,32 @@ function playSound(type) {
       osc.start(now + offset);
       osc.stop(now + offset + 0.2);
     });
+  } else if (type === 'achievement') {
+    // Triumphant ascending arpeggio
+    [0, 0.1, 0.2, 0.35].forEach((offset, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = i < 3 ? 'sine' : 'triangle';
+      osc.frequency.setValueAtTime([523, 659, 784, 1047][i], now + offset);
+      gain.gain.setValueAtTime(i === 3 ? 0.18 : 0.12, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.25);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.25);
+    });
+  } else if (type === 'complete') {
+    // Grand fanfare for game completion
+    [0, 0.15, 0.3, 0.5, 0.7].forEach((offset, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = i < 4 ? 'sine' : 'triangle';
+      osc.frequency.setValueAtTime([523, 659, 784, 1047, 1319][i], now + offset);
+      gain.gain.setValueAtTime(0.15, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.4);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.4);
+    });
   } else if (type === 'event') {
     // Two quick notes
     [0, 0.08].forEach((offset, i) => {
@@ -564,9 +704,15 @@ function buyUpgrade(id) {
 
   game.fp -= cost;
   upgrade.count++;
+  game.totalUpgradesBought++;
   calculateFpPerSecond();
   playSound('buy');
   updateUI();
+
+  // Check for game completion
+  if (upgrade.id === 'total_defense') {
+    showEndScreen();
+  }
 }
 
 // --- Buy Click Upgrade ---
@@ -811,6 +957,120 @@ function toggleMute() {
   dom.muteBtn.classList.toggle('muted', game.muted);
 }
 
+// --- Achievement System ---
+const _toastQueue = [];
+let _toastActive = false;
+
+function checkAchievements() {
+  for (const a of achievements) {
+    if (!a.unlocked && a.check()) {
+      a.unlocked = true;
+      showAchievementToast(a);
+      playSound('achievement');
+      updateAchievementBtn();
+    }
+  }
+}
+
+function showAchievementToast(achievement) {
+  _toastQueue.push(achievement);
+  if (!_toastActive) processToastQueue();
+}
+
+function processToastQueue() {
+  if (_toastQueue.length === 0) { _toastActive = false; return; }
+  _toastActive = true;
+  const a = _toastQueue.shift();
+  const toast = document.createElement('div');
+  toast.className = 'achievement-toast';
+  toast.innerHTML = `<div class="toast-icon">\u{1F3C6}</div><div class="toast-body"><div class="toast-title">${a.name}</div><div class="toast-desc">${a.description}</div></div>`;
+  dom.toastContainer.appendChild(toast);
+  // Trigger animation
+  requestAnimationFrame(() => toast.classList.add('visible'));
+  setTimeout(() => {
+    toast.classList.remove('visible');
+    setTimeout(() => { toast.remove(); processToastQueue(); }, 400);
+  }, 3000);
+}
+
+function updateAchievementBtn() {
+  const unlocked = achievements.filter(a => a.unlocked).length;
+  dom.achievementCount.textContent = `${unlocked}/${achievements.length}`;
+}
+
+function toggleAchievementPanel() {
+  const isVisible = dom.achievementPanel.classList.toggle('visible');
+  if (isVisible) renderAchievementPanel();
+}
+
+function renderAchievementPanel() {
+  const unlocked = achievements.filter(a => a.unlocked).length;
+  dom.achievementProgress.textContent = `${unlocked} / ${achievements.length}`;
+  dom.achievementList.innerHTML = '';
+  for (const a of achievements) {
+    const el = document.createElement('div');
+    el.className = 'achievement-item' + (a.unlocked ? ' unlocked' : '');
+    el.innerHTML = `<div class="achievement-icon">${a.unlocked ? '\u{1F3C6}' : '\u{1F512}'}</div><div class="achievement-info"><div class="achievement-name">${a.unlocked ? a.name : '???'}</div><div class="achievement-desc">${a.unlocked ? a.description : 'Ännu ej upplåst'}</div></div>`;
+    dom.achievementList.appendChild(el);
+  }
+}
+
+// --- End Screen ---
+function showEndScreen() {
+  if (game.gameComplete) return;
+  game.gameComplete = true;
+  playSound('complete');
+
+  const elapsed = Math.floor((Date.now() - game.startTime) / 1000);
+  const minutes = Math.floor(elapsed / 60);
+  const seconds = elapsed % 60;
+
+  dom.endStatClicks.textContent = game.totalClicks.toLocaleString();
+  dom.endStatTime.textContent = `${minutes} min ${seconds} sek`;
+  dom.endStatFp.textContent = formatNumber(game.totalFp);
+  dom.endStatUpgrades.textContent = game.totalUpgradesBought;
+  dom.endStatAchievements.textContent = `${achievements.filter(a => a.unlocked).length}/${achievements.length}`;
+
+  // Delay to let the buy animation finish
+  setTimeout(() => {
+    dom.endScreen.classList.add('visible');
+  }, 500);
+
+  // Check achievements one more time (game_complete + all_achievements)
+  setTimeout(() => checkAchievements(), 600);
+}
+
+function resetGame() {
+  // Reset game state
+  game.fp = 0;
+  game.totalFp = 0;
+  game.fpPerClick = 1;
+  game.fpPerSecond = 0;
+  game.totalClicks = 0;
+  game.totalUpgradesBought = 0;
+  game.currentEra = 0;
+  game.lastEra = 0;
+  game.startTime = Date.now();
+  game.activeEvent = null;
+  game.eventMultiplier = 1;
+  game.eventEndTime = 0;
+  game.gameComplete = false;
+
+  // Reset upgrades
+  for (const u of upgrades) u.count = 0;
+  for (const u of clickUpgrades) u.purchased = false;
+  for (const a of achievements) a.unlocked = false;
+
+  // Hide overlays
+  dom.endScreen.classList.remove('visible');
+  dom.activeBonus.classList.remove('visible');
+  dom.eventOverlay.classList.remove('visible');
+
+  calculateFpPerSecond();
+  updateAchievementBtn();
+  updateUI();
+}
+
 // --- Game Loop ---
 function startGameLoop() {
   setInterval(() => {
@@ -822,17 +1082,26 @@ function startGameLoop() {
     }
     updateActiveBonus();
   }, 100);
+
+  // Check achievements every second
+  setInterval(checkAchievements, 1000);
 }
 
 // --- Initialize ---
 function init() {
   dom.clickButton.addEventListener('click', handleClick);
   dom.muteBtn.addEventListener('click', toggleMute);
+  dom.achievementBtn.addEventListener('click', toggleAchievementPanel);
+  dom.achievementPanel.addEventListener('click', (e) => {
+    if (e.target === dom.achievementPanel) dom.achievementPanel.classList.remove('visible');
+  });
   dom.eventOverlay.addEventListener('click', () => {
     dom.eventOverlay.classList.remove('visible');
   });
+  document.getElementById('play-again-btn').addEventListener('click', resetGame);
   setupTicker();
   calculateFpPerSecond();
+  updateAchievementBtn();
   updateUI();
   startGameLoop();
   scheduleNextEvent();
