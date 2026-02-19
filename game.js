@@ -563,6 +563,7 @@ function spawnParticles(x, y) {
     p.style.setProperty('--duration', duration + 's');
     document.body.appendChild(p);
     p.addEventListener('animationend', () => p.remove());
+    setTimeout(() => { if (p.parentNode) p.remove(); }, 1500);
   }
 }
 
@@ -575,6 +576,7 @@ function spawnFloatText(x, y, text) {
   el.style.top = y + 'px';
   document.body.appendChild(el);
   el.addEventListener('animationend', () => el.remove());
+  setTimeout(() => { if (el.parentNode) el.remove(); }, 1500);
 }
 
 // --- Sound System ---
@@ -706,6 +708,7 @@ function buyUpgrade(id) {
   upgrade.count++;
   game.totalUpgradesBought++;
   calculateFpPerSecond();
+  markUpgradesDirty();
   playSound('buy');
   updateUI();
 
@@ -724,13 +727,23 @@ function buyClickUpgrade(id) {
   game.fp -= upgrade.cost;
   upgrade.purchased = true;
   game.fpPerClick *= upgrade.multiplier;
+  markClickUpgradesDirty();
   playSound('buy');
   updateUI();
 }
 
 // --- Render Upgrades ---
-function renderUpgrades() {
+// Track whether a full rebuild is needed (e.g. new era unlocked, upgrade bought)
+let _upgradesNeedRebuild = true;
+let _clickUpgradesNeedRebuild = true;
+let _lastVisibleEra = -1;
+
+function markUpgradesDirty() { _upgradesNeedRebuild = true; }
+function markClickUpgradesDirty() { _clickUpgradesNeedRebuild = true; }
+
+function buildUpgrades() {
   dom.upgradesList.innerHTML = '';
+  _lastVisibleEra = game.currentEra;
 
   let lastEra = -1;
   for (const u of upgrades) {
@@ -750,6 +763,7 @@ function renderUpgrades() {
 
     const card = document.createElement('div');
     card.className = 'upgrade-card' + (canAfford ? '' : ' disabled');
+    card.dataset.id = u.id;
     card.innerHTML = `
       <div class="upgrade-name">${u.name}</div>
       <div class="upgrade-count">${u.count > 0 ? u.count : ''}</div>
@@ -762,15 +776,43 @@ function renderUpgrades() {
     card.addEventListener('click', () => buyUpgrade(u.id));
     dom.upgradesList.appendChild(card);
   }
+  _upgradesNeedRebuild = false;
+}
+
+function refreshUpgrades() {
+  // Check if era changed — need full rebuild
+  if (game.currentEra !== _lastVisibleEra) {
+    _upgradesNeedRebuild = true;
+  }
+  if (_upgradesNeedRebuild) {
+    buildUpgrades();
+    return;
+  }
+  // Just update affordability and counts in-place
+  const cards = dom.upgradesList.querySelectorAll('.upgrade-card');
+  for (const card of cards) {
+    const id = card.dataset.id;
+    const u = upgrades.find(up => up.id === id);
+    if (!u) continue;
+    const cost = getUpgradeCost(u);
+    const canAfford = game.fp >= cost;
+    if (canAfford) card.classList.remove('disabled');
+    else card.classList.add('disabled');
+    const countEl = card.querySelector('.upgrade-count');
+    if (countEl) countEl.textContent = u.count > 0 ? u.count : '';
+    const costEl = card.querySelector('.upgrade-cost');
+    if (costEl) costEl.textContent = formatNumber(cost) + ' FP';
+  }
 }
 
 // --- Render Click Upgrades ---
-function renderClickUpgrades() {
+function buildClickUpgrades() {
   dom.clickUpgradesList.innerHTML = '';
 
   for (const u of clickUpgrades) {
     const canAfford = game.fp >= u.cost;
     const card = document.createElement('div');
+    card.dataset.id = u.id;
 
     if (u.purchased) {
       card.className = 'upgrade-card click-upgrade purchased';
@@ -795,6 +837,23 @@ function renderClickUpgrades() {
 
     dom.clickUpgradesList.appendChild(card);
   }
+  _clickUpgradesNeedRebuild = false;
+}
+
+function refreshClickUpgrades() {
+  if (_clickUpgradesNeedRebuild) {
+    buildClickUpgrades();
+    return;
+  }
+  const cards = dom.clickUpgradesList.querySelectorAll('.upgrade-card');
+  for (const card of cards) {
+    const id = card.dataset.id;
+    const u = clickUpgrades.find(up => up.id === id);
+    if (!u || u.purchased) continue;
+    const canAfford = game.fp >= u.cost;
+    if (canAfford) card.classList.remove('disabled');
+    else card.classList.add('disabled');
+  }
 }
 
 // --- Update UI ---
@@ -803,8 +862,8 @@ function updateUI() {
   dom.fpPerSecond.textContent = formatNumber(game.fpPerSecond);
   dom.fpPerClick.textContent = formatNumber(game.fpPerClick);
   updateEra();
-  renderUpgrades();
-  renderClickUpgrades();
+  refreshUpgrades();
+  refreshClickUpgrades();
 }
 
 // --- News Ticker ---
@@ -1041,6 +1100,12 @@ function showEndScreen() {
 }
 
 function resetGame() {
+  deleteSave();
+
+  // Clear event timers
+  clearTimeout(game.eventTimer);
+  clearTimeout(game._eventDismissTimer);
+
   // Reset game state
   game.fp = 0;
   game.totalFp = 0;
@@ -1054,6 +1119,7 @@ function resetGame() {
   game.activeEvent = null;
   game.eventMultiplier = 1;
   game.eventEndTime = 0;
+  game._clickBonusValue = 0;
   game.gameComplete = false;
 
   // Reset upgrades
@@ -1061,14 +1127,109 @@ function resetGame() {
   for (const u of clickUpgrades) u.purchased = false;
   for (const a of achievements) a.unlocked = false;
 
+  // Clean up floating DOM elements (particles, float text)
+  document.querySelectorAll('.particle, .float-text').forEach(el => el.remove());
+
   // Hide overlays
   dom.endScreen.classList.remove('visible');
   dom.activeBonus.classList.remove('visible');
   dom.eventOverlay.classList.remove('visible');
 
   calculateFpPerSecond();
+  markUpgradesDirty();
+  markClickUpgradesDirty();
   updateAchievementBtn();
   updateUI();
+
+  // Restart event scheduling
+  scheduleNextEvent();
+}
+
+// --- Save / Load ---
+const SAVE_KEY = 'forsvarsvilja_save';
+
+function getSaveData() {
+  return {
+    version: 1,
+    fp: game.fp,
+    totalFp: game.totalFp,
+    fpPerClick: game.fpPerClick,
+    totalClicks: game.totalClicks,
+    totalUpgradesBought: game.totalUpgradesBought,
+    currentEra: game.currentEra,
+    startTime: game.startTime,
+    muted: game.muted,
+    gameComplete: game.gameComplete,
+    upgradeCounts: upgrades.map(u => u.count),
+    clickPurchased: clickUpgrades.map(u => u.purchased),
+    achievementsUnlocked: achievements.map(a => a.unlocked),
+    savedAt: Date.now(),
+  };
+}
+
+function saveGame() {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(getSaveData()));
+  } catch (e) {
+    // localStorage full or unavailable — silently ignore
+  }
+}
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (!data || data.version !== 1) return false;
+
+    game.fp = data.fp || 0;
+    game.totalFp = data.totalFp || 0;
+    game.fpPerClick = data.fpPerClick || 1;
+    game.totalClicks = data.totalClicks || 0;
+    game.totalUpgradesBought = data.totalUpgradesBought || 0;
+    game.currentEra = data.currentEra || 0;
+    game.startTime = data.startTime || Date.now();
+    game.muted = data.muted || false;
+    game.gameComplete = data.gameComplete || false;
+
+    if (Array.isArray(data.upgradeCounts)) {
+      for (let i = 0; i < upgrades.length && i < data.upgradeCounts.length; i++) {
+        upgrades[i].count = data.upgradeCounts[i] || 0;
+      }
+    }
+    if (Array.isArray(data.clickPurchased)) {
+      for (let i = 0; i < clickUpgrades.length && i < data.clickPurchased.length; i++) {
+        clickUpgrades[i].purchased = !!data.clickPurchased[i];
+      }
+    }
+    if (Array.isArray(data.achievementsUnlocked)) {
+      for (let i = 0; i < achievements.length && i < data.achievementsUnlocked.length; i++) {
+        achievements[i].unlocked = !!data.achievementsUnlocked[i];
+      }
+    }
+
+    // Recalculate derived state
+    calculateFpPerSecond();
+
+    // Apply mute state
+    if (game.muted) {
+      dom.muteBtn.textContent = '\u{1F507}';
+      dom.muteBtn.classList.add('muted');
+    }
+
+    // Show end screen if game was already complete
+    if (game.gameComplete) {
+      setTimeout(() => dom.endScreen.classList.add('visible'), 100);
+    }
+
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function deleteSave() {
+  try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* ignore */ }
 }
 
 // --- Game Loop ---
@@ -1085,11 +1246,24 @@ function startGameLoop() {
 
   // Check achievements every second
   setInterval(checkAchievements, 1000);
+
+  // Auto-save every 30 seconds
+  setInterval(saveGame, 30000);
 }
 
 // --- Initialize ---
 function init() {
-  dom.clickButton.addEventListener('click', handleClick);
+  // Prevent double-tap zoom on click button
+  let _touchHandled = false;
+  dom.clickButton.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    _touchHandled = true;
+    handleClick(e);
+  }, { passive: false });
+  dom.clickButton.addEventListener('click', (e) => {
+    if (_touchHandled) { _touchHandled = false; return; }
+    handleClick(e);
+  });
   dom.muteBtn.addEventListener('click', toggleMute);
   dom.achievementBtn.addEventListener('click', toggleAchievementPanel);
   dom.achievementPanel.addEventListener('click', (e) => {
@@ -1099,12 +1273,24 @@ function init() {
     dom.eventOverlay.classList.remove('visible');
   });
   document.getElementById('play-again-btn').addEventListener('click', resetGame);
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    if (confirm('Vill du verkligen nollställa spelet? All progress försvinner.')) {
+      resetGame();
+    }
+  });
+
+  // Load saved game
+  loadGame();
+
   setupTicker();
   calculateFpPerSecond();
   updateAchievementBtn();
   updateUI();
   startGameLoop();
   scheduleNextEvent();
+
+  // Save on page unload
+  window.addEventListener('beforeunload', saveGame);
 }
 
 init();

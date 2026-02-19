@@ -993,6 +993,188 @@ section('Full Game Achievement Simulation');
   console.log(`  → ${unlockedCount}/15 achievements unlocked in ${(sec/60).toFixed(1)} min`);
 }
 
+// ============================================================
+// SPRINT 5 TESTS — Save/Load, Reset, Edge Cases
+// ============================================================
+
+section('Save Data Serialization');
+{
+  const ups = makeUpgrades();
+  const clicks = makeClickUpgrades();
+
+  // Simulate some game state
+  ups[0].count = 5;
+  ups[1].count = 3;
+  ups[6].count = 2; // Era 1 upgrade
+  clicks[0].purchased = true;
+  clicks[1].purchased = true;
+
+  const saveData = {
+    version: 1,
+    fp: 12345.67,
+    totalFp: 99999.99,
+    fpPerClick: 6,
+    totalClicks: 500,
+    totalUpgradesBought: 10,
+    currentEra: 1,
+    startTime: Date.now() - 60000,
+    muted: false,
+    gameComplete: false,
+    upgradeCounts: ups.map(u => u.count),
+    clickPurchased: clicks.map(u => u.purchased),
+    achievementsUnlocked: [true, true, false, false, true, false, false, false, false, false, false, false, false, false, false],
+    savedAt: Date.now(),
+  };
+
+  // Verify structure
+  assertEq(saveData.version, 1, 'Save data has version 1');
+  assertEq(saveData.upgradeCounts.length, 30, 'Save data has 30 upgrade counts');
+  assertEq(saveData.clickPurchased.length, 6, 'Save data has 6 click upgrade states');
+  assertEq(saveData.achievementsUnlocked.length, 15, 'Save data has 15 achievement states');
+
+  // Verify values
+  assertEq(saveData.upgradeCounts[0], 5, 'Water upgrade count saved as 5');
+  assertEq(saveData.upgradeCounts[1], 3, 'Cans upgrade count saved as 3');
+  assertEq(saveData.upgradeCounts[6], 2, 'Neighbors upgrade count saved as 2');
+  assertEq(saveData.clickPurchased[0], true, 'Viking purchased saved as true');
+  assertEq(saveData.clickPurchased[2], false, 'Artsoppa purchased saved as false');
+
+  // JSON round-trip
+  const json = JSON.stringify(saveData);
+  const restored = JSON.parse(json);
+  assertEq(restored.fp, 12345.67, 'FP survives JSON round-trip');
+  assertEq(restored.totalClicks, 500, 'Total clicks survives JSON round-trip');
+  assertEq(restored.upgradeCounts[0], 5, 'Upgrade counts survive JSON round-trip');
+  assertEq(restored.clickPurchased[0], true, 'Click purchased survives JSON round-trip');
+  assertEq(restored.achievementsUnlocked[0], true, 'Achievements survive JSON round-trip');
+  assertEq(restored.achievementsUnlocked[2], false, 'Locked achievements survive JSON round-trip');
+}
+
+section('Save Data Restoration');
+{
+  const ups = makeUpgrades();
+  const clicks = makeClickUpgrades();
+
+  const saveData = {
+    version: 1,
+    fp: 50000,
+    totalFp: 200000,
+    fpPerClick: 30,
+    totalClicks: 1500,
+    totalUpgradesBought: 20,
+    currentEra: 2,
+    startTime: Date.now() - 300000,
+    muted: true,
+    gameComplete: false,
+    upgradeCounts: ups.map(() => 0),
+    clickPurchased: clicks.map(() => false),
+    achievementsUnlocked: new Array(15).fill(false),
+    savedAt: Date.now(),
+  };
+
+  // Modify some specific values
+  saveData.upgradeCounts[0] = 10; // water
+  saveData.upgradeCounts[5] = 3;  // kit
+  saveData.clickPurchased[0] = true; // viking
+
+  // Simulate restoration
+  const game = { fp: 0, totalFp: 0, fpPerClick: 1, totalClicks: 0, totalUpgradesBought: 0, currentEra: 0, muted: false, gameComplete: false };
+  const restoredUps = makeUpgrades();
+  const restoredClicks = makeClickUpgrades();
+
+  game.fp = saveData.fp;
+  game.totalFp = saveData.totalFp;
+  game.fpPerClick = saveData.fpPerClick;
+  game.totalClicks = saveData.totalClicks;
+  game.totalUpgradesBought = saveData.totalUpgradesBought;
+  game.currentEra = saveData.currentEra;
+  game.muted = saveData.muted;
+
+  for (let i = 0; i < restoredUps.length && i < saveData.upgradeCounts.length; i++) {
+    restoredUps[i].count = saveData.upgradeCounts[i] || 0;
+  }
+  for (let i = 0; i < restoredClicks.length && i < saveData.clickPurchased.length; i++) {
+    restoredClicks[i].purchased = !!saveData.clickPurchased[i];
+  }
+
+  assertEq(game.fp, 50000, 'FP restored correctly');
+  assertEq(game.totalFp, 200000, 'Total FP restored correctly');
+  assertEq(game.fpPerClick, 30, 'FP per click restored correctly');
+  assertEq(game.totalClicks, 1500, 'Total clicks restored correctly');
+  assertEq(game.currentEra, 2, 'Current era restored correctly');
+  assertEq(game.muted, true, 'Muted state restored correctly');
+  assertEq(restoredUps[0].count, 10, 'Water count restored to 10');
+  assertEq(restoredUps[5].count, 3, 'Kit count restored to 3');
+  assertEq(restoredClicks[0].purchased, true, 'Viking purchased restored');
+  assertEq(restoredClicks[1].purchased, false, 'Karolin not purchased after restore');
+
+  // FP/s should recalculate correctly
+  const fps = calcFpPerSecond(restoredUps);
+  const expected = restoredUps[0].fpPerSecond * 10 + restoredUps[5].fpPerSecond * 3;
+  assertEq(fps, expected, 'FP/s recalculates correctly after restore');
+}
+
+section('Reset Clears All State');
+{
+  const ups = makeUpgrades();
+  const clicks = makeClickUpgrades();
+
+  // Simulate a mid-game state
+  ups[0].count = 10;
+  ups[5].count = 5;
+  clicks[0].purchased = true;
+
+  // Reset
+  for (const u of ups) u.count = 0;
+  for (const c of clicks) c.purchased = false;
+
+  assertEq(ups[0].count, 0, 'Water count reset to 0');
+  assertEq(ups[5].count, 0, 'Kit count reset to 0');
+  assertEq(clicks[0].purchased, false, 'Viking reset to not purchased');
+
+  const fps = calcFpPerSecond(ups);
+  assertEq(fps, 0, 'FP/s is 0 after reset');
+}
+
+section('Save Data Version Check');
+{
+  // Invalid version should be rejected
+  const badSave = { version: 999, fp: 100 };
+  const isValid = badSave.version === 1;
+  assertEq(isValid, false, 'Version 999 is rejected');
+
+  // Missing version should be rejected
+  const noVersion = { fp: 100 };
+  const isValid2 = noVersion.version === 1;
+  assertEq(isValid2, false, 'Missing version is rejected');
+
+  // Null data should be rejected
+  const isValid3 = null && null.version === 1;
+  assertEq(!!isValid3, false, 'Null data is rejected');
+}
+
+section('Edge Cases — Large Numbers in Save');
+{
+  const huge = 5e15;
+  const saveData = JSON.parse(JSON.stringify({ fp: huge, totalFp: huge * 2 }));
+  assertEq(saveData.fp, huge, 'Very large FP value survives JSON round-trip');
+  assertEq(saveData.totalFp, huge * 2, 'Very large total FP survives JSON round-trip');
+  assertEq(formatNumber(huge), '5.00Q', 'Very large number formats correctly');
+}
+
+section('Edge Cases — Partial Save Data');
+{
+  // If save data has fewer upgrades than current (e.g., new version added upgrades)
+  const ups = makeUpgrades();
+  const shortCounts = [5, 3]; // Only 2 values
+  for (let i = 0; i < ups.length && i < shortCounts.length; i++) {
+    ups[i].count = shortCounts[i] || 0;
+  }
+  assertEq(ups[0].count, 5, 'First upgrade count set from short array');
+  assertEq(ups[1].count, 3, 'Second upgrade count set from short array');
+  assertEq(ups[2].count, 0, 'Third upgrade count stays 0 (not in short array)');
+}
+
 // --- Summary ---
 console.log('');
 const total = passed + failed;

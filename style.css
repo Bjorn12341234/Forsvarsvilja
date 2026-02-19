@@ -110,6 +110,8 @@ main {
   justify-content: center;
   padding: 32px 24px;
   gap: 24px;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .stats {
@@ -153,6 +155,7 @@ main {
   transition: transform 0.1s ease;
   position: relative;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 #click-button:hover {
@@ -267,6 +270,7 @@ main {
   grid-template-rows: auto auto;
   gap: 2px 12px;
   user-select: none;
+  touch-action: manipulation;
 }
 
 .upgrade-card:hover:not(.disabled):not(.purchased) {
@@ -281,6 +285,7 @@ main {
 .upgrade-card.disabled {
   opacity: 0.45;
   cursor: default;
+  transition: opacity 0.3s ease;
 }
 
 /* === PURCHASED CLICK UPGRADES === */
@@ -515,6 +520,26 @@ main {
 }
 
 .mute-btn.muted {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+/* === RESET BUTTON === */
+
+.reset-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: color 0.15s, border-color 0.15s;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.reset-btn:hover {
   color: var(--danger);
   border-color: var(--danger);
 }
@@ -930,7 +955,19 @@ main {
   box-shadow: 0 0 20px rgba(254, 204, 2, 0.4);
 }
 
-/* === RESPONSIVE (basic for Sprint 1) === */
+/* === RESPONSIVE — Tablet (768–1024px) === */
+
+@media (max-width: 1024px) {
+  .upgrades-panel {
+    width: 320px;
+  }
+
+  .upgrade-card {
+    padding: 10px 12px;
+  }
+}
+
+/* === RESPONSIVE — Mobile (<768px) === */
 
 @media (max-width: 768px) {
   main {
@@ -945,30 +982,135 @@ main {
   }
 
   .game-area {
-    padding: 20px 16px;
-    gap: 16px;
+    padding: 16px 12px;
+    gap: 12px;
+    min-height: 0;
+    flex: 0 0 auto;
   }
 
   #click-button {
-    width: 140px;
-    height: 170px;
+    width: 130px;
+    height: 160px;
   }
 
   .stat-main {
     font-size: 1.8rem;
   }
 
+  .stat-row {
+    gap: 16px;
+  }
+
   header {
-    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    padding: 10px 12px;
+  }
+
+  h1 {
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+  }
+
+  .era-indicator {
+    order: 3;
+    flex-basis: 100%;
     gap: 8px;
-    padding: 10px 16px;
+  }
+
+  .progress-bar {
+    max-width: none;
+  }
+
+  #era-name {
+    font-size: 0.75rem;
+  }
+
+  .click-hint {
+    display: none;
+  }
+
+  .event-card {
+    max-width: 90vw;
+    padding: 20px 20px;
+  }
+
+  .event-card h3 {
+    font-size: 1.1rem;
   }
 
   .era-unlock-content {
-    padding: 24px 32px;
+    padding: 20px 24px;
   }
 
   .era-unlock-name {
+    font-size: 1.3rem;
+  }
+
+  .achievement-panel-inner {
+    width: 95%;
+    padding: 18px 16px;
+  }
+
+  .end-screen-inner {
+    padding: 24px 16px;
+  }
+
+  .end-title {
     font-size: 1.4rem;
+  }
+
+  .end-stats {
+    gap: 12px;
+  }
+
+  .end-stat {
+    min-width: 65px;
+  }
+
+  .end-quote {
+    font-size: 1.6rem;
+  }
+
+  .toast-container {
+    right: 8px;
+    left: 8px;
+  }
+
+  .achievement-toast {
+    max-width: 100%;
+  }
+
+  .news-ticker {
+    height: 30px;
+  }
+
+  .ticker-content {
+    font-size: 0.7rem;
+  }
+}
+
+/* === RESPONSIVE — Small phones (<400px) === */
+
+@media (max-width: 400px) {
+  #click-button {
+    width: 110px;
+    height: 135px;
+  }
+
+  .stat-main {
+    font-size: 1.5rem;
+  }
+
+  .upgrade-card {
+    padding: 10px 10px;
+  }
+
+  .upgrade-name {
+    font-size: 0.82rem;
+  }
+
+  .upgrade-desc {
+    font-size: 0.7rem;
   }
 }
