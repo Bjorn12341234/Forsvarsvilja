@@ -25,6 +25,10 @@ const game = {
   dilemmaHistory: [],
   dilemmaFpMultiplier: 1,
   dilemmaFpMultiplierEnd: 0,
+  // Sprint 4: tracking for achievements and end screen
+  resourceMin: { supply: 80, comms: 80, community: 80 },
+  resourceZeroCount: { supply: 0, comms: 0, community: 0 },
+  crisesTotal: 0,
 };
 
 // --- Era Definitions ---
@@ -47,6 +51,36 @@ const threatLevels = [
 
 // Resource drain rates per threat level (per minute)
 const drainRates = [0, 0.5, 1.5, 3, 0.5];
+
+// --- Synergy System (Sprint 4) ---
+// Returns number of distinct upgrades owned in a given tab
+function getTabUpgradeCount(tabIndex) {
+  let count = 0;
+  for (const u of upgrades) {
+    if (u.tab === tabIndex && u.count > 0) count++;
+  }
+  return count;
+}
+
+// Tab 2 (Grannar) synergy: reduces community drain by 5% per unique upgrade owned
+function getCommunityDrainReduction() {
+  return getTabUpgradeCount(2) * 0.05;
+}
+
+// Tab 3 (Kommun) synergy: reduces ALL drain by 3% per unique upgrade owned
+function getAllDrainReduction() {
+  return getTabUpgradeCount(3) * 0.03;
+}
+
+// Tab 4 (Nationen) synergy: global FPS multiplier (1 + 0.05 per unique upgrade)
+function getNationFpsMultiplier() {
+  return 1 + getTabUpgradeCount(4) * 0.05;
+}
+
+// Tab 1 (Info) synergy: number of info upgrades → dilemma hint quality
+function getInfoSynergyLevel() {
+  return getTabUpgradeCount(1);
+}
 
 // --- Tab Definitions (v2) ---
 const tabs = [
@@ -187,32 +221,32 @@ const upgrades = [
   {
     id: 'mcf', name: 'MCF',
     description: 'Myndigheten för civilt försvar (f.d. MSB)',
-    baseCost: 40000000000, fpPerSecond: 8000000000, count: 0, era: 4,
+    baseCost: 15000000000, fpPerSecond: 5000000000, count: 0, era: 4,
   },
   {
     id: 'home_guard', name: 'Hemvärnet',
     description: '9 842 ansökte på EN vecka efter Ukraina-invasionen',
-    baseCost: 100000000000, fpPerSecond: 20000000000, count: 0, era: 4,
+    baseCost: 40000000000, fpPerSecond: 12000000000, count: 0, era: 4,
   },
   {
     id: 'gripen', name: 'JAS 39 Gripen',
     description: 'Sveriges stolthet i luften',
-    baseCost: 300000000000, fpPerSecond: 50000000000, count: 0, era: 4,
+    baseCost: 100000000000, fpPerSecond: 30000000000, count: 0, era: 4,
   },
   {
     id: 'global_eye', name: 'Global Eye-flygplan',
     description: '3 st anskaffas — ser allt, överallt',
-    baseCost: 800000000000, fpPerSecond: 120000000000, count: 0, era: 4,
+    baseCost: 300000000000, fpPerSecond: 80000000000, count: 0, era: 4,
   },
   {
     id: 'nato_art5', name: 'NATO artikel 5',
     description: 'En för alla, alla för en',
-    baseCost: 2000000000000, fpPerSecond: 300000000000, count: 0, era: 4,
+    baseCost: 800000000000, fpPerSecond: 200000000000, count: 0, era: 4,
   },
   {
     id: 'total_defense', name: 'Totalförsvar 3,5% av BNP',
     description: 'Den kraftfullaste förstärkningen sedan kalla kriget',
-    baseCost: 5000000000000, fpPerSecond: 800000000000, count: 0, era: 4,
+    baseCost: 2000000000000, fpPerSecond: 500000000000, count: 0, era: 4,
   },
 ];
 
@@ -222,9 +256,9 @@ const upgrades = [
     // Tab 0: Hemmet
     water: 0, cans: 0, stove: 0, sleeping: 0, kit: 0,
     // Tab 1: Info & Kommunikation
-    radio: 1, rakel: 1, cyber_security: 1,
+    radio: 1, rakel: 1, cyber_security: 1, faktakoll: 1,
     // Tab 2: Familj & Grannar
-    neighbors: 2, firewood: 2, water_purifier: 2, info_meeting: 2, local_group: 2, shelter: 2,
+    neighbors: 2, firewood: 2, shared_cooking: 2, water_purifier: 2, info_meeting: 2, safety_walks: 2, local_group: 2, shelter: 2,
     // Tab 3: Kommun & Region
     crisis_plan: 3, prep_week: 3, water_supply: 3, fire_service: 3, civil_duty: 3,
     county_coord: 3, civil_area: 3, power_prep: 3, food_supply: 3, fuel_reserves: 3,
@@ -240,10 +274,11 @@ const upgrades = [
     sleeping: { supply: 10 }, kit: { supply: 15 },
     // Tab 1 (Info) → comms
     radio: { comms: 5 }, neighbor_list: { comms: 7 }, crank_radio_net: { comms: 10 },
-    crisis_app: { comms: 12 }, rakel: { comms: 15 }, cyber_security: { comms: 15 },
+    crisis_app: { comms: 12 }, faktakoll: { comms: 13 }, rakel: { comms: 15 }, cyber_security: { comms: 15 },
     // Tab 2 (Grannar) → community
-    neighbors: { community: 5 }, firewood: { community: 7 }, water_purifier: { community: 8 },
-    info_meeting: { community: 10 }, local_group: { community: 12 }, shelter: { community: 15 },
+    neighbors: { community: 5 }, firewood: { community: 7 }, shared_cooking: { community: 7 },
+    water_purifier: { community: 8 }, info_meeting: { community: 10 }, safety_walks: { community: 11 },
+    local_group: { community: 12 }, shelter: { community: 15 },
     // Tab 3 (Kommun) → all three
     crisis_plan: { supply: 5, comms: 5, community: 5 },
     prep_week: { supply: 5, comms: 5, community: 5 },
@@ -290,6 +325,21 @@ const upgrades = [
       description: 'MCF:s app — varningar direkt i fickan',
       baseCost: 100000, fpPerSecond: 8000, count: 0, era: 2, tab: 1,
     },
+    {
+      id: 'faktakoll', name: 'Faktakoll-grupp',
+      description: 'Grannarna delar verifierad information — rykten har svårare att spridas',
+      baseCost: 400000, fpPerSecond: 30000, count: 0, era: 2, tab: 1,
+    },
+    {
+      id: 'shared_cooking', name: 'Gemensam matlagning',
+      description: 'Dela resurser och laga mat tillsammans — räcker längre för alla',
+      baseCost: 50000, fpPerSecond: 3000, count: 0, era: 1, tab: 2,
+    },
+    {
+      id: 'safety_walks', name: 'Trygghetsvandringar',
+      description: 'Gå runt i kvarteret och kolla att alla mår bra',
+      baseCost: 350000, fpPerSecond: 25000, count: 0, era: 1, tab: 2,
+    },
   ];
   upgrades.push(...newUpgrades);
   upgrades.sort((a, b) => a.tab - b.tab || a.era - b.era || a.baseCost - b.baseCost);
@@ -321,6 +371,12 @@ const clickUpgrades = [
     id: 'minister', name: 'Försvarsminister-handslag',
     description: 'Med hela regeringens kraft bakom varje klick',
     cost: 100000000, multiplier: 25, purchased: false,
+  },
+  {
+    id: 'folkforankring', name: 'Folkförankring',
+    description: 'Hela folkets kraft i varje klick',
+    cost: 1000000000, multiplier: 50, purchased: false,
+    resourceBonus: { community: 10 },
   },
   {
     id: 'nu_javlar', name: '"NU JÄVLAR"-knappen',
@@ -632,6 +688,42 @@ const achievements = [
     unlocked: false,
   },
   {
+    id: 'resursstark', name: 'Resursstark',
+    description: 'Alla resurser över 50 under hela spelet',
+    check: () => game.gameComplete && game.resourceMin.supply > 50 && game.resourceMin.comms > 50 && game.resourceMin.community > 50,
+    unlocked: false,
+  },
+  {
+    id: 'medmanniska', name: 'Medmänniska',
+    description: 'Valt det generösa alternativet i minst 5 dilemman',
+    check: () => game.dilemmaHistory.filter(d => d.choice === 'a').length >= 5,
+    unlocked: false,
+  },
+  {
+    id: 'kriserfaren', name: 'Kriserfaren',
+    description: 'Överlevt 10 kriser',
+    check: () => game.crisesTotal >= 10,
+    unlocked: false,
+  },
+  {
+    id: 'informerad', name: 'Informerad',
+    description: 'Alla Info & Komm-uppgraderingar köpta',
+    check: () => upgrades.filter(u => u.tab === 1).every(u => u.count >= 1),
+    unlocked: false,
+  },
+  {
+    id: 'nollgangar', name: 'Nollgångar',
+    description: 'En resurs nådde 0 minst 3 gånger — men du överlevde',
+    check: () => game.gameComplete && (game.resourceZeroCount.supply >= 3 || game.resourceZeroCount.comms >= 3 || game.resourceZeroCount.community >= 3),
+    unlocked: false,
+  },
+  {
+    id: 'synergi', name: 'Synergieffekt',
+    description: 'Minst 3 uppgraderingar i varje flik',
+    check: () => [0, 1, 2, 3, 4].every(tab => getTabUpgradeCount(tab) >= 3),
+    unlocked: false,
+  },
+  {
     id: 'all_achievements', name: 'Fullständig beredskap',
     description: 'Alla andra achievements upplåsta — du är helt beredd',
     check: () => achievements.filter(a => a.id !== 'all_achievements').every(a => a.unlocked),
@@ -727,6 +819,8 @@ function calculateFpPerSecond() {
   for (const u of upgrades) {
     total += u.fpPerSecond * u.count;
   }
+  // Nation synergy: global FPS multiplier
+  total *= getNationFpsMultiplier();
   if (game.resources.supply === 0) {
     total *= 0.5;
   }
@@ -853,16 +947,37 @@ function showThreatNotification(levelIndex) {
 
 // --- Resource System ---
 function updateResources() {
-  const drain = drainRates[game.threatLevel] / 60 / 10; // per tick (100ms)
-  if (drain > 0) {
+  const baseDrain = drainRates[game.threatLevel] / 60 / 10; // per tick (100ms)
+  if (baseDrain > 0) {
+    // Tab 3 synergy: reduce ALL drain
+    const allReduction = getAllDrainReduction();
+    // Tab 2 synergy: extra community drain reduction
+    const communityReduction = getCommunityDrainReduction();
+
+    const supplyDrain = baseDrain * Math.max(0, 1 - allReduction);
+    const commsDrain = baseDrain * Math.max(0, 1 - allReduction);
+    const communityDrain = baseDrain * Math.max(0, 1 - allReduction - communityReduction);
+
     const wasDepleted = {
       supply: game.resources.supply === 0,
       comms: game.resources.comms === 0,
       community: game.resources.community === 0,
     };
-    game.resources.supply = Math.max(0, game.resources.supply - drain);
-    game.resources.comms = Math.max(0, game.resources.comms - drain);
-    game.resources.community = Math.max(0, game.resources.community - drain);
+    game.resources.supply = Math.max(0, game.resources.supply - supplyDrain);
+    game.resources.comms = Math.max(0, game.resources.comms - commsDrain);
+    game.resources.community = Math.max(0, game.resources.community - communityDrain);
+
+    // Track resource minimums
+    for (const key of ['supply', 'comms', 'community']) {
+      if (game.resources[key] < game.resourceMin[key]) {
+        game.resourceMin[key] = game.resources[key];
+      }
+      // Track zero transitions
+      if (!wasDepleted[key] && game.resources[key] === 0) {
+        game.resourceZeroCount[key]++;
+      }
+    }
+
     // Recalculate FP/s if supply just hit 0 or recovered
     if (wasDepleted.supply !== (game.resources.supply === 0)) {
       calculateFpPerSecond();
@@ -1102,6 +1217,11 @@ function buyUpgrade(id) {
   if (upgrade.era > game.currentEra) return;
   if (!game.tabsUnlocked[upgrade.tab]) return;
 
+  // Resource gate: total_defense requires all resources > 20
+  if (upgrade.id === 'total_defense') {
+    if (game.resources.supply <= 20 || game.resources.comms <= 20 || game.resources.community <= 20) return;
+  }
+
   const cost = getUpgradeCost(upgrade);
   if (game.fp < cost) return;
 
@@ -1136,6 +1256,14 @@ function buyClickUpgrade(id) {
   game.fp -= upgrade.cost;
   upgrade.purchased = true;
   game.fpPerClick *= upgrade.multiplier;
+
+  // Apply resource bonus if any (Sprint 4)
+  if (upgrade.resourceBonus) {
+    for (const [res, val] of Object.entries(upgrade.resourceBonus)) {
+      game.resources[res] = Math.min(100, game.resources[res] + val);
+    }
+  }
+
   markClickUpgradesDirty();
   playSound('buy');
   updateUI();
@@ -1162,14 +1290,19 @@ function buildUpgrades() {
 
     const cost = getUpgradeCost(u);
     const canAfford = game.fp >= cost;
+    const resourceGated = u.id === 'total_defense' &&
+      (game.resources.supply <= 20 || game.resources.comms <= 20 || game.resources.community <= 20);
 
     const card = document.createElement('div');
-    card.className = 'upgrade-card' + (canAfford ? '' : ' disabled');
+    card.className = 'upgrade-card' + (canAfford && !resourceGated ? '' : ' disabled');
+    if (resourceGated) card.classList.add('resource-gated');
     card.dataset.id = u.id;
+    const gateHint = resourceGated ? '<div class="upgrade-gate">Kräver alla resurser &gt; 20</div>' : '';
     card.innerHTML = `
       <div class="upgrade-name">${u.name}</div>
       <div class="upgrade-count">${u.count > 0 ? u.count : ''}</div>
       <div class="upgrade-desc">${u.description}</div>
+      ${gateHint}
       <div class="upgrade-stats">
         <span class="upgrade-fps">+${formatNumber(u.fpPerSecond)} FP/s</span>
         <span class="upgrade-cost">${formatNumber(cost)} FP</span>
@@ -1366,6 +1499,16 @@ function formatResourceDeltaText(delta) {
   return parts.join(', ');
 }
 
+function getDilemmaResourceScore(choice) {
+  let score = 0;
+  if (choice.effects?.resources) {
+    for (const val of Object.values(choice.effects.resources)) {
+      score += val;
+    }
+  }
+  return score;
+}
+
 function setEventMode(event) {
   dom.eventOverlay.classList.remove('dilemma-mode');
   dom.eventCard.classList.remove('crisis', 'dilemma');
@@ -1453,8 +1596,19 @@ function triggerEvent(event) {
     dom.eventChoiceB.textContent = `${event.choiceB.label}: ${event.choiceB.preview}`;
     dom.eventChoiceA.onclick = () => resolveDilemma('a');
     dom.eventChoiceB.onclick = () => resolveDilemma('b');
+    // Info synergy: show hint about which choice benefits resources more
+    const infoLevel = getInfoSynergyLevel();
+    if (infoLevel >= 3) {
+      const scoreA = getDilemmaResourceScore(event.choiceA);
+      const scoreB = getDilemmaResourceScore(event.choiceB);
+      if (scoreA !== scoreB) {
+        const hint = scoreA > scoreB ? event.choiceA.label : event.choiceB.label;
+        dom.eventConsequence.textContent = `\u{1F4E1} Info-nätverk: "${hint}" ger bättre resursutfall`;
+      }
+    }
     game.eventEndTime = 0;
   } else if (event.category === 'crisis') {
+    game.crisesTotal++;
     applyResourceDelta(event.effects);
     let extraText = '';
     if (event.conditional) {
@@ -1683,6 +1837,9 @@ function resetGame() {
   game.dilemmaHistory = [];
   game.dilemmaFpMultiplier = 1;
   game.dilemmaFpMultiplierEnd = 0;
+  game.resourceMin = { supply: 80, comms: 80, community: 80 };
+  game.resourceZeroCount = { supply: 0, comms: 0, community: 0 };
+  game.crisesTotal = 0;
 
   // Reset upgrades
   for (const u of upgrades) u.count = 0;
@@ -1748,6 +1905,9 @@ function getSaveData() {
     threatStartTime: game.threatStartTime,
     resources: { ...game.resources },
     dilemmaHistory: [...game.dilemmaHistory],
+    resourceMin: { ...game.resourceMin },
+    resourceZeroCount: { ...game.resourceZeroCount },
+    crisesTotal: game.crisesTotal,
     savedAt: Date.now(),
   };
 }
@@ -1830,6 +1990,27 @@ function loadGame() {
         game.resources = { supply: 80, comms: 80, community: 80 };
       }
       game.dilemmaHistory = Array.isArray(data.dilemmaHistory) ? [...data.dilemmaHistory] : [];
+
+      // Sprint 4 fields (may be missing in older saves)
+      if (data.resourceMin && typeof data.resourceMin === 'object') {
+        game.resourceMin = {
+          supply: data.resourceMin.supply ?? 80,
+          comms: data.resourceMin.comms ?? 80,
+          community: data.resourceMin.community ?? 80,
+        };
+      } else {
+        game.resourceMin = { supply: 80, comms: 80, community: 80 };
+      }
+      if (data.resourceZeroCount && typeof data.resourceZeroCount === 'object') {
+        game.resourceZeroCount = {
+          supply: data.resourceZeroCount.supply ?? 0,
+          comms: data.resourceZeroCount.comms ?? 0,
+          community: data.resourceZeroCount.community ?? 0,
+        };
+      } else {
+        game.resourceZeroCount = { supply: 0, comms: 0, community: 0 };
+      }
+      game.crisesTotal = data.crisesTotal || 0;
     }
 
     // Recalculate derived state

@@ -351,6 +351,17 @@ main {
   color: var(--danger);
 }
 
+.upgrade-card.resource-gated {
+  border: 1px solid var(--danger);
+}
+
+.upgrade-gate {
+  font-size: 0.7em;
+  color: var(--danger);
+  margin: 2px 0;
+  font-style: italic;
+}
+
 /* === ERA UNLOCK OVERLAY === */
 
 .era-unlock-overlay {

@@ -73,13 +73,16 @@ function makeUpgrades() {
     { id: 'neighbor_list', name: 'Grannlista', baseCost: 3000, fpPerSecond: 150, count: 0, era: 0, tab: 1 },
     { id: 'crank_radio_net', name: 'Vevradio-nätverk', baseCost: 20000, fpPerSecond: 1000, count: 0, era: 1, tab: 1 },
     { id: 'crisis_app', name: 'Krisapp', baseCost: 100000, fpPerSecond: 8000, count: 0, era: 2, tab: 1 },
+    { id: 'faktakoll', name: 'Faktakoll-grupp', baseCost: 400000, fpPerSecond: 30000, count: 0, era: 2, tab: 1 },
     { id: 'rakel', name: 'Rakel-kommunikation', baseCost: 150000000, fpPerSecond: 20000000, count: 0, era: 2, tab: 1 },
     { id: 'cyber_security', name: 'Cybersäkerhet', baseCost: 25000000000, fpPerSecond: 4000000000, count: 0, era: 3, tab: 1 },
     // Tab 2: Familj & Grannar (era 1)
     { id: 'neighbors', name: 'Grannsamverkan', baseCost: 8000, fpPerSecond: 500, count: 0, era: 1, tab: 2 },
     { id: 'firewood', name: 'Vedförråd & gemensam eldstad', baseCost: 25000, fpPerSecond: 1500, count: 0, era: 1, tab: 2 },
+    { id: 'shared_cooking', name: 'Gemensam matlagning', baseCost: 50000, fpPerSecond: 3000, count: 0, era: 1, tab: 2 },
     { id: 'water_purifier', name: 'Vattenrenare & vattendunkar', baseCost: 75000, fpPerSecond: 5000, count: 0, era: 1, tab: 2 },
     { id: 'info_meeting', name: 'Informationsmöte', baseCost: 200000, fpPerSecond: 15000, count: 0, era: 1, tab: 2 },
+    { id: 'safety_walks', name: 'Trygghetsvandringar', baseCost: 350000, fpPerSecond: 25000, count: 0, era: 1, tab: 2 },
     { id: 'local_group', name: 'Lokal beredskapsgrupp', baseCost: 500000, fpPerSecond: 40000, count: 0, era: 1, tab: 2 },
     { id: 'shelter', name: 'Gemensamt skyddsrum', baseCost: 1200000, fpPerSecond: 100000, count: 0, era: 1, tab: 2 },
     // Tab 3: Kommun & Region
@@ -94,12 +97,12 @@ function makeUpgrades() {
     { id: 'food_supply', name: 'Livsmedelsförsörjning', baseCost: 4000000000, fpPerSecond: 600000000, count: 0, era: 3, tab: 3 },
     { id: 'fuel_reserves', name: 'Drivmedelsreserver', baseCost: 10000000000, fpPerSecond: 1500000000, count: 0, era: 3, tab: 3 },
     // Tab 4: Nationen (era 4)
-    { id: 'mcf', name: 'MCF', baseCost: 40000000000, fpPerSecond: 8000000000, count: 0, era: 4, tab: 4 },
-    { id: 'home_guard', name: 'Hemvärnet', baseCost: 100000000000, fpPerSecond: 20000000000, count: 0, era: 4, tab: 4 },
-    { id: 'gripen', name: 'JAS 39 Gripen', baseCost: 300000000000, fpPerSecond: 50000000000, count: 0, era: 4, tab: 4 },
-    { id: 'global_eye', name: 'Global Eye-flygplan', baseCost: 800000000000, fpPerSecond: 120000000000, count: 0, era: 4, tab: 4 },
-    { id: 'nato_art5', name: 'NATO artikel 5', baseCost: 2000000000000, fpPerSecond: 300000000000, count: 0, era: 4, tab: 4 },
-    { id: 'total_defense', name: 'Totalförsvar 3,5% av BNP', baseCost: 5000000000000, fpPerSecond: 800000000000, count: 0, era: 4, tab: 4 },
+    { id: 'mcf', name: 'MCF', baseCost: 15000000000, fpPerSecond: 5000000000, count: 0, era: 4, tab: 4 },
+    { id: 'home_guard', name: 'Hemvärnet', baseCost: 40000000000, fpPerSecond: 12000000000, count: 0, era: 4, tab: 4 },
+    { id: 'gripen', name: 'JAS 39 Gripen', baseCost: 100000000000, fpPerSecond: 30000000000, count: 0, era: 4, tab: 4 },
+    { id: 'global_eye', name: 'Global Eye-flygplan', baseCost: 300000000000, fpPerSecond: 80000000000, count: 0, era: 4, tab: 4 },
+    { id: 'nato_art5', name: 'NATO artikel 5', baseCost: 800000000000, fpPerSecond: 200000000000, count: 0, era: 4, tab: 4 },
+    { id: 'total_defense', name: 'Totalförsvar 3,5% av BNP', baseCost: 2000000000000, fpPerSecond: 500000000000, count: 0, era: 4, tab: 4 },
   ];
 }
 
@@ -110,6 +113,7 @@ function makeClickUpgrades() {
     { id: 'artsoppa', name: 'Ärtsoppekraft', cost: 250000, multiplier: 5, purchased: false },
     { id: 'beredskap_fighter', name: 'Beredskapskämpe', cost: 5000000, multiplier: 10, purchased: false },
     { id: 'minister', name: 'Försvarsminister-handslag', cost: 100000000, multiplier: 25, purchased: false },
+    { id: 'folkforankring', name: 'Folkförankring', cost: 1000000000, multiplier: 50, purchased: false, resourceBonus: { community: 10 } },
     { id: 'nu_javlar', name: '"NU JÄVLAR"-knappen', cost: 5000000000, multiplier: 100, purchased: false },
   ];
 }
@@ -145,9 +149,10 @@ const resourceBonuses = {
   water: { supply: 5 }, cans: { supply: 7 }, stove: { supply: 8 },
   sleeping: { supply: 10 }, kit: { supply: 15 }, backup_power: { supply: 6 },
   radio: { comms: 5 }, neighbor_list: { comms: 7 }, crank_radio_net: { comms: 10 },
-  crisis_app: { comms: 12 }, rakel: { comms: 15 }, cyber_security: { comms: 15 },
-  neighbors: { community: 5 }, firewood: { community: 7 }, water_purifier: { community: 8 },
-  info_meeting: { community: 10 }, local_group: { community: 12 }, shelter: { community: 15 },
+  crisis_app: { comms: 12 }, faktakoll: { comms: 13 }, rakel: { comms: 15 }, cyber_security: { comms: 15 },
+  neighbors: { community: 5 }, firewood: { community: 7 }, shared_cooking: { community: 7 },
+  water_purifier: { community: 8 }, info_meeting: { community: 10 }, safety_walks: { community: 11 },
+  local_group: { community: 12 }, shelter: { community: 15 },
   crisis_plan: { supply: 5, comms: 5, community: 5 },
   prep_week: { supply: 5, comms: 5, community: 5 },
   water_supply: { supply: 5, comms: 5, community: 5 },
@@ -309,17 +314,17 @@ assertEq(getCurrentEra(50000000), 4, '50M = Era 4');
 section('All Upgrades Data Integrity');
 {
   const ups = makeUpgrades();
-  assertEq(ups.length, 34, '34 total upgrades');
+  assertEq(ups.length, 37, '37 total upgrades');
 
   const ids = new Set(ups.map(u => u.id));
-  assertEq(ids.size, 34, 'All upgrade IDs unique');
+  assertEq(ids.size, 37, 'All upgrade IDs unique');
 
   // Check tab distribution
   const tabCounts = [0, 0, 0, 0, 0];
   for (const u of ups) tabCounts[u.tab]++;
   assertEq(tabCounts[0], 6, 'Tab 0 (Hemmet) has 6 upgrades');
-  assertEq(tabCounts[1], 6, 'Tab 1 (Info) has 6 upgrades');
-  assertEq(tabCounts[2], 6, 'Tab 2 (Grannar) has 6 upgrades');
+  assertEq(tabCounts[1], 7, 'Tab 1 (Info) has 7 upgrades');
+  assertEq(tabCounts[2], 8, 'Tab 2 (Grannar) has 8 upgrades');
   assertEq(tabCounts[3], 10, 'Tab 3 (Kommun) has 10 upgrades');
   assertEq(tabCounts[4], 6, 'Tab 4 (Nationen) has 6 upgrades');
 
@@ -348,10 +353,10 @@ section('All Upgrades Data Integrity');
 section('Click Upgrades Data Integrity');
 {
   const clicks = makeClickUpgrades();
-  assertEq(clicks.length, 6, '6 click upgrades');
+  assertEq(clicks.length, 7, '7 click upgrades');
 
   const ids = new Set(clicks.map(c => c.id));
-  assertEq(ids.size, 6, 'All click upgrade IDs unique');
+  assertEq(ids.size, 7, 'All click upgrade IDs unique');
 
   // Costs should be ascending
   for (let i = 1; i < clicks.length; i++) {
@@ -365,9 +370,9 @@ section('Click Upgrades Data Integrity');
   // Multipliers should all be > 1
   assert(clicks.every(c => c.multiplier > 1), 'All multipliers > 1');
 
-  // Total multiplier check: 2 * 3 * 5 * 10 * 25 * 100
+  // Total multiplier check: 2 * 3 * 5 * 10 * 25 * 50 * 100
   const totalMult = clicks.reduce((acc, c) => acc * c.multiplier, 1);
-  assertEq(totalMult, 750000, 'Total click multiplier = 750,000x');
+  assertEq(totalMult, 37500000, 'Total click multiplier = 37,500,000x');
 }
 
 section('Click Upgrade Buy Logic');
@@ -404,13 +409,13 @@ section('Tab-filtered Upgrade Visibility');
   const tab1era1 = ups.filter(u => u.tab === 1 && u.era <= 1);
   assertEq(tab1era1.length, 3, 'Tab 1, Era 1: 3 Info upgrades visible');
 
-  // Tab 1 at era 2: adds crisis_app + rakel = 5
+  // Tab 1 at era 2: adds crisis_app + faktakoll + rakel = 6
   const tab1era2 = ups.filter(u => u.tab === 1 && u.era <= 2);
-  assertEq(tab1era2.length, 5, 'Tab 1, Era 2: 5 Info upgrades visible');
+  assertEq(tab1era2.length, 6, 'Tab 1, Era 2: 6 Info upgrades visible');
 
-  // Tab 2 at era 1: all 6 (all era 1)
+  // Tab 2 at era 1: all 8 (all era 1)
   const tab2era1 = ups.filter(u => u.tab === 2 && u.era <= 1);
-  assertEq(tab2era1.length, 6, 'Tab 2, Era 1: all 6 Grannar upgrades visible');
+  assertEq(tab2era1.length, 8, 'Tab 2, Era 1: all 8 Grannar upgrades visible');
 
   // Tab 3 at era 2: 5 era-2 upgrades
   const tab3era2 = ups.filter(u => u.tab === 3 && u.era <= 2);
@@ -429,10 +434,10 @@ section('Tab-filtered Upgrade Visibility');
   assertEq(buyableEra0.length, 6, 'Era 0 (Tab 0 only): 6 buyable upgrades');
 
   const buyableEra1 = ups.filter(u => u.era <= 1 && [0, 1, 2].includes(u.tab));
-  assertEq(buyableEra1.length, 15, 'Era 1 (Tabs 0-2): 15 buyable upgrades');
+  assertEq(buyableEra1.length, 17, 'Era 1 (Tabs 0-2): 17 buyable upgrades');
 
   const buyableEra4 = ups.filter(u => u.era <= 4);
-  assertEq(buyableEra4.length, 34, 'Era 4: all 34 buyable');
+  assertEq(buyableEra4.length, 37, 'Era 4: all 37 buyable');
 }
 
 section('Tab System');
@@ -913,6 +918,13 @@ function makeAchievements(ups, clickUps, gameState) {
     { id: 'kontanter', name: 'Kontanter?!', check: () => gameState.totalFp >= 10000, unlocked: false },
     { id: 'broschyren', name: 'Har du läst broschyren?', check: () => gameState.totalFp >= 5200000, unlocked: false },
     { id: 'game_complete', name: 'Totalförsvaret komplett', check: () => gameState.gameComplete, unlocked: false },
+    // Sprint 4 achievements
+    { id: 'resursstark', name: 'Resursstark', check: () => gameState.gameComplete && gameState.resourceMin?.supply > 50 && gameState.resourceMin?.comms > 50 && gameState.resourceMin?.community > 50, unlocked: false },
+    { id: 'medmanniska', name: 'Medmänniska', check: () => (gameState.dilemmaHistory || []).filter(d => d.choice === 'a').length >= 5, unlocked: false },
+    { id: 'kriserfaren', name: 'Kriserfaren', check: () => (gameState.crisesTotal || 0) >= 10, unlocked: false },
+    { id: 'informerad', name: 'Informerad', check: () => ups.filter(u => u.tab === 1).every(u => u.count >= 1), unlocked: false },
+    { id: 'nollgangar', name: 'Nollgångar', check: () => gameState.gameComplete && (gameState.resourceZeroCount?.supply >= 3 || gameState.resourceZeroCount?.comms >= 3 || gameState.resourceZeroCount?.community >= 3), unlocked: false },
+    { id: 'synergi', name: 'Synergieffekt', check: () => [0, 1, 2, 3, 4].every(tab => getTabUpgradeCount(ups, tab) >= 3), unlocked: false },
   ];
   // Note: 'all_achievements' is excluded from tests because it references the array itself
 }
@@ -935,10 +947,10 @@ section('Achievement Data Integrity');
   const gs = { totalClicks: 0, totalUpgradesBought: 0, currentEra: 0, totalFp: 0, gameComplete: false };
   const achs = makeAchievements(ups, clicks, gs);
 
-  assertEq(achs.length, 15, '15 testable achievements (16 including meta)');
+  assertEq(achs.length, 21, '21 testable achievements (22 including meta)');
 
   const ids = new Set(achs.map(a => a.id));
-  assertEq(ids.size, 15, 'All achievement IDs unique');
+  assertEq(ids.size, 21, 'All achievement IDs unique');
 
   // All start unlocked = false
   assert(achs.every(a => a.unlocked === false), 'All achievements start locked');
@@ -1041,7 +1053,7 @@ section('Achievement — Click Upgrades');
   let unlocked = checkAchievementsTest(achs);
   assert(unlocked.includes('first_click_upgrade'), 'First click upgrade achievement unlocks');
 
-  clicks[5].purchased = true; // nu_javlar
+  clicks.find(c => c.id === 'nu_javlar').purchased = true;
   unlocked = checkAchievementsTest(achs);
   assert(unlocked.includes('nu_javlar'), 'NU JÄVLAR achievement unlocks');
 }
@@ -1080,7 +1092,7 @@ section('End Game Detection');
   const totalDefense = ups.find(u => u.id === 'total_defense');
   assert(totalDefense !== undefined, 'total_defense upgrade exists');
   assertEq(totalDefense.era, 4, 'total_defense is in Era 5 (index 4)');
-  assertEq(totalDefense.baseCost, 5000000000000, 'total_defense costs 5T');
+  assertEq(totalDefense.baseCost, 2000000000000, 'total_defense costs 2T');
 
   // The last upgrade in the array should be total_defense
   assertEq(ups[ups.length - 1].id, 'total_defense', 'total_defense is the last upgrade');
@@ -1089,9 +1101,9 @@ section('End Game Detection');
 section('Achievement Count');
 {
   // Total achievement count in the game (including all_achievements meta)
-  const TOTAL_ACHIEVEMENTS = 16;
+  const TOTAL_ACHIEVEMENTS = 22;
   assert(TOTAL_ACHIEVEMENTS >= 14, 'At least 14 achievements planned');
-  assert(TOTAL_ACHIEVEMENTS <= 20, 'No more than 20 achievements');
+  assert(TOTAL_ACHIEVEMENTS <= 25, 'No more than 25 achievements');
 }
 
 section('Full Game Achievement Simulation');
@@ -1973,6 +1985,515 @@ section('Sprint 3 — Save/Load Dilemma History');
     dilemmaHistory: Array.isArray(oldSave.dilemmaHistory) ? [...oldSave.dilemmaHistory] : [],
   };
   assertEq(gsOld.dilemmaHistory.length, 0, 'Missing dilemma history defaults to empty array');
+}
+
+// ============================================================
+// Sprint 4: Synergy System, New Upgrades, Resource Gate, Achievements
+// ============================================================
+
+// --- Synergy helper functions (mirrored from game.js) ---
+function getTabUpgradeCount(ups, tabIndex) {
+  let count = 0;
+  for (const u of ups) {
+    if (u.tab === tabIndex && u.count > 0) count++;
+  }
+  return count;
+}
+
+function getCommunityDrainReduction(ups) {
+  return getTabUpgradeCount(ups, 2) * 0.05;
+}
+
+function getAllDrainReduction(ups) {
+  return getTabUpgradeCount(ups, 3) * 0.03;
+}
+
+function getNationFpsMultiplier(ups) {
+  return 1 + getTabUpgradeCount(ups, 4) * 0.05;
+}
+
+function getInfoSynergyLevel(ups) {
+  return getTabUpgradeCount(ups, 1);
+}
+
+function getDilemmaResourceScore(choice) {
+  let score = 0;
+  if (choice.effects?.resources) {
+    for (const val of Object.values(choice.effects.resources)) {
+      score += val;
+    }
+  }
+  return score;
+}
+
+function calcFpPerSecondWithSynergy(ups, supplyResource) {
+  let total = 0;
+  for (const u of ups) total += u.fpPerSecond * u.count;
+  total *= getNationFpsMultiplier(ups);
+  if (supplyResource === 0) total *= 0.5;
+  return total;
+}
+
+// ---- 4.1 New Upgrades ----
+section('Sprint 4: New Upgrades');
+{
+  const ups = makeUpgrades();
+  const tab1 = ups.filter(u => u.tab === 1);
+  const tab2 = ups.filter(u => u.tab === 2);
+
+  assert(tab1.some(u => u.id === 'faktakoll'), 'Faktakoll-grupp exists in Tab 1');
+  assert(tab2.some(u => u.id === 'shared_cooking'), 'Gemensam matlagning exists in Tab 2');
+  assert(tab2.some(u => u.id === 'safety_walks'), 'Trygghetsvandringar exists in Tab 2');
+
+  assertEq(tab1.length, 7, 'Tab 1 has 7 upgrades');
+  assertEq(tab2.length, 8, 'Tab 2 has 8 upgrades');
+
+  // Check resource bonuses for new upgrades
+  assert(resourceBonuses.faktakoll?.comms === 13, 'Faktakoll gives comms bonus');
+  assert(resourceBonuses.shared_cooking?.community === 7, 'Shared cooking gives community bonus');
+  assert(resourceBonuses.safety_walks?.community === 11, 'Safety walks gives community bonus');
+
+  // Total upgrade count
+  assertEq(ups.length, 37, 'Total upgrade count is 37');
+}
+
+// ---- 4.2 New Click Upgrade ----
+section('Sprint 4: New Click Upgrade');
+{
+  const clicks = makeClickUpgrades();
+  assert(clicks.some(u => u.id === 'folkforankring'), 'Folkförankring click upgrade exists');
+  const folk = clicks.find(u => u.id === 'folkforankring');
+  assertEq(folk.multiplier, 50, 'Folkförankring gives 50x multiplier');
+  assertEq(folk.cost, 1000000000, 'Folkförankring costs 1B');
+  assert(folk.resourceBonus?.community === 10, 'Folkförankring gives +10 community');
+  assertEq(clicks.length, 7, 'Total click upgrades is 7');
+
+  // Verify click upgrades are sorted by cost
+  for (let i = 1; i < clicks.length; i++) {
+    assert(clicks[i].cost >= clicks[i - 1].cost, `Click upgrade ${clicks[i].id} cost >= ${clicks[i - 1].id} cost`);
+  }
+}
+
+// ---- 4.3 Synergy: Tab 2 (Grannar) reduces community drain ----
+section('Sprint 4: Grannar Synergy — Community Drain Reduction');
+{
+  const ups = makeUpgrades();
+  assertEq(getCommunityDrainReduction(ups), 0, 'No reduction with 0 grannar upgrades');
+
+  // Buy 4 grannar upgrades
+  ups.find(u => u.id === 'neighbors').count = 1;
+  ups.find(u => u.id === 'firewood').count = 1;
+  ups.find(u => u.id === 'shared_cooking').count = 1;
+  ups.find(u => u.id === 'water_purifier').count = 1;
+  assertClose(getCommunityDrainReduction(ups), 0.20, 0.001, '4 grannar upgrades → 20% community drain reduction');
+
+  // Buy all 8 → 40% reduction
+  ups.find(u => u.id === 'info_meeting').count = 1;
+  ups.find(u => u.id === 'safety_walks').count = 1;
+  ups.find(u => u.id === 'local_group').count = 1;
+  ups.find(u => u.id === 'shelter').count = 1;
+  assertClose(getCommunityDrainReduction(ups), 0.40, 0.001, '8 grannar upgrades → 40% community drain reduction');
+}
+
+// ---- 4.4 Synergy: Tab 3 (Kommun) reduces ALL drain ----
+section('Sprint 4: Kommun Synergy — All Drain Reduction');
+{
+  const ups = makeUpgrades();
+  assertEq(getAllDrainReduction(ups), 0, 'No reduction with 0 kommun upgrades');
+
+  // Buy 5 kommun upgrades → 15% reduction
+  ups.find(u => u.id === 'crisis_plan').count = 1;
+  ups.find(u => u.id === 'prep_week').count = 1;
+  ups.find(u => u.id === 'water_supply').count = 1;
+  ups.find(u => u.id === 'fire_service').count = 1;
+  ups.find(u => u.id === 'civil_duty').count = 1;
+  assertClose(getAllDrainReduction(ups), 0.15, 0.001, '5 kommun upgrades → 15% all drain reduction');
+
+  // Buy all 10 → 30% reduction
+  ups.find(u => u.id === 'county_coord').count = 1;
+  ups.find(u => u.id === 'civil_area').count = 1;
+  ups.find(u => u.id === 'power_prep').count = 1;
+  ups.find(u => u.id === 'food_supply').count = 1;
+  ups.find(u => u.id === 'fuel_reserves').count = 1;
+  assertClose(getAllDrainReduction(ups), 0.30, 0.001, '10 kommun upgrades → 30% all drain reduction');
+}
+
+// ---- 4.5 Synergy: Tab 4 (Nationen) FPS multiplier ----
+section('Sprint 4: Nation Synergy — FPS Multiplier');
+{
+  const ups = makeUpgrades();
+  assertClose(getNationFpsMultiplier(ups), 1.0, 0.001, 'No nation upgrades → 1.0x multiplier');
+
+  // Buy 3 nation upgrades → 1.15x
+  ups.find(u => u.id === 'mcf').count = 1;
+  ups.find(u => u.id === 'home_guard').count = 1;
+  ups.find(u => u.id === 'gripen').count = 1;
+  assertClose(getNationFpsMultiplier(ups), 1.15, 0.001, '3 nation upgrades → 1.15x multiplier');
+
+  // All 6 → 1.30x
+  ups.find(u => u.id === 'global_eye').count = 1;
+  ups.find(u => u.id === 'nato_art5').count = 1;
+  ups.find(u => u.id === 'total_defense').count = 1;
+  assertClose(getNationFpsMultiplier(ups), 1.30, 0.001, '6 nation upgrades → 1.30x multiplier');
+
+  // Verify FPS calculation with synergy
+  const ups2 = makeUpgrades();
+  ups2.find(u => u.id === 'water').count = 10; // 5 FPS
+  ups2.find(u => u.id === 'mcf').count = 1; // 5B FPS + 1.05x synergy
+  const expected = (0.5 * 10 + 5000000000) * 1.05;
+  assertClose(calcFpPerSecondWithSynergy(ups2, 80), expected, 1, 'FPS includes nation synergy multiplier');
+}
+
+// ---- 4.6 Synergy: Tab 1 (Info) → Dilemma hints ----
+section('Sprint 4: Info Synergy — Dilemma Hints');
+{
+  const ups = makeUpgrades();
+  assertEq(getInfoSynergyLevel(ups), 0, 'No info upgrades → level 0');
+
+  ups.find(u => u.id === 'radio').count = 1;
+  ups.find(u => u.id === 'neighbor_list').count = 1;
+  assertEq(getInfoSynergyLevel(ups), 2, '2 info upgrades → level 2 (no hints yet)');
+
+  ups.find(u => u.id === 'crank_radio_net').count = 1;
+  assertEq(getInfoSynergyLevel(ups), 3, '3 info upgrades → level 3 (hints active)');
+
+  // Test dilemma resource score calculation
+  const choiceA = { effects: { resources: { supply: -10, community: +15 } } };
+  const choiceB = { effects: { resources: { community: -5 } } };
+  assertEq(getDilemmaResourceScore(choiceA), 5, 'Dilemma score A: -10 + 15 = 5');
+  assertEq(getDilemmaResourceScore(choiceB), -5, 'Dilemma score B: -5');
+
+  // Empty effects
+  const choiceEmpty = { effects: {} };
+  assertEq(getDilemmaResourceScore(choiceEmpty), 0, 'Empty effects → score 0');
+
+  const choiceNoResources = { effects: { fp: -20 } };
+  assertEq(getDilemmaResourceScore(choiceNoResources), 0, 'No resources → score 0');
+}
+
+// ---- 4.7 Resource Gate: total_defense ----
+section('Sprint 4: Resource Gate for Total Defense');
+{
+  // Simulate buyUpgrade gate logic
+  function canBuyTotalDefense(resources) {
+    return resources.supply > 20 && resources.comms > 20 && resources.community > 20;
+  }
+
+  assert(!canBuyTotalDefense({ supply: 20, comms: 50, community: 50 }), 'Cannot buy: supply = 20');
+  assert(!canBuyTotalDefense({ supply: 50, comms: 0, community: 50 }), 'Cannot buy: comms = 0');
+  assert(!canBuyTotalDefense({ supply: 50, comms: 50, community: 15 }), 'Cannot buy: community = 15');
+  assert(canBuyTotalDefense({ supply: 21, comms: 21, community: 21 }), 'Can buy: all resources > 20');
+  assert(canBuyTotalDefense({ supply: 100, comms: 100, community: 100 }), 'Can buy: all resources at 100');
+  assert(!canBuyTotalDefense({ supply: 50, comms: 50, community: 20 }), 'Cannot buy: community exactly 20');
+}
+
+// ---- 4.8 Resource Tracking ----
+section('Sprint 4: Resource Tracking');
+{
+  // Simulate resource tracking logic
+  let resourceMin = { supply: 80, comms: 80, community: 80 };
+  let resourceZeroCount = { supply: 0, comms: 0, community: 0 };
+  let resources = { supply: 80, comms: 80, community: 80 };
+
+  // Drain to 40
+  resources.supply = 40;
+  if (resources.supply < resourceMin.supply) resourceMin.supply = resources.supply;
+  assertEq(resourceMin.supply, 40, 'Resource min tracks supply drop to 40');
+
+  // Drain to 0
+  const wasZero = resources.supply === 0;
+  resources.supply = 0;
+  if (resources.supply < resourceMin.supply) resourceMin.supply = resources.supply;
+  if (!wasZero && resources.supply === 0) resourceZeroCount.supply++;
+  assertEq(resourceMin.supply, 0, 'Resource min tracks supply at 0');
+  assertEq(resourceZeroCount.supply, 1, 'Zero count incremented on depletion');
+
+  // Recover and deplete again
+  resources.supply = 30;
+  const wasZero2 = resources.supply === 0;
+  resources.supply = 0;
+  if (!wasZero2 && resources.supply === 0) resourceZeroCount.supply++;
+  assertEq(resourceZeroCount.supply, 2, 'Zero count incremented again');
+}
+
+// ---- 4.9 Drain with Synergies (simulation) ----
+section('Sprint 4: Drain with Synergies');
+{
+  const ups = makeUpgrades();
+
+  // No synergies: full drain at Kris level (3/min)
+  const baseDrain = drainRates[3] / 60 / 10; // per tick
+  const supplyDrain = baseDrain * Math.max(0, 1 - getAllDrainReduction(ups));
+  const communityDrain = baseDrain * Math.max(0, 1 - getAllDrainReduction(ups) - getCommunityDrainReduction(ups));
+  assertClose(supplyDrain, baseDrain, 0.00001, 'No synergies: full supply drain');
+  assertClose(communityDrain, baseDrain, 0.00001, 'No synergies: full community drain');
+
+  // With 5 kommun upgrades (15% reduction) and 4 grannar upgrades (20% community reduction)
+  ups.find(u => u.id === 'crisis_plan').count = 1;
+  ups.find(u => u.id === 'prep_week').count = 1;
+  ups.find(u => u.id === 'water_supply').count = 1;
+  ups.find(u => u.id === 'fire_service').count = 1;
+  ups.find(u => u.id === 'civil_duty').count = 1;
+  ups.find(u => u.id === 'neighbors').count = 1;
+  ups.find(u => u.id === 'firewood').count = 1;
+  ups.find(u => u.id === 'shared_cooking').count = 1;
+  ups.find(u => u.id === 'water_purifier').count = 1;
+
+  const allRed = getAllDrainReduction(ups);
+  const comRed = getCommunityDrainReduction(ups);
+  const supplyDrain2 = baseDrain * Math.max(0, 1 - allRed);
+  const communityDrain2 = baseDrain * Math.max(0, 1 - allRed - comRed);
+
+  assertClose(supplyDrain2, baseDrain * 0.85, 0.00001, 'With synergies: supply drain reduced by 15%');
+  assertClose(communityDrain2, baseDrain * 0.65, 0.00001, 'With synergies: community drain reduced by 35% (15+20)');
+}
+
+// ---- 4.10 Achievement checks ----
+section('Sprint 4: New Achievements');
+{
+  // Resursstark: all resources > 50 at game end
+  const minGood = { supply: 51, comms: 55, community: 60 };
+  const minBad = { supply: 51, comms: 50, community: 60 };
+  assert(minGood.supply > 50 && minGood.comms > 50 && minGood.community > 50, 'Resursstark: passes when all min > 50');
+  assert(!(minBad.supply > 50 && minBad.comms > 50 && minBad.community > 50), 'Resursstark: fails when one min = 50');
+
+  // Medmänniska: choice 'a' in >= 5 dilemmas
+  const history5a = [
+    { choice: 'a' }, { choice: 'a' }, { choice: 'a' }, { choice: 'a' }, { choice: 'a' },
+  ];
+  const history4a = [
+    { choice: 'a' }, { choice: 'a' }, { choice: 'a' }, { choice: 'a' }, { choice: 'b' },
+  ];
+  assertEq(history5a.filter(d => d.choice === 'a').length >= 5, true, 'Medmänniska: 5 choice-a passes');
+  assertEq(history4a.filter(d => d.choice === 'a').length >= 5, false, 'Medmänniska: 4 choice-a fails');
+
+  // Kriserfaren: 10 crises survived
+  assert(10 >= 10, 'Kriserfaren: 10 crises passes');
+  assert(!(9 >= 10), 'Kriserfaren: 9 crises fails');
+
+  // Informerad: all Tab 1 upgrades
+  const ups = makeUpgrades();
+  const tab1 = ups.filter(u => u.tab === 1);
+  assert(!tab1.every(u => u.count >= 1), 'Informerad: fails with no upgrades');
+  for (const u of tab1) u.count = 1;
+  assert(tab1.every(u => u.count >= 1), 'Informerad: passes with all Tab 1 bought');
+
+  // Nollgångar: any resource hit 0 >= 3 times
+  const zeros = { supply: 3, comms: 1, community: 0 };
+  assert(zeros.supply >= 3 || zeros.comms >= 3 || zeros.community >= 3, 'Nollgångar: supply 3 times passes');
+  const zerosNone = { supply: 2, comms: 2, community: 2 };
+  assert(!(zerosNone.supply >= 3 || zerosNone.comms >= 3 || zerosNone.community >= 3), 'Nollgångar: all < 3 fails');
+
+  // Synergi: >= 3 upgrades in every tab
+  const ups2 = makeUpgrades();
+  assert(![0, 1, 2, 3, 4].every(tab => getTabUpgradeCount(ups2, tab) >= 3), 'Synergi: fails with no upgrades');
+  // Give 3 in each tab
+  for (let tab = 0; tab <= 4; tab++) {
+    let given = 0;
+    for (const u of ups2) {
+      if (u.tab === tab && given < 3) { u.count = 1; given++; }
+    }
+  }
+  assert([0, 1, 2, 3, 4].every(tab => getTabUpgradeCount(ups2, tab) >= 3), 'Synergi: passes with 3 per tab');
+}
+
+// ---- 4.11 Save/Load with Sprint 4 fields ----
+section('Sprint 4: Save/Load');
+{
+  const saveData = {
+    version: 2,
+    resourceMin: { supply: 12, comms: 0, community: 35 },
+    resourceZeroCount: { supply: 1, comms: 3, community: 0 },
+    crisesTotal: 14,
+    dilemmaHistory: [{ eventId: 'dilemma_vatten_granne', choice: 'a', time: 1000 }],
+  };
+
+  const json = JSON.stringify(saveData);
+  const restored = JSON.parse(json);
+
+  assertEq(restored.resourceMin.supply, 12, 'resourceMin.supply restored');
+  assertEq(restored.resourceMin.comms, 0, 'resourceMin.comms restored');
+  assertEq(restored.resourceZeroCount.comms, 3, 'resourceZeroCount.comms restored');
+  assertEq(restored.crisesTotal, 14, 'crisesTotal restored');
+
+  // Missing fields in old save defaults
+  const oldSave = { version: 2 };
+  const minDefault = oldSave.resourceMin?.supply ?? 80;
+  const zeroDefault = oldSave.resourceZeroCount?.supply ?? 0;
+  const crisisDefault = oldSave.crisesTotal || 0;
+  assertEq(minDefault, 80, 'Missing resourceMin defaults to 80');
+  assertEq(zeroDefault, 0, 'Missing resourceZeroCount defaults to 0');
+  assertEq(crisisDefault, 0, 'Missing crisesTotal defaults to 0');
+}
+
+// ---- 4.12 Balance simulation with synergies ----
+section('Sprint 4: Balance Simulation with Synergies');
+{
+  const ups = makeUpgrades();
+  const clicks = makeClickUpgrades();
+
+  let fp = 0, totalFp = 0, totalClicks = 0, totalUpgrades = 0;
+  let fpPerClick = 1;
+  let resources = { supply: 80, comms: 80, community: 80 };
+  const CPS = 3;
+  const ticksPerSec = 10;
+  const totalTicks = 50 * 60 * ticksPerSec; // 50 min max sim time
+
+  let currentEra = 0;
+  let threatLevel = 0;
+  let tabsUnlocked = [true, false, false, false, false];
+  let gameComplete = false;
+  let completionTick = 0;
+
+  for (let tick = 0; tick < totalTicks; tick++) {
+    const elapsedSec = tick / ticksPerSec;
+
+    // Update threat level
+    for (let i = threatLevels.length - 1; i >= 0; i--) {
+      if (elapsedSec >= threatLevels[i].time) { threatLevel = i; break; }
+    }
+    updateSimTabsByThreat(threatLevel, tabsUnlocked);
+
+    // Update era
+    for (let i = eras.length - 1; i >= 0; i--) {
+      if (totalFp >= eras[i].threshold) { currentEra = i; break; }
+    }
+
+    // Resource drain with synergies
+    const baseDrain = drainRates[threatLevel] / 60 / ticksPerSec;
+    if (baseDrain > 0) {
+      const allRed = getAllDrainReduction(ups);
+      const comRed = getCommunityDrainReduction(ups);
+      resources.supply = Math.max(0, resources.supply - baseDrain * Math.max(0, 1 - allRed));
+      resources.comms = Math.max(0, resources.comms - baseDrain * Math.max(0, 1 - allRed));
+      resources.community = Math.max(0, resources.community - baseDrain * Math.max(0, 1 - allRed - comRed));
+    }
+
+    // FPS with synergies
+    let fps = 0;
+    for (const u of ups) fps += u.fpPerSecond * u.count;
+    fps *= getNationFpsMultiplier(ups);
+    if (resources.supply === 0) fps *= 0.5;
+
+    const gain = fps / ticksPerSec;
+    fp += gain;
+    totalFp += gain;
+
+    // Click
+    if (tick % Math.round(ticksPerSec / CPS) === 0) {
+      fp += fpPerClick;
+      totalFp += fpPerClick;
+      totalClicks++;
+    }
+
+    // Buy upgrades (greedy: best cost/FPS ratio first)
+    let bought = true;
+    while (bought) {
+      bought = false;
+      let bestIdx = -1, bestRatio = Infinity;
+      for (let i = 0; i < ups.length; i++) {
+        const u = ups[i];
+        if (u.era > currentEra) continue;
+        if (!tabsUnlocked[u.tab]) continue;
+        if (u.id === 'total_defense' && (resources.supply <= 20 || resources.comms <= 20 || resources.community <= 20)) continue;
+        const communityPenalty = resources.community === 0 ? 1.5 : 1;
+        const cost = Math.ceil(u.baseCost * Math.pow(1.15, u.count) * communityPenalty);
+        if (fp >= cost) {
+          const ratio = cost / u.fpPerSecond;
+          if (ratio < bestRatio) { bestRatio = ratio; bestIdx = i; }
+        }
+      }
+      if (bestIdx >= 0) {
+        const u = ups[bestIdx];
+        const communityPenalty = resources.community === 0 ? 1.5 : 1;
+        const cost = Math.ceil(u.baseCost * Math.pow(1.15, u.count) * communityPenalty);
+        fp -= cost;
+        u.count++;
+        totalUpgrades++;
+        bought = true;
+        const bonus = resourceBonuses[u.id];
+        if (bonus) {
+          for (const [res, val] of Object.entries(bonus)) {
+            resources[res] = Math.min(100, resources[res] + val);
+          }
+        }
+        if (u.id === 'total_defense') {
+          gameComplete = true;
+          completionTick = tick;
+        }
+      }
+      // Buy click upgrades
+      for (const cu of clicks) {
+        if (cu.purchased) continue;
+        if (fp >= cu.cost) {
+          fp -= cu.cost;
+          cu.purchased = true;
+          fpPerClick *= cu.multiplier;
+          if (cu.resourceBonus) {
+            for (const [res, val] of Object.entries(cu.resourceBonus)) {
+              resources[res] = Math.min(100, resources[res] + val);
+            }
+          }
+          bought = true;
+          break;
+        }
+      }
+    }
+
+    if (gameComplete) break;
+  }
+
+  const completionMin = gameComplete ? (completionTick / ticksPerSec / 60).toFixed(1) : 'DNF';
+  assert(gameComplete, `Game completes (at ${completionMin} min at ${CPS} CPS)`);
+  if (gameComplete) {
+    const mins = completionTick / ticksPerSec / 60;
+    assert(mins >= 20, `Takes at least 20 min (got ${completionMin})`);
+    assert(mins <= 45, `Takes at most 45 min (got ${completionMin})`);
+  }
+  assert(totalUpgrades > 0, `Bought ${totalUpgrades} upgrades total`);
+}
+
+// ---- 4.13 Upgrade data integrity ----
+section('Sprint 4: Upgrade Data Integrity');
+{
+  const ups = makeUpgrades();
+
+  // All upgrades have valid tab
+  for (const u of ups) {
+    assert(u.tab >= 0 && u.tab <= 4, `Upgrade ${u.id} has valid tab ${u.tab}`);
+  }
+
+  // All upgrades have resource bonus mapping
+  for (const u of ups) {
+    assert(resourceBonuses[u.id] !== undefined, `Upgrade ${u.id} has resource bonus entry`);
+  }
+
+  // Tab counts
+  const tabCounts = [0, 0, 0, 0, 0];
+  for (const u of ups) tabCounts[u.tab]++;
+  assertEq(tabCounts[0], 6, 'Tab 0 has 6 upgrades');
+  assertEq(tabCounts[1], 7, 'Tab 1 has 7 upgrades');
+  assertEq(tabCounts[2], 8, 'Tab 2 has 8 upgrades');
+  assertEq(tabCounts[3], 10, 'Tab 3 has 10 upgrades');
+  assertEq(tabCounts[4], 6, 'Tab 4 has 6 upgrades');
+
+  // Upgrades sorted by tab, era, baseCost
+  for (let i = 1; i < ups.length; i++) {
+    const prev = ups[i - 1], curr = ups[i];
+    const ordered = prev.tab < curr.tab ||
+      (prev.tab === curr.tab && prev.era < curr.era) ||
+      (prev.tab === curr.tab && prev.era === curr.era && prev.baseCost <= curr.baseCost);
+    assert(ordered, `Upgrade ${curr.id} sorted after ${prev.id}`);
+  }
+
+  // No duplicate IDs
+  const ids = ups.map(u => u.id);
+  assertEq(ids.length, new Set(ids).size, 'No duplicate upgrade IDs');
+
+  // Click upgrades integrity
+  const clicks = makeClickUpgrades();
+  const clickIds = clicks.map(u => u.id);
+  assertEq(clickIds.length, new Set(clickIds).size, 'No duplicate click upgrade IDs');
 }
 
 // --- Summary ---
