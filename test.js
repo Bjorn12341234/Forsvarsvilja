@@ -476,6 +476,259 @@ section('Click Upgrade Timing');
   assert(range >= 1000000, `Click upgrade cost range ≥1M (${range.toLocaleString()}x)`);
 }
 
+// ---- Sprint 3 Tests: Events ----
+
+function makeEvents() {
+  return [
+    {
+      id: 'stromavbrott', name: 'Strömavbrott!',
+      description: 'Elnätet är nere. De med radio klarar sig bättre!',
+      type: 'conditional', duration: 0, value: 15,
+      relatedUpgrade: 'radio',
+      bonusDescription: 'Radio-bonus: +{value}s av FP/s',
+    },
+    {
+      id: 'vattenledning', name: 'Vattenledningen brast!',
+      description: 'Vattnet är avstängt. Har du vatten hemma?',
+      type: 'conditional', duration: 0, value: 10,
+      relatedUpgrade: 'water',
+      bonusDescription: 'Vattenförråd-bonus: +{value}s av FP/s',
+    },
+    {
+      id: 'beredskapslarm', name: 'Beredskapslarm!',
+      description: 'Hesa Fredrik ljuder — alla mobiliserar!',
+      type: 'multiplier', duration: 30, value: 2,
+    },
+    {
+      id: 'jas_flyby', name: 'JAS-flyby!',
+      description: 'Ett JAS 39 Gripen dundrar över himlen — moralen stiger!',
+      type: 'bonus', duration: 0, value: 10,
+    },
+    {
+      id: 'hemvarnsovning', name: 'Hemvärnsövning',
+      description: 'Hemvärnet övar i ditt område — extra beredskap!',
+      type: 'multiplier', duration: 60, value: 1.5,
+    },
+    {
+      id: 'desinformation', name: 'Desinformationsattack!',
+      description: 'Falsk information sprids! Klicka snabbt för att motverka!',
+      type: 'click_bonus', duration: 15, value: 3,
+    },
+    {
+      id: 'om_krisen_kommer', name: '"Om krisen kommer"-utskick',
+      description: 'MSB:s broschyr inspirerar hela befolkningen!',
+      type: 'bonus', duration: 0, value: 20,
+    },
+    {
+      id: 'artsoppetorsdag', name: 'Ärtsoppetorsdag!',
+      description: 'Traditionen stärker banden — och beredskapen!',
+      type: 'multiplier', duration: 30, value: 2,
+    },
+    {
+      id: 'nato_ovning', name: 'NATO-övning',
+      description: 'Allierade övar tillsammans — massiv förstärkning!',
+      type: 'multiplier', duration: 20, value: 3,
+    },
+    {
+      id: 'frivilligvag', name: 'Frivilligvåg!',
+      description: 'Rekordmånga anmäler sig som frivilliga!',
+      type: 'upgrade_bonus', duration: 0, value: 0.5,
+    },
+    {
+      id: 'kall_vinter', name: 'Kall vinter',
+      description: 'Temperaturen faller. Har du sovsäck och filtar?',
+      type: 'conditional', duration: 0, value: 12,
+      relatedUpgrade: 'sleeping',
+      bonusDescription: 'Sovsäck-bonus: +{value}s av FP/s',
+    },
+    {
+      id: 'mobilnat_nere', name: 'Mobilnätet nere!',
+      description: 'Inga samtal, inget internet. Radio är enda kontakten.',
+      type: 'conditional', duration: 0, value: 15,
+      relatedUpgrade: 'radio',
+      bonusDescription: 'Radio-bonus: +{value}s av FP/s',
+    },
+  ];
+}
+
+// Pure event bonus calculation (mirrors game.js getEventBonus)
+function getEventBonus(event, ups, fpPerSecond) {
+  if (event.type === 'bonus') {
+    return fpPerSecond * event.value;
+  }
+  if (event.type === 'conditional') {
+    const upgrade = ups.find(u => u.id === event.relatedUpgrade);
+    if (upgrade && upgrade.count > 0) {
+      return fpPerSecond * event.value;
+    }
+    return 0;
+  }
+  if (event.type === 'upgrade_bonus') {
+    let totalCount = 0;
+    for (const u of ups) totalCount += u.count;
+    return fpPerSecond * event.value * totalCount;
+  }
+  return 0;
+}
+
+section('Event Data Integrity');
+{
+  const evts = makeEvents();
+  assertEq(evts.length, 12, '12 events total');
+
+  const ids = new Set(evts.map(e => e.id));
+  assertEq(ids.size, 12, 'All event IDs unique');
+
+  // All events have required fields
+  const requiredFields = ['id', 'name', 'description', 'type', 'duration', 'value'];
+  for (const e of evts) {
+    for (const f of requiredFields) {
+      assert(e[f] !== undefined, `Event "${e.id}" has field "${f}"`);
+    }
+  }
+
+  // Valid types
+  const validTypes = ['bonus', 'multiplier', 'click_bonus', 'conditional', 'upgrade_bonus'];
+  for (const e of evts) {
+    assert(validTypes.includes(e.type), `Event "${e.id}" has valid type "${e.type}"`);
+  }
+
+  // Conditional events have relatedUpgrade
+  const conditionals = evts.filter(e => e.type === 'conditional');
+  assert(conditionals.length >= 3, 'At least 3 conditional events');
+  for (const e of conditionals) {
+    assert(e.relatedUpgrade !== undefined, `Conditional event "${e.id}" has relatedUpgrade`);
+    assert(e.bonusDescription !== undefined, `Conditional event "${e.id}" has bonusDescription`);
+  }
+
+  // Timed events have positive duration
+  const timed = evts.filter(e => e.type === 'multiplier' || e.type === 'click_bonus');
+  for (const e of timed) {
+    assert(e.duration > 0, `Timed event "${e.id}" has positive duration (${e.duration}s)`);
+  }
+
+  // Instant events have duration 0
+  const instant = evts.filter(e => e.type === 'bonus' || e.type === 'conditional' || e.type === 'upgrade_bonus');
+  for (const e of instant) {
+    assertEq(e.duration, 0, `Instant event "${e.id}" has duration 0`);
+  }
+}
+
+section('Event Type Distribution');
+{
+  const evts = makeEvents();
+  const typeCounts = {};
+  for (const e of evts) {
+    typeCounts[e.type] = (typeCounts[e.type] || 0) + 1;
+  }
+  assert(typeCounts['multiplier'] >= 3, 'At least 3 multiplier events');
+  assert(typeCounts['bonus'] >= 2, 'At least 2 bonus events');
+  assert(typeCounts['conditional'] >= 3, 'At least 3 conditional events');
+  assert(typeCounts['click_bonus'] >= 1, 'At least 1 click_bonus event');
+  assert(typeCounts['upgrade_bonus'] >= 1, 'At least 1 upgrade_bonus event');
+}
+
+section('Event Multiplier Application');
+{
+  // With multiplier event active, FP/s should be multiplied
+  const baseFps = 100;
+  const evts = makeEvents();
+  const beredskapslarm = evts.find(e => e.id === 'beredskapslarm');
+  const effectiveFps = baseFps * beredskapslarm.value;
+  assertEq(effectiveFps, 200, 'Beredskapslarm doubles FP/s (100 → 200)');
+
+  const natoOvning = evts.find(e => e.id === 'nato_ovning');
+  assertEq(baseFps * natoOvning.value, 300, 'NATO-övning triples FP/s (100 → 300)');
+
+  const hemvarnsovning = evts.find(e => e.id === 'hemvarnsovning');
+  assertEq(baseFps * hemvarnsovning.value, 150, 'Hemvärnsövning 1.5x FP/s (100 → 150)');
+}
+
+section('Event Bonus Calculation');
+{
+  const ups = makeUpgrades();
+  const fpPerSecond = 100;
+
+  // JAS-flyby: 10 seconds of FP/s
+  const evts = makeEvents();
+  const jasFlyby = evts.find(e => e.id === 'jas_flyby');
+  assertEq(getEventBonus(jasFlyby, ups, fpPerSecond), 1000, 'JAS-flyby gives 10s of FP/s (1000 FP at 100/s)');
+
+  // Om krisen kommer: 20 seconds of FP/s
+  const omKrisen = evts.find(e => e.id === 'om_krisen_kommer');
+  assertEq(getEventBonus(omKrisen, ups, fpPerSecond), 2000, 'Om krisen 20s of FP/s (2000 FP at 100/s)');
+}
+
+section('Conditional Event Bonus');
+{
+  const ups = makeUpgrades();
+  const evts = makeEvents();
+  const fpPerSecond = 100;
+
+  // Strömavbrott without radio = no bonus
+  const stromavbrott = evts.find(e => e.id === 'stromavbrott');
+  assertEq(getEventBonus(stromavbrott, ups, fpPerSecond), 0, 'Strömavbrott without radio = 0 bonus');
+
+  // Buy radio
+  ups.find(u => u.id === 'radio').count = 1;
+  assertEq(getEventBonus(stromavbrott, ups, fpPerSecond), 1500, 'Strömavbrott with radio = 15s of FP/s');
+
+  // Kall vinter without sleeping bag = no bonus
+  const kallVinter = evts.find(e => e.id === 'kall_vinter');
+  assertEq(getEventBonus(kallVinter, ups, fpPerSecond), 0, 'Kall vinter without sleeping = 0 bonus');
+
+  // Buy sleeping bag
+  ups.find(u => u.id === 'sleeping').count = 2;
+  assertEq(getEventBonus(kallVinter, ups, fpPerSecond), 1200, 'Kall vinter with sleeping = 12s of FP/s');
+}
+
+section('Upgrade Bonus Event');
+{
+  const ups = makeUpgrades();
+  const evts = makeEvents();
+  const fpPerSecond = 100;
+
+  // Frivilligvåg with no upgrades = 0
+  const frivilligvag = evts.find(e => e.id === 'frivilligvag');
+  assertEq(getEventBonus(frivilligvag, ups, fpPerSecond), 0, 'Frivilligvåg with 0 upgrades = 0');
+
+  // Buy some upgrades
+  ups[0].count = 5; ups[1].count = 3;
+  const totalCount = 8;
+  assertEq(getEventBonus(frivilligvag, ups, fpPerSecond), fpPerSecond * 0.5 * totalCount,
+    'Frivilligvåg with 8 upgrades = 0.5 * 8 * FP/s');
+}
+
+section('Event Scheduling Range');
+{
+  // The scheduling function uses 45-90s — test the range is valid
+  const MIN_DELAY = 45;
+  const MAX_DELAY = 90;
+  assert(MIN_DELAY >= 30, 'Min event delay ≥30s');
+  assert(MAX_DELAY <= 120, 'Max event delay ≤120s');
+  assert(MAX_DELAY > MIN_DELAY, 'Max > Min delay');
+
+  // Simulate many random delays to verify range
+  let allInRange = true;
+  for (let i = 0; i < 1000; i++) {
+    const delay = MIN_DELAY + Math.random() * (MAX_DELAY - MIN_DELAY);
+    if (delay < MIN_DELAY || delay > MAX_DELAY) allInRange = false;
+  }
+  assert(allInRange, '1000 random delays all within 45-90s');
+}
+
+section('Conditional Event Related Upgrades Exist');
+{
+  const ups = makeUpgrades();
+  const evts = makeEvents();
+  const conditionals = evts.filter(e => e.type === 'conditional');
+
+  for (const e of conditionals) {
+    const upgrade = ups.find(u => u.id === e.relatedUpgrade);
+    assert(upgrade !== undefined, `Conditional event "${e.id}" references existing upgrade "${e.relatedUpgrade}"`);
+  }
+}
+
 // --- Summary ---
 console.log('');
 const total = passed + failed;

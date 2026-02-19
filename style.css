@@ -449,6 +449,182 @@ main {
 
 /* === RESPONSIVE (basic for Sprint 1) === */
 
+/* === PARTICLES === */
+
+.particle {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 100;
+  animation: particle-fly var(--duration, 0.6s) ease-out forwards;
+}
+
+@keyframes particle-fly {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx, 0px), var(--dy, 0px)) scale(0.3);
+    opacity: 0;
+  }
+}
+
+/* === FLOAT TEXT === */
+
+.float-text {
+  position: fixed;
+  pointer-events: none;
+  z-index: 101;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--yellow);
+  text-shadow: 0 0 8px rgba(254, 204, 2, 0.5);
+  animation: float-up 1s ease-out forwards;
+}
+
+@keyframes float-up {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-80px);
+    opacity: 0;
+  }
+}
+
+/* === MUTE BUTTON === */
+
+.mute-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: color 0.15s, border-color 0.15s;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.mute-btn:hover {
+  color: var(--yellow);
+  border-color: var(--yellow-dim);
+}
+
+.mute-btn.muted {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+/* === EVENT OVERLAY === */
+
+.event-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.event-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.event-card {
+  background: var(--bg-panel);
+  border: 2px solid var(--yellow);
+  border-radius: 12px;
+  padding: 28px 36px;
+  text-align: center;
+  max-width: 420px;
+  box-shadow: 0 0 40px rgba(254, 204, 2, 0.2), 0 0 80px rgba(254, 204, 2, 0.1);
+  animation: event-appear 0.4s ease;
+}
+
+@keyframes event-appear {
+  0% { transform: scale(0.8) translateY(20px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.event-card h3 {
+  font-size: 1.3rem;
+  color: var(--yellow);
+  margin-bottom: 8px;
+  text-shadow: 0 0 12px rgba(254, 204, 2, 0.4);
+}
+
+.event-card p {
+  font-size: 0.9rem;
+  color: var(--text);
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.event-timer-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-card);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.event-timer-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--yellow-dim), var(--yellow));
+  border-radius: 3px;
+  transition: width 0.5s linear;
+}
+
+.event-dismiss {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+/* === ACTIVE BONUS INDICATOR === */
+
+.active-bonus {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(254, 204, 2, 0.1);
+  border: 1px solid var(--yellow-dim);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: var(--yellow);
+  font-weight: 600;
+  animation: bonus-glow 1.5s ease-in-out infinite alternate;
+}
+
+.active-bonus.visible {
+  display: flex;
+}
+
+.active-bonus-time {
+  color: var(--text);
+  font-weight: 400;
+}
+
+@keyframes bonus-glow {
+  0% { box-shadow: 0 0 4px rgba(254, 204, 2, 0.2); }
+  100% { box-shadow: 0 0 16px rgba(254, 204, 2, 0.4); }
+}
+
+/* === RESPONSIVE (basic for Sprint 1) === */
+
 @media (max-width: 768px) {
   main {
     flex-direction: column;

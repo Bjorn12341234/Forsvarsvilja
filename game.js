@@ -10,6 +10,11 @@ const game = {
   currentEra: 0,
   lastEra: 0,
   startTime: Date.now(),
+  muted: false,
+  activeEvent: null,
+  eventMultiplier: 1,
+  eventTimer: null,
+  eventEndTime: 0,
 };
 
 // --- Era Definitions ---
@@ -243,6 +248,78 @@ const tickerMessages = [
   'Beredskapsveckan har hållits årligen sedan 2017.',
 ];
 
+// --- Random Events ---
+const events = [
+  {
+    id: 'stromavbrott', name: 'Strömavbrott!',
+    description: 'Elnätet är nere. De med radio klarar sig bättre!',
+    type: 'conditional', duration: 0, value: 15,
+    relatedUpgrade: 'radio',
+    bonusDescription: 'Radio-bonus: +{value}s av FP/s',
+  },
+  {
+    id: 'vattenledning', name: 'Vattenledningen brast!',
+    description: 'Vattnet är avstängt. Har du vatten hemma?',
+    type: 'conditional', duration: 0, value: 10,
+    relatedUpgrade: 'water',
+    bonusDescription: 'Vattenförråd-bonus: +{value}s av FP/s',
+  },
+  {
+    id: 'beredskapslarm', name: 'Beredskapslarm!',
+    description: 'Hesa Fredrik ljuder — alla mobiliserar!',
+    type: 'multiplier', duration: 30, value: 2,
+  },
+  {
+    id: 'jas_flyby', name: 'JAS-flyby!',
+    description: 'Ett JAS 39 Gripen dundrar över himlen — moralen stiger!',
+    type: 'bonus', duration: 0, value: 10,
+  },
+  {
+    id: 'hemvarnsovning', name: 'Hemvärnsövning',
+    description: 'Hemvärnet övar i ditt område — extra beredskap!',
+    type: 'multiplier', duration: 60, value: 1.5,
+  },
+  {
+    id: 'desinformation', name: 'Desinformationsattack!',
+    description: 'Falsk information sprids! Klicka snabbt för att motverka!',
+    type: 'click_bonus', duration: 15, value: 3,
+  },
+  {
+    id: 'om_krisen_kommer', name: '"Om krisen kommer"-utskick',
+    description: 'MSB:s broschyr inspirerar hela befolkningen!',
+    type: 'bonus', duration: 0, value: 20,
+  },
+  {
+    id: 'artsoppetorsdag', name: 'Ärtsoppetorsdag!',
+    description: 'Traditionen stärker banden — och beredskapen!',
+    type: 'multiplier', duration: 30, value: 2,
+  },
+  {
+    id: 'nato_ovning', name: 'NATO-övning',
+    description: 'Allierade övar tillsammans — massiv förstärkning!',
+    type: 'multiplier', duration: 20, value: 3,
+  },
+  {
+    id: 'frivilligvag', name: 'Frivilligvåg!',
+    description: 'Rekordmånga anmäler sig som frivilliga!',
+    type: 'upgrade_bonus', duration: 0, value: 0.5,
+  },
+  {
+    id: 'kall_vinter', name: 'Kall vinter',
+    description: 'Temperaturen faller. Har du sovsäck och filtar?',
+    type: 'conditional', duration: 0, value: 12,
+    relatedUpgrade: 'sleeping',
+    bonusDescription: 'Sovsäck-bonus: +{value}s av FP/s',
+  },
+  {
+    id: 'mobilnat_nere', name: 'Mobilnätet nere!',
+    description: 'Inga samtal, inget internet. Radio är enda kontakten.',
+    type: 'conditional', duration: 0, value: 15,
+    relatedUpgrade: 'radio',
+    bonusDescription: 'Radio-bonus: +{value}s av FP/s',
+  },
+];
+
 // --- DOM References ---
 const dom = {
   fpCount: document.getElementById('fp-count'),
@@ -257,6 +334,14 @@ const dom = {
   tickerContent: document.getElementById('ticker-content'),
   eraUnlockOverlay: document.getElementById('era-unlock-overlay'),
   eraUnlockName: document.getElementById('era-unlock-name'),
+  muteBtn: document.getElementById('mute-btn'),
+  eventOverlay: document.getElementById('event-overlay'),
+  eventName: document.getElementById('event-name'),
+  eventDesc: document.getElementById('event-desc'),
+  eventTimerFill: document.getElementById('event-timer-fill'),
+  activeBonus: document.getElementById('active-bonus'),
+  activeBonusText: document.getElementById('active-bonus-text'),
+  activeBonusTime: document.getElementById('active-bonus-time'),
 };
 
 // --- Number Formatting ---
@@ -335,13 +420,120 @@ function showEraUnlock(eraIndex) {
   const era = eras[eraIndex];
   dom.eraUnlockName.textContent = `Era ${eraIndex + 1}: ${era.name}`;
   dom.eraUnlockOverlay.classList.add('visible');
+  playSound('era');
   setTimeout(() => {
     dom.eraUnlockOverlay.classList.remove('visible');
   }, 2500);
 }
 
+// --- Particle Effects ---
+function spawnParticles(x, y) {
+  const count = 6 + Math.floor(Math.random() * 5); // 6-10
+  const colors = ['#FECC02', '#FFD633', '#E6B800', '#FFF2AA', '#D4A800'];
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+    const dist = 40 + Math.random() * 60;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist;
+    const size = 3 + Math.random() * 5;
+    const duration = 0.4 + Math.random() * 0.4;
+    p.style.left = x + 'px';
+    p.style.top = y + 'px';
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.setProperty('--dx', dx + 'px');
+    p.style.setProperty('--dy', dy + 'px');
+    p.style.setProperty('--duration', duration + 's');
+    document.body.appendChild(p);
+    p.addEventListener('animationend', () => p.remove());
+  }
+}
+
+// --- Float Text ---
+function spawnFloatText(x, y, text) {
+  const el = document.createElement('div');
+  el.className = 'float-text';
+  el.textContent = text;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  document.body.appendChild(el);
+  el.addEventListener('animationend', () => el.remove());
+}
+
+// --- Sound System ---
+let audioCtx = null;
+
+function ensureAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+function playSound(type) {
+  if (game.muted) return;
+  const ctx = ensureAudioCtx();
+  const now = ctx.currentTime;
+
+  if (type === 'click') {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(800, now);
+    osc.frequency.exponentialRampToValueAtTime(600, now + 0.05);
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.05);
+  } else if (type === 'buy') {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(400, now);
+    osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+    gain.gain.setValueAtTime(0.1, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.1);
+  } else if (type === 'era') {
+    // Three ascending tones
+    [0, 0.12, 0.24].forEach((offset, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime([523, 659, 784][i], now + offset);
+      gain.gain.setValueAtTime(0.15, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.2);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.2);
+    });
+  } else if (type === 'event') {
+    // Two quick notes
+    [0, 0.08].forEach((offset, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime([600, 900][i], now + offset);
+      gain.gain.setValueAtTime(0.12, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.12);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.12);
+    });
+  }
+}
+
 // --- Click Handler ---
-function handleClick() {
+function handleClick(e) {
   game.fp += game.fpPerClick;
   game.totalFp += game.fpPerClick;
   game.totalClicks++;
@@ -350,6 +542,14 @@ function handleClick() {
   dom.clickButton.classList.add('clicking');
   setTimeout(() => dom.clickButton.classList.remove('clicking'), 100);
 
+  // Particles and float text
+  const rect = dom.clickButton.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  spawnParticles(cx, cy);
+  spawnFloatText(cx + (Math.random() - 0.5) * 40, cy - 20, '+' + formatNumber(game.fpPerClick) + ' FP');
+
+  playSound('click');
   updateUI();
 }
 
@@ -365,6 +565,7 @@ function buyUpgrade(id) {
   game.fp -= cost;
   upgrade.count++;
   calculateFpPerSecond();
+  playSound('buy');
   updateUI();
 }
 
@@ -377,6 +578,7 @@ function buyClickUpgrade(id) {
   game.fp -= upgrade.cost;
   upgrade.purchased = true;
   game.fpPerClick *= upgrade.multiplier;
+  playSound('buy');
   updateUI();
 }
 
@@ -475,25 +677,165 @@ function setupTicker() {
   });
 }
 
+// --- Event System ---
+function getEventBonus(event, ups) {
+  if (event.type === 'bonus') {
+    // Instant FP bonus: value seconds of current FP/s
+    return game.fpPerSecond * event.value;
+  }
+  if (event.type === 'conditional') {
+    const upgrade = ups.find(u => u.id === event.relatedUpgrade);
+    if (upgrade && upgrade.count > 0) {
+      return game.fpPerSecond * event.value;
+    }
+    return 0;
+  }
+  if (event.type === 'upgrade_bonus') {
+    // Bonus based on total upgrade count
+    let totalCount = 0;
+    for (const u of ups) totalCount += u.count;
+    return game.fpPerSecond * event.value * totalCount;
+  }
+  return 0;
+}
+
+function triggerEvent(event) {
+  game.activeEvent = event;
+  playSound('event');
+
+  // Show overlay
+  dom.eventName.textContent = event.name;
+
+  // Build description
+  let desc = event.description;
+  if (event.type === 'conditional') {
+    const upgrade = upgrades.find(u => u.id === event.relatedUpgrade);
+    if (upgrade && upgrade.count > 0) {
+      desc += '\n' + event.bonusDescription.replace('{value}', event.value);
+    } else {
+      desc += '\nIngen bonus — du saknar rätt utrustning!';
+    }
+  }
+  dom.eventDesc.textContent = desc;
+
+  // Apply effect
+  if (event.type === 'multiplier') {
+    game.eventMultiplier = event.value;
+    game.eventEndTime = Date.now() + event.duration * 1000;
+    dom.eventTimerFill.style.width = '100%';
+    showActiveBonus(event.value + 'x FP/s', event.duration);
+  } else if (event.type === 'click_bonus') {
+    game.eventMultiplier = 1;
+    game.fpPerClick *= event.value;
+    game.eventEndTime = Date.now() + event.duration * 1000;
+    dom.eventTimerFill.style.width = '100%';
+    showActiveBonus(event.value + 'x klick', event.duration);
+    // Store original multiplier for restoration
+    game._clickBonusValue = event.value;
+  } else {
+    // Instant effects (bonus, conditional, upgrade_bonus)
+    const bonus = getEventBonus(event, upgrades);
+    if (bonus > 0) {
+      game.fp += bonus;
+      game.totalFp += bonus;
+    }
+    dom.eventTimerFill.style.width = '0%';
+    game.eventEndTime = 0;
+  }
+
+  dom.eventOverlay.classList.add('visible');
+
+  // Auto-dismiss after 4s for instant events, or after duration for timed
+  const dismissTime = event.duration > 0 ? Math.min(event.duration * 1000, 4000) : 4000;
+  clearTimeout(game._eventDismissTimer);
+  game._eventDismissTimer = setTimeout(() => {
+    dom.eventOverlay.classList.remove('visible');
+  }, dismissTime);
+}
+
+function endEvent() {
+  if (!game.activeEvent) return;
+  const event = game.activeEvent;
+
+  if (event.type === 'multiplier') {
+    game.eventMultiplier = 1;
+  } else if (event.type === 'click_bonus' && game._clickBonusValue) {
+    game.fpPerClick /= game._clickBonusValue;
+    game._clickBonusValue = 0;
+  }
+
+  game.activeEvent = null;
+  game.eventEndTime = 0;
+  dom.activeBonus.classList.remove('visible');
+  dom.eventOverlay.classList.remove('visible');
+}
+
+function showActiveBonus(text, duration) {
+  dom.activeBonusText.textContent = text;
+  dom.activeBonusTime.textContent = duration + 's';
+  dom.activeBonus.classList.add('visible');
+}
+
+function updateActiveBonus() {
+  if (!game.activeEvent || game.eventEndTime <= 0) return;
+  const remaining = Math.max(0, Math.ceil((game.eventEndTime - Date.now()) / 1000));
+  dom.activeBonusTime.textContent = remaining + 's';
+
+  // Update timer bar in overlay
+  const event = game.activeEvent;
+  if (event.duration > 0) {
+    const pct = (remaining / event.duration) * 100;
+    dom.eventTimerFill.style.width = pct + '%';
+  }
+
+  if (remaining <= 0) {
+    endEvent();
+  }
+}
+
+function scheduleNextEvent() {
+  const delay = (45 + Math.random() * 45) * 1000; // 45-90 seconds
+  game.eventTimer = setTimeout(() => {
+    if (!game.activeEvent) {
+      const event = events[Math.floor(Math.random() * events.length)];
+      triggerEvent(event);
+    }
+    scheduleNextEvent();
+  }, delay);
+}
+
+// --- Mute Toggle ---
+function toggleMute() {
+  game.muted = !game.muted;
+  dom.muteBtn.textContent = game.muted ? '\u{1F507}' : '\u{1F50A}';
+  dom.muteBtn.classList.toggle('muted', game.muted);
+}
+
 // --- Game Loop ---
 function startGameLoop() {
   setInterval(() => {
     if (game.fpPerSecond > 0) {
-      const gain = game.fpPerSecond / 10;
+      const gain = (game.fpPerSecond * game.eventMultiplier) / 10;
       game.fp += gain;
       game.totalFp += gain;
       updateUI();
     }
+    updateActiveBonus();
   }, 100);
 }
 
 // --- Initialize ---
 function init() {
   dom.clickButton.addEventListener('click', handleClick);
+  dom.muteBtn.addEventListener('click', toggleMute);
+  dom.eventOverlay.addEventListener('click', () => {
+    dom.eventOverlay.classList.remove('visible');
+  });
   setupTicker();
   calculateFpPerSecond();
   updateUI();
   startGameLoop();
+  scheduleNextEvent();
 }
 
 init();

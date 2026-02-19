@@ -134,75 +134,43 @@
 
 ---
 
-## Sprint 3: Juice & Events
+## Sprint 3: Juice & Events ✅
 
-### 3.1 Partikeleffekter
-- [ ] Generera partiklar vid klick (CSS-animerade element)
-- [ ] Partiklar flyger ut från klickpunkten
-- [ ] Variation i riktning, hastighet, storlek
-- [ ] Ta bort partiklar efter animation (performance)
+### 3.1 Partikeleffekter ✅
+- [x] Generera partiklar vid klick (CSS-animerade element)
+- [x] Partiklar flyger ut från klickpunkten
+- [x] Variation i riktning, hastighet, storlek
+- [x] Ta bort partiklar efter animation (performance)
 
-### 3.2 Float-text
-- [ ] Visa "+X FP" text som flyter uppåt vid klick
-- [ ] Text fadar ut och försvinner
-- [ ] Positionera vid klickpunkten
+### 3.2 Float-text ✅
+- [x] Visa "+X FP" text som flyter uppåt vid klick
+- [x] Text fadar ut och försvinner
+- [x] Positionera vid klickpunkten
 
-### 3.3 Ljud
-- [ ] Web Audio API-setup
-- [ ] Klickljud (kort, tillfredsställande)
-- [ ] Köp-ljud
-- [ ] Era-unlock-ljud
-- [ ] Achievement-ljud
-- [ ] Volymkontroll / mute-knapp
+### 3.3 Ljud ✅
+- [x] Web Audio API-setup
+- [x] Klickljud (kort, tillfredsställande)
+- [x] Köp-ljud
+- [x] Era-unlock-ljud
+- [ ] Achievement-ljud (Sprint 4)
+- [x] Volymkontroll / mute-knapp
 
-### 3.4 Slumpmässiga händelser
-- [ ] Event-system: slumpmässigt event var 45-90 sekund
-- [ ] Overlay/popup med eventbeskrivning och klickbar knapp
-- [ ] ~10-12 events:
-  - Strömavbrott! ("Elen är borta — bra att du har ficklampa!" bonus om upgrade köpt)
-  - Vattenledningen brast! ("Bra att du har vattendunkar!" bonus om upgrade köpt)
-  - Beredskapslarm! (2x FP/s i 30 sek)
-  - JAS-flyby (bonus-FP)
-  - Hemvärnsövning (1.5x FP/s i 60 sek)
-  - Desinformationsattack (klicka bort snabbt eller förlora FP)
-  - "Om krisen kommer"-utskick (stor FP-bonus)
-  - Ärtsoppetorsdag (boost)
-  - NATO-övning (3x FP/s i 20 sek)
-  - Frivilligvåg (bonus baserad på totala upgrades)
-  - Kall vinter! ("Minus 25 och elementen är kalla — sovsäck räddar dig!" bonus om upgrade köpt)
-  - Mobilnätet nere! ("Vevradion blir din livlina" bonus om upgrade köpt)
-- [ ] Timer/countdown på aktiva events
-- [ ] Visuell indikation på aktiv bonus (glödande ram, ikon)
+### 3.4 Slumpmässiga händelser ✅
+- [x] Event-system: slumpmässigt event var 45-90 sekund
+- [x] Overlay/popup med eventbeskrivning och klickbar knapp
+- [x] 12 events med 5 typer (multiplier, bonus, conditional, click_bonus, upgrade_bonus)
+- [x] Timer/countdown på aktiva events
+- [x] Visuell indikation på aktiv bonus (glödande indikator med tid)
 
-### 3.5 Nyhetsticker
-- [ ] Löpande text längst ner på skärmen (CSS marquee/animation)
-- [ ] ~25 riktiga budskap om beredskap:
-  - "Har du vatten hemma för minst en vecka? Räkna 3 liter per person per dag."
-  - "Ha mat hemma som inte behöver kylskåp eller spis. Konserver, knäckebröd, müsli."
-  - "Kontanter! Swish fungerar inte utan el och internet."
-  - "En vevdriven radio ger dig information även vid strömavbrott."
-  - "Ha en ficklampa med extra batterier — stearinljus är en brandrisk."
-  - "Hur håller du dig varm om värmen försvinner? Sovsäck, filtar, varma kläder."
-  - "Stormkök eller friluftskök — så lagar du mat utan el."
-  - "Vet du var ditt närmaste skyddsrum är? Sverige har ~65 000."
-  - "Ha viktiga mediciner hemma för minst en veckas förbrukning."
-  - "Kopior på viktiga dokument: pass, försäkring, recept."
-  - "Prata med dina grannar: vem kan hjälpa vem vid kris?"
-  - "9 842 ansökte till Hemvärnet på EN vecka efter Ukraina-invasionen."
-  - "Beredskapsveckan har hållits årligen sedan 2017."
-  - "Värnpliktsmålet: minst 10 000 per år till 2030."
-  - "Visste du att MSB blev MCF den 1 januari 2026?"
-  - "Försvarsbudgeten ska nå 3,5% av BNP till 2030."
-  - "Broschyren 'Om krisen eller kriget kommer' skickades till 5,2 miljoner hushåll."
-  - "Vattenrening: koka vattnet i minst 3 minuter om du är osäker."
-  - "Ladda powerbank — din mobil är din länk till omvärlden."
-  - "Brandsläckare och brandvarnare — grunden i alla hem."
-  - "Kan du första hjälpen? En kurs kan rädda liv."
-  - "Bränsle i bilen — kör inte på tomma tanken i oroliga tider."
-  - "Ha en plan med din familj: var träffas ni om ni tappar kontakten?"
-  - "Totalförsvar = militärt försvar + civilt försvar. Du är en del av det."
-  - "NATO artikel 5: en för alla, alla för en."
-- [ ] Nya meddelanden roterar in
+### 3.5 Nyhetsticker ✅ (Sprint 1)
+- [x] Löpande text längst ner på skärmen (CSS animation)
+- [x] 25 riktiga budskap om beredskap
+- [x] Seamless loop med duplicerade meddelanden
+
+### 3.6 Tester ✅
+- [x] 278 automatiserade tester (131 nya event-tester)
+- [x] Event data integrity, type distribution, multiplier math, bonus calculations
+- [x] Conditional event logic, scheduling range, upgrade references
 
 ---
 

@@ -17,6 +17,7 @@
       </div>
       <span id="era-progress-text" class="era-progress-text"></span>
     </div>
+    <button id="mute-btn" class="mute-btn" aria-label="Ljud på/av" title="Ljud på/av">&#128266;</button>
   </header>
 
   <main>
@@ -62,6 +63,10 @@
       </button>
 
       <p class="click-hint">Klicka på skölden!</p>
+      <div id="active-bonus" class="active-bonus">
+        <span id="active-bonus-text"></span>
+        <span id="active-bonus-time" class="active-bonus-time"></span>
+      </div>
     </section>
 
     <aside class="upgrades-panel">
@@ -71,6 +76,18 @@
       <div id="click-upgrades-list"></div>
     </aside>
   </main>
+
+  <!-- Event Overlay -->
+  <div id="event-overlay" class="event-overlay">
+    <div class="event-card">
+      <h3 id="event-name"></h3>
+      <p id="event-desc"></p>
+      <div class="event-timer-bar">
+        <div id="event-timer-fill" class="event-timer-fill"></div>
+      </div>
+      <div class="event-dismiss">Klicka för att stänga</div>
+    </div>
+  </div>
 
   <!-- Era Unlock Overlay -->
   <div id="era-unlock-overlay" class="era-unlock-overlay">
