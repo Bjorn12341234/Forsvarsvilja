@@ -121,7 +121,7 @@ const upgrades = [
   },
   {
     id: 'kit', name: 'Hemberedskapskit',
-    description: 'Kontanter, mediciner, dokument, första hjälpen',
+    description: 'Kontanter, receptbelagda mediciner, ID-kopior, första hjälpen \u2014 MCF:s baslista',
     baseCost: 5000, fpPerSecond: 300, count: 0, era: 0,
   },
   // Era 1: Grannskapet
@@ -178,7 +178,7 @@ const upgrades = [
   },
   {
     id: 'civil_duty', name: 'Civilplikt-organisering',
-    description: 'Alla yrken kan krigsplaceras',
+    description: 'Vid höjd beredskap kan alla 16\u201370 år krigsplaceras inom totalförsvaret',
     baseCost: 60000000, fpPerSecond: 8000000, count: 0, era: 2,
   },
   {
@@ -220,33 +220,33 @@ const upgrades = [
   // Era 4: Nationen
   {
     id: 'mcf', name: 'MCF',
-    description: 'Myndigheten för civilt försvar (f.d. MSB)',
-    baseCost: 15000000000, fpPerSecond: 5000000000, count: 0, era: 4,
+    description: 'Samordnar hela det civila försvaret sedan 2026 (f.d. MSB)',
+    baseCost: 10000000000, fpPerSecond: 5000000000, count: 0, era: 4,
   },
   {
     id: 'home_guard', name: 'Hemvärnet',
-    description: '9 842 ansökte på EN vecka efter Ukraina-invasionen',
-    baseCost: 40000000000, fpPerSecond: 12000000000, count: 0, era: 4,
+    description: '22 000 frivilliga som skyddar Sverige lokalt. 9 842 ansökte på en vecka 2022',
+    baseCost: 25000000000, fpPerSecond: 12000000000, count: 0, era: 4,
   },
   {
     id: 'gripen', name: 'JAS 39 Gripen',
-    description: 'Sveriges stolthet i luften',
-    baseCost: 100000000000, fpPerSecond: 30000000000, count: 0, era: 4,
+    description: 'Svenskt stridsflygplan \u2014 ryggraden i flygförsvaret',
+    baseCost: 55000000000, fpPerSecond: 30000000000, count: 0, era: 4,
   },
   {
     id: 'global_eye', name: 'Global Eye-flygplan',
-    description: '3 st anskaffas — ser allt, överallt',
-    baseCost: 300000000000, fpPerSecond: 80000000000, count: 0, era: 4,
+    description: 'Luftburet radarsystem \u2014 Sveriges ögon i luften, 3 st beställda',
+    baseCost: 150000000000, fpPerSecond: 80000000000, count: 0, era: 4,
   },
   {
     id: 'nato_art5', name: 'NATO artikel 5',
-    description: 'En för alla, alla för en',
-    baseCost: 800000000000, fpPerSecond: 200000000000, count: 0, era: 4,
+    description: 'Kollektivt försvar \u2014 ett angrepp mot en medlem är ett angrepp mot alla',
+    baseCost: 400000000000, fpPerSecond: 200000000000, count: 0, era: 4,
   },
   {
     id: 'total_defense', name: 'Totalförsvar 3,5% av BNP',
-    description: 'Den kraftfullaste förstärkningen sedan kalla kriget',
-    baseCost: 2000000000000, fpPerSecond: 500000000000, count: 0, era: 4,
+    description: 'Militärt + civilt försvar. 3,5% av BNP till 2030 \u2014 du är en del av det',
+    baseCost: 1000000000000, fpPerSecond: 500000000000, count: 0, era: 4,
   },
 ];
 
@@ -412,6 +412,16 @@ const tickerMessages = [
   'NATO artikel 5: en för alla, alla för en.',
   '9 842 ansökte till Hemvärnet på EN vecka efter Ukraina-invasionen.',
   'Beredskapsveckan har hållits årligen sedan 2017.',
+  'Vid höjd beredskap kan du krigsplaceras. Vet du vad din roll skulle vara?',
+  'Allmän tjänsteplikt gäller alla mellan 16 och 70 år. Du kan kallas in där du behövs mest.',
+  'Krigsplacering innebär att du har en bestämd uppgift i totalförsvaret. Vissa vet redan sin.',
+  'Om du kallas in \u2014 vem tar hand om barnen? Prata igenom det med din familj nu.',
+  'Psykologisk beredskap: att ha tänkt igenom krisen i förväg gör dig lugnare när den kommer.',
+  'Motståndskraft börjar i huvudet. Den som har en plan panikerar mindre.',
+  'Vilken roll har du i grannskapet vid kris? Sjukvårdare, organisatör, kommunikatör?',
+  'Grannsamverkan är inte bara stöldskydd \u2014 det är din närmaste trygghet i kris.',
+  'Gör en familjeplan: mötesplats, kontaktlista, vem hämtar barnen, vem har nyckel.',
+  'Totalförsvar kräver alla. Din vardag \u2014 jobb, familj, grannar \u2014 ÄR försvaret.',
 ];
 
 // --- Random Events ---
@@ -578,6 +588,24 @@ const dilemmaEvents = [
     description: 'Din bil kan användas för akut transporter.',
     choiceA: { label: 'Lämna ut', preview: '-15 Försörjning, +20 Samhörighet, +100 FP', effects: { resources: { supply: -15, community: +20 }, fp: +100 } },
     choiceB: { label: 'Neka', preview: '-10 Samhörighet', effects: { resources: { community: -10 } } },
+  },
+  {
+    id: 'dilemma_krigsplacering', category: 'dilemma', name: 'Krigsplaceringsbrev',
+    description: 'Du har fått besked om din krigsplacering. Din familj måste klara sig utan dig.',
+    choiceA: { label: 'Förbered familjen', preview: '-15 Försörjning, +20 Samhörighet', effects: { resources: { supply: -15, community: +20 } } },
+    choiceB: { label: 'Fokusera på din post', preview: 'FP/s +30% i 60s, -10 Samhörighet', effects: { tempFpMultiplier: 1.3, duration: 60, resources: { community: -10 } } },
+  },
+  {
+    id: 'dilemma_tjansteplikt', category: 'dilemma', name: 'Allmän tjänsteplikt aktiveras',
+    description: 'Alla mellan 16 och 70 kan kallas in. Du tilldelas en uppgift långt från hemmet.',
+    choiceA: { label: 'Inställ dig', preview: 'FP/s +25% i 60s, -10 Försörjning, -10 Samhörighet', effects: { tempFpMultiplier: 1.25, duration: 60, resources: { supply: -10, community: -10 } } },
+    choiceB: { label: 'Stanna hemma', preview: '+10 Försörjning, -15 Samband', effects: { resources: { supply: +10, comms: -15 } } },
+  },
+  {
+    id: 'dilemma_panik', category: 'dilemma', name: 'Panik sprider sig',
+    description: 'Grannar vill fly staden. Du vet att planen är att stanna, men oron smittar.',
+    choiceA: { label: 'Lugna och organisera', preview: '-5 Försörjning, +15 Samhörighet, +10 Samband', effects: { resources: { supply: -5, community: +15, comms: +10 } } },
+    choiceB: { label: 'Stäng dörren och vänta', preview: '+5 Försörjning, -15 Samhörighet', effects: { resources: { supply: +5, community: -15 } } },
   },
 ];
 
@@ -913,15 +941,19 @@ function switchTab(tabIndex) {
 
 function renderTabs() {
   dom.tabBar.innerHTML = '';
+  dom.tabBar.setAttribute('role', 'tablist');
   for (let i = 0; i < tabs.length; i++) {
     const tab = tabs[i];
     const btn = document.createElement('button');
     btn.className = 'tab-btn';
+    btn.setAttribute('role', 'tab');
+    btn.setAttribute('aria-selected', i === game.activeTab ? 'true' : 'false');
     if (i === game.activeTab) btn.classList.add('active');
     if (!game.tabsUnlocked[i]) {
       btn.classList.add('locked');
       btn.textContent = '\u{1F512}';
       btn.title = 'L\u00e5st';
+      btn.setAttribute('aria-disabled', 'true');
     } else {
       btn.textContent = tab.icon + ' ' + tab.name;
       btn.addEventListener('click', () => switchTab(i));
@@ -1333,7 +1365,15 @@ function buildUpgrades() {
         <span class="upgrade-cost">${formatNumber(cost)} FP</span>
       </div>
     `;
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
     card.addEventListener('click', () => buyUpgrade(u.id));
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        buyUpgrade(u.id);
+      }
+    });
     dom.upgradesList.appendChild(card);
   }
   _upgradesNeedRebuild = false;
@@ -1392,7 +1432,15 @@ function buildClickUpgrades() {
           <span class="upgrade-cost">${formatNumber(u.cost)} FP</span>
         </div>
       `;
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('role', 'button');
       card.addEventListener('click', () => buyClickUpgrade(u.id));
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          buyClickUpgrade(u.id);
+        }
+      });
     }
 
     dom.clickUpgradesList.appendChild(card);
@@ -2171,6 +2219,20 @@ function init() {
   document.getElementById('reset-btn').addEventListener('click', () => {
     if (confirm('Vill du verkligen nollställa spelet? All progress försvinner.')) {
       resetGame();
+    }
+  });
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      // Close event overlay (unless dilemma requiring choice)
+      if (dom.eventOverlay.classList.contains('visible') && !dom.eventOverlay.classList.contains('dilemma-mode')) {
+        dom.eventOverlay.classList.remove('visible');
+      }
+      // Close achievement panel
+      if (dom.achievementPanel.classList.contains('visible')) {
+        dom.achievementPanel.classList.remove('visible');
+      }
     }
   });
 

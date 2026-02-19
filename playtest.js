@@ -46,12 +46,12 @@ const upgradeData = [
   { id: 'food_supply', name: 'Livsmedel', baseCost: 4000000000, fpPerSecond: 600000000, era: 3 },
   { id: 'fuel_reserves', name: 'Drivmedel', baseCost: 10000000000, fpPerSecond: 1500000000, era: 3 },
   { id: 'cyber_security', name: 'Cybersäkerhet', baseCost: 25000000000, fpPerSecond: 4000000000, era: 3 },
-  { id: 'mcf', name: 'MCF', baseCost: 40000000000, fpPerSecond: 8000000000, era: 4 },
-  { id: 'home_guard', name: 'Hemvärnet', baseCost: 100000000000, fpPerSecond: 20000000000, era: 4 },
-  { id: 'gripen', name: 'JAS 39 Gripen', baseCost: 300000000000, fpPerSecond: 50000000000, era: 4 },
-  { id: 'global_eye', name: 'Global Eye', baseCost: 800000000000, fpPerSecond: 120000000000, era: 4 },
-  { id: 'nato_art5', name: 'NATO artikel 5', baseCost: 2000000000000, fpPerSecond: 300000000000, era: 4 },
-  { id: 'total_defense', name: 'Totalförsvar 3,5%', baseCost: 5000000000000, fpPerSecond: 800000000000, era: 4 },
+  { id: 'mcf', name: 'MCF', baseCost: 10000000000, fpPerSecond: 5000000000, era: 4 },
+  { id: 'home_guard', name: 'Hemvärnet', baseCost: 25000000000, fpPerSecond: 12000000000, era: 4 },
+  { id: 'gripen', name: 'JAS 39 Gripen', baseCost: 55000000000, fpPerSecond: 30000000000, era: 4 },
+  { id: 'global_eye', name: 'Global Eye', baseCost: 150000000000, fpPerSecond: 80000000000, era: 4 },
+  { id: 'nato_art5', name: 'NATO artikel 5', baseCost: 400000000000, fpPerSecond: 200000000000, era: 4 },
+  { id: 'total_defense', name: 'Totalförsvar 3,5%', baseCost: 1000000000000, fpPerSecond: 500000000000, era: 4 },
 ];
 
 const clickUpgradeData = [

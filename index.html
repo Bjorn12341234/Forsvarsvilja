@@ -8,11 +8,17 @@
   <meta property="og:title" content="FÖRSVARSVILJA — Klickerspel">
   <meta property="og:description" content="Bygg upp Sveriges totalförsvar — från konservburkar till NATO-samarbete.">
   <meta property="og:type" content="website">
+  <meta property="og:locale" content="sv_SE">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="FÖRSVARSVILJA — Klickerspel">
+  <meta name="twitter:description" content="Bygg upp Sveriges totalförsvar — från konservburkar till NATO-samarbete.">
   <title>FÖRSVARSVILJA — Klickerspel</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 120'><path d='M50 4L96 24L91 81L50 116L9 81L4 24Z' fill='%231B365D' stroke='%23FECC02' stroke-width='4'/><path d='M38 35L42 21L47 29L50 15L53 29L58 21L62 35Z' fill='%23FECC02'/><path d='M38 75L42 61L47 69L50 55L53 69L58 61L62 75Z' fill='%23FECC02'/></svg>">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+  <a href="#click-button" class="skip-link">Hoppa till spelet</a>
 
   <header>
     <h1>FÖRSVARSVILJA</h1>
@@ -111,7 +117,7 @@
   </main>
 
   <!-- Event Overlay -->
-  <div id="event-overlay" class="event-overlay">
+  <div id="event-overlay" class="event-overlay" role="dialog" aria-modal="true" aria-labelledby="event-name">
     <div class="event-card">
       <h3 id="event-name"></h3>
       <p id="event-desc"></p>
@@ -128,7 +134,7 @@
   </div>
 
   <!-- Era Unlock Overlay -->
-  <div id="era-unlock-overlay" class="era-unlock-overlay">
+  <div id="era-unlock-overlay" class="era-unlock-overlay" role="alert" aria-live="assertive">
     <div class="era-unlock-content">
       <div class="era-unlock-label">NY ERA UPPLÅST</div>
       <div id="era-unlock-name" class="era-unlock-name"></div>
@@ -136,7 +142,7 @@
   </div>
 
   <!-- Threat Level Unlock Overlay -->
-  <div id="threat-unlock-overlay" class="era-unlock-overlay">
+  <div id="threat-unlock-overlay" class="era-unlock-overlay" role="alert" aria-live="assertive">
     <div class="era-unlock-content threat-unlock-content">
       <div class="era-unlock-label">BEREDSKAPSL&Auml;GE</div>
       <div id="threat-unlock-name" class="era-unlock-name"></div>
@@ -144,10 +150,10 @@
   </div>
 
   <!-- Achievement Toast Container -->
-  <div id="toast-container" class="toast-container"></div>
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
   <!-- Achievement Panel -->
-  <div id="achievement-panel" class="achievement-panel">
+  <div id="achievement-panel" class="achievement-panel" role="dialog" aria-modal="true" aria-label="Meriter">
     <div class="achievement-panel-inner">
       <h2>Meriter <span id="achievement-progress" class="achievement-progress-text">0 / 25</span></h2>
       <div id="achievement-list" class="achievement-list"></div>
@@ -155,7 +161,7 @@
   </div>
 
   <!-- End Screen -->
-  <div id="end-screen" class="end-screen">
+  <div id="end-screen" class="end-screen" role="dialog" aria-modal="true" aria-label="Spelet klart">
     <div class="end-screen-inner">
       <div class="end-label">SPELET KLART</div>
       <h2 class="end-title">Du har byggt Sveriges totalförsvar</h2>
@@ -218,6 +224,7 @@
         <p class="end-fact">Totalf&ouml;rsvar = milit&auml;rt f&ouml;rsvar + civilt f&ouml;rsvar. Du &auml;r en del av det. Din beredskap hemma &auml;r grunden som allt annat vilar p&aring;.</p>
         <p class="end-fact">Sverige har cirka 65&nbsp;000 skyddsrum. F&ouml;rsvarsbudgeten ska n&aring; 3,5&nbsp;% av BNP till 2030 &mdash; den kraftfullaste f&ouml;rst&auml;rkningen sedan kalla kriget.</p>
         <p class="end-fact">Broschyren &ldquo;Om krisen eller kriget kommer&rdquo; skickades till 5,2 miljoner hush&aring;ll. Den inneh&aring;ller konkreta r&aring;d om vad du beh&ouml;ver hemma och hur du agerar vid h&ouml;jd beredskap.</p>
+        <p class="end-fact">Vid h&ouml;jd beredskap aktiveras krigsplacering. M&aring;nga civila yrken &mdash; sjukv&aring;rdare, chauff&ouml;rer, IT-tekniker &mdash; har redan f&ouml;rutbest&auml;mda roller i totalf&ouml;rsvaret.</p>
       </div>
 
       <!-- Section 4: Reflektionsfrågor -->
@@ -229,6 +236,8 @@
         <p class="end-reflection">Har du pratat med dina grannar om vad ni g&ouml;r vid en kris?</p>
         <p class="end-reflection">Har du en plan med din familj f&ouml;r var ni tr&auml;ffas om ni tappar kontakten?</p>
         <p class="end-reflection">Hur f&ouml;rberedd &auml;r du, p&aring; riktigt?</p>
+        <p class="end-reflection">Om allm&auml;n tj&auml;nsteplikt aktiveras &mdash; vilken uppgift tror du att du skulle f&aring;?</p>
+        <p class="end-reflection">Hur beredd &auml;r du mentalt? Har du t&auml;nkt igenom vad du g&ouml;r om krisen kommer ikv&auml;ll?</p>
       </div>
 
       <!-- Section 5: Nu jävlar + Länkar -->
