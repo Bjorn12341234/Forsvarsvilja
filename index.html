@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FÖRSVARSVILJA - Klickerspel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <h1>FÖRSVARSVILJA</h1>
+    <div class="era-indicator">
+      <span id="era-name">Era 1: Hemberedskap</span>
+      <div class="progress-bar">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
+      <span id="era-progress-text" class="era-progress-text"></span>
+    </div>
+  </header>
+
+  <main>
+    <section class="game-area">
+      <div class="stats">
+        <div class="stat-main">
+          <span id="fp-count">0</span> <span class="stat-label">FP</span>
+        </div>
+        <div class="stat-row">
+          <div class="stat-secondary">
+            <span id="fp-per-second">0</span> FP/sek
+          </div>
+          <div class="stat-secondary">
+            <span id="fp-per-click">1</span> FP/klick
+          </div>
+        </div>
+      </div>
+
+      <button id="click-button" aria-label="Klicka för försvarspoäng">
+        <svg class="shield-svg" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+          <!-- Shield body -->
+          <path d="M100 8 L192 48 L182 162 L100 232 L18 162 L8 48 Z"
+                class="shield-body"/>
+          <!-- Inner border -->
+          <path d="M100 24 L180 58 L171 156 L100 218 L29 156 L20 58 Z"
+                class="shield-inner" fill="none"/>
+          <!-- Crown top-left -->
+          <g transform="translate(45, 55) scale(1.3)">
+            <rect x="3" y="20" width="24" height="7" rx="1.5" class="crown"/>
+            <path d="M3 20 L7 6 L12 14 L15 0 L18 14 L23 6 L27 20 Z" class="crown"/>
+          </g>
+          <!-- Crown top-right -->
+          <g transform="translate(115, 55) scale(1.3)">
+            <rect x="3" y="20" width="24" height="7" rx="1.5" class="crown"/>
+            <path d="M3 20 L7 6 L12 14 L15 0 L18 14 L23 6 L27 20 Z" class="crown"/>
+          </g>
+          <!-- Crown bottom-center -->
+          <g transform="translate(80, 120) scale(1.3)">
+            <rect x="3" y="20" width="24" height="7" rx="1.5" class="crown"/>
+            <path d="M3 20 L7 6 L12 14 L15 0 L18 14 L23 6 L27 20 Z" class="crown"/>
+          </g>
+        </svg>
+      </button>
+
+      <p class="click-hint">Klicka på skölden!</p>
+    </section>
+
+    <aside class="upgrades-panel">
+      <h2>Uppgraderingar</h2>
+      <div id="upgrades-list"></div>
+    </aside>
+  </main>
+
+  <footer class="news-ticker">
+    <div id="ticker-content" class="ticker-content"></div>
+  </footer>
+
+  <script src="game.js"></script>
+</body>
+</html>

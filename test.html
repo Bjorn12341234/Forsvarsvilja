@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>FÖRSVARSVILJA — Tests</title>
+  <style>
+    body { font-family: monospace; background: #1a1a2e; color: #e0e0e0; padding: 20px; }
+    h1 { color: #FECC02; }
+    .pass { color: #33AA55; }
+    .fail { color: #CC3333; font-weight: bold; }
+    .section { color: #6699CC; margin-top: 16px; font-weight: bold; }
+    .summary { margin-top: 24px; padding: 12px; border-top: 2px solid #333; font-size: 1.1em; }
+    pre { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>FÖRSVARSVILJA — Sprint 1 Tests</h1>
+  <pre id="output"></pre>
+
+  <script>
+    // --- Minimal test runner ---
+    let passed = 0;
+    let failed = 0;
+    const out = document.getElementById('output');
+
+    function log(text, cls) {
+      const span = document.createElement('span');
+      span.className = cls || '';
+      span.textContent = text + '\n';
+      out.appendChild(span);
+    }
+
+    function section(name) {
+      log('\n▸ ' + name, 'section');
+    }
+
+    function assert(condition, description) {
+      if (condition) {
+        passed++;
+        log('  ✓ ' + description, 'pass');
+      } else {
+        failed++;
+        log('  ✗ ' + description, 'fail');
+      }
+    }
+
+    function assertEq(actual, expected, description) {
+      const pass = actual === expected;
+      if (pass) {
+        passed++;
+        log('  ✓ ' + description, 'pass');
+      } else {
+        failed++;
+        log(`  ✗ ${description} — expected "${expected}", got "${actual}"`, 'fail');
+      }
+    }
+
+    function assertClose(actual, expected, tolerance, description) {
+      const pass = Math.abs(actual - expected) <= tolerance;
+      if (pass) {
+        passed++;
+        log('  ✓ ' + description, 'pass');
+      } else {
+        failed++;
+        log(`  ✗ ${description} — expected ~${expected}, got ${actual}`, 'fail');
+      }
+    }
+
+    // ============================================================
+    // Import game functions by re-declaring them here (no modules)
+    // We duplicate the pure functions to test them in isolation.
+    // ============================================================
+
+    // --- formatNumber (copy from game.js) ---
+    function formatNumber(n) {
+      if (n < 0) return '-' + formatNumber(-n);
+      if (n < 1000) {
+        return n < 10 ? n.toFixed(1) : Math.floor(n).toString();
+      }
+      const tiers = [
+        { threshold: 1e15, suffix: 'Q' },
+        { threshold: 1e12, suffix: 'T' },
+        { threshold: 1e9, suffix: 'B' },
+        { threshold: 1e6, suffix: 'M' },
+        { threshold: 1e3, suffix: 'K' },
+      ];
+      for (const tier of tiers) {
+        if (n >= tier.threshold) {
+          const value = n / tier.threshold;
+          return (value < 10 ? value.toFixed(2) : value < 100 ? value.toFixed(1) : Math.floor(value)) + tier.suffix;
+        }
+      }
+      return Math.floor(n).toString();
+    }
+
+    // --- getUpgradeCost ---
+    function getUpgradeCost(upgrade) {
+      return Math.ceil(upgrade.baseCost * Math.pow(1.15, upgrade.count));
+    }
+
+    // --- Upgrade definitions (same as game.js) ---
+    function makeUpgrades() {
+      return [
+        { id: 'water', name: 'Vattenflaskor', baseCost: 10, fpPerSecond: 0.5, count: 0 },
+        { id: 'cans', name: 'Konservburkar', baseCost: 50, fpPerSecond: 2, count: 0 },
+        { id: 'stove', name: 'Stormkök & bränsle', baseCost: 200, fpPerSecond: 8, count: 0 },
+        { id: 'radio', name: 'Ficklampa, radio & batterier', baseCost: 600, fpPerSecond: 30, count: 0 },
+        { id: 'sleeping', name: 'Sovsäck & filtar', baseCost: 1500, fpPerSecond: 100, count: 0 },
+        { id: 'kit', name: 'Hemberedskapskit', baseCost: 5000, fpPerSecond: 300, count: 0 },
+      ];
+    }
+
+    // --- Era definitions ---
+    const eras = [
+      { name: 'Hemberedskap', threshold: 0 },
+      { name: 'Grannskapet', threshold: 5000 },
+      { name: 'Kommunen', threshold: 100000 },
+      { name: 'Regionen', threshold: 2000000 },
+      { name: 'Nationen', threshold: 50000000 },
+    ];
+
+    function getCurrentEra(totalFp) {
+      let era = 0;
+      for (let i = eras.length - 1; i >= 0; i--) {
+        if (totalFp >= eras[i].threshold) { era = i; break; }
+      }
+      return era;
+    }
+
+    // ============================================================
+    // TESTS
+    // ============================================================
+
+    section('Number Formatting');
+    assertEq(formatNumber(0), '0.0', 'Zero shows as 0.0');
+    assertEq(formatNumber(1), '1.0', 'Small number shows decimal');
+    assertEq(formatNumber(9.5), '9.5', 'Fractional small number');
+    assertEq(formatNumber(10), '10', 'Ten shows as integer');
+    assertEq(formatNumber(999), '999', '999 stays under K');
+    assertEq(formatNumber(1000), '1.00K', '1000 = 1.00K');
+    assertEq(formatNumber(1500), '1.50K', '1500 = 1.50K');
+    assertEq(formatNumber(15000), '15.0K', '15000 = 15.0K');
+    assertEq(formatNumber(150000), '150K', '150000 = 150K');
+    assertEq(formatNumber(1000000), '1.00M', '1M');
+    assertEq(formatNumber(25500000), '25.5M', '25.5M');
+    assertEq(formatNumber(1000000000), '1.00B', '1B');
+    assertEq(formatNumber(1000000000000), '1.00T', '1T');
+    assertEq(formatNumber(1e15), '1.00Q', '1Q');
+    assertEq(formatNumber(-500), '-500', 'Negative number');
+
+    section('Cost Calculation');
+    {
+      const u = { baseCost: 10, count: 0 };
+      assertEq(getUpgradeCost(u), 10, 'First purchase costs baseCost');
+      u.count = 1;
+      assertEq(getUpgradeCost(u), 12, 'Second purchase: ceil(10 * 1.15) = 12');
+      u.count = 5;
+      assertEq(getUpgradeCost(u), Math.ceil(10 * Math.pow(1.15, 5)), '6th purchase matches formula');
+      u.count = 10;
+      assertEq(getUpgradeCost(u), Math.ceil(10 * Math.pow(1.15, 10)), '11th purchase matches formula');
+    }
+    {
+      const u = { baseCost: 10000, count: 0 };
+      assertEq(getUpgradeCost(u), 10000, 'Expensive upgrade first cost');
+      u.count = 20;
+      assertEq(getUpgradeCost(u), Math.ceil(10000 * Math.pow(1.15, 20)), 'Expensive upgrade 21st cost');
+    }
+
+    section('FP/s Calculation');
+    {
+      const ups = makeUpgrades();
+      let total = 0;
+      for (const u of ups) total += u.fpPerSecond * u.count;
+      assertEq(total, 0, 'No purchases = 0 FP/s');
+
+      ups[0].count = 5; // 5 water = 2.5 FP/s
+      total = 0;
+      for (const u of ups) total += u.fpPerSecond * u.count;
+      assertClose(total, 2.5, 0.001, '5 water bottles = 2.5 FP/s');
+
+      ups[1].count = 3; // 3 cans = 6 FP/s
+      total = 0;
+      for (const u of ups) total += u.fpPerSecond * u.count;
+      assertClose(total, 8.5, 0.001, '5 water + 3 cans = 8.5 FP/s');
+    }
+
+    section('Buy Logic');
+    {
+      let fp = 100;
+      const ups = makeUpgrades();
+      // Buy water (cost 10)
+      const cost1 = getUpgradeCost(ups[0]);
+      assert(fp >= cost1, 'Can afford first water');
+      fp -= cost1;
+      ups[0].count++;
+      assertEq(ups[0].count, 1, 'Water count is 1 after purchase');
+      assertEq(fp, 90, 'FP reduced by cost');
+
+      // Buy 8 more waters
+      for (let i = 0; i < 8; i++) {
+        const cost = getUpgradeCost(ups[0]);
+        if (fp >= cost) { fp -= cost; ups[0].count++; }
+      }
+      assert(ups[0].count >= 2, 'Bought multiple waters');
+      assert(fp >= 0, 'FP never goes negative');
+
+      // Try to buy something too expensive
+      const expensiveUps = makeUpgrades();
+      let lowFp = 5;
+      const kitCost = getUpgradeCost(expensiveUps[5]);
+      assert(lowFp < kitCost, 'Cannot afford kit with 5 FP');
+    }
+
+    section('Era Progression');
+    assertEq(getCurrentEra(0), 0, 'Start at Era 0 (Hemberedskap)');
+    assertEq(getCurrentEra(4999), 0, 'Still Era 0 at 4999 FP');
+    assertEq(getCurrentEra(5000), 1, 'Era 1 (Grannskapet) at 5000 FP');
+    assertEq(getCurrentEra(99999), 1, 'Still Era 1 at 99999 FP');
+    assertEq(getCurrentEra(100000), 2, 'Era 2 (Kommunen) at 100K FP');
+    assertEq(getCurrentEra(2000000), 3, 'Era 3 (Regionen) at 2M FP');
+    assertEq(getCurrentEra(50000000), 4, 'Era 4 (Nationen) at 50M FP');
+    assertEq(getCurrentEra(999999999), 4, 'Still Era 4 at high FP');
+
+    section('Game Balance — Simulation');
+    {
+      function calcFps(ups) { let t=0; for (const u of ups) t += u.fpPerSecond*u.count; return t; }
+
+      // Sim: Time to reach Era 2 (5000 FP) at 2 cps (casual)
+      const ups = makeUpgrades();
+      let fp = 0, totalFp = 0, fpPerSecond = 0, seconds = 0;
+      while (totalFp < 5000 && seconds < 600) {
+        fp += 2 + fpPerSecond; totalFp += 2 + fpPerSecond; seconds++;
+        let bought = true;
+        while (bought) {
+          bought = false;
+          for (const u of ups) {
+            const cost = getUpgradeCost(u);
+            if (fp >= cost) { fp -= cost; u.count++; fpPerSecond = calcFps(ups); bought = true; break; }
+          }
+        }
+      }
+      const minutes = seconds / 60;
+      assert(totalFp >= 5000, 'Can reach Era 2 threshold (5000 FP)');
+      assert(minutes >= 1, `Era 2 takes at least 1 min (took ${minutes.toFixed(1)} min)`);
+      assert(minutes <= 5, `Era 2 in under 5 min (took ${minutes.toFixed(1)} min)`);
+      log(`  → Era 2 in ${minutes.toFixed(1)} min, FP/s: ${fpPerSecond.toFixed(1)}`, '');
+
+      // First upgrade affordable within 10 clicks
+      assert(10 >= makeUpgrades()[0].baseCost, 'First upgrade affordable within 10 clicks');
+    }
+
+    section('Upgrade Data Integrity');
+    {
+      const ups = makeUpgrades();
+      assert(ups.length === 6, 'Era 1 has 6 upgrades');
+      for (const u of ups) {
+        assert(u.id && u.id.length > 0, `Upgrade "${u.name}" has an id`);
+        assert(u.baseCost > 0, `"${u.name}" has positive baseCost`);
+        assert(u.fpPerSecond > 0, `"${u.name}" has positive FP/s`);
+        assertEq(u.count, 0, `"${u.name}" starts at count 0`);
+      }
+      // Costs should be increasing
+      for (let i = 1; i < ups.length; i++) {
+        assert(ups[i].baseCost > ups[i-1].baseCost, `"${ups[i].name}" costs more than "${ups[i-1].name}"`);
+      }
+      // FP/s should be increasing
+      for (let i = 1; i < ups.length; i++) {
+        assert(ups[i].fpPerSecond > ups[i-1].fpPerSecond, `"${ups[i].name}" gives more FP/s than "${ups[i-1].name}"`);
+      }
+    }
+
+    // --- Summary ---
+    log('', '');
+    const totalTests = passed + failed;
+    if (failed === 0) {
+      log(`══════════════════════════════════`, 'pass');
+      log(`  ALL ${totalTests} TESTS PASSED`, 'pass');
+      log(`══════════════════════════════════`, 'pass');
+    } else {
+      log(`══════════════════════════════════`, 'fail');
+      log(`  ${failed} FAILED / ${totalTests} total`, 'fail');
+      log(`══════════════════════════════════`, 'fail');
+    }
+  </script>
+</body>
+</html>
